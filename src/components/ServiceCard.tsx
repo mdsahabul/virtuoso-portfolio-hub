@@ -1,5 +1,4 @@
 
-import { Link } from 'react-router-dom';
 import { LucideIcon } from 'lucide-react';
 
 interface ServiceCardProps {
@@ -10,6 +9,7 @@ interface ServiceCardProps {
   features: string[];
   cta: string;
   highlighted?: boolean;
+  onAction?: () => void;
 }
 
 const ServiceCard = ({ 
@@ -19,12 +19,13 @@ const ServiceCard = ({
   price, 
   features, 
   cta, 
-  highlighted = false 
+  highlighted = false,
+  onAction
 }: ServiceCardProps) => {
   return (
     <div 
       className={`
-        card relative overflow-hidden transition-all duration-300 hover:translate-y-[-5px]
+        card relative overflow-hidden transition-all duration-300 hover:translate-y-[-5px] hover:shadow-lg
         ${highlighted ? 'border-2 border-blue-500' : ''}
       `}
     >
@@ -59,15 +60,15 @@ const ServiceCard = ({
         ))}
       </ul>
       
-      <Link 
-        to="/contact" 
+      <button 
+        onClick={onAction}
         className={`
           w-full text-center py-3 px-6 rounded-md font-medium transition-colors
           ${highlighted ? 'bg-blue-500 text-white hover:bg-blue-600' : 'border-2 border-blue-500 text-blue-500 hover:bg-blue-50'}
         `}
       >
         {cta}
-      </Link>
+      </button>
     </div>
   );
 };
