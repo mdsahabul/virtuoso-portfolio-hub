@@ -2,11 +2,13 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const isMobile = useIsMobile();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -24,6 +26,11 @@ const Header = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [location.pathname]);
 
   const isCurrentPath = (path: string) => {
     return location.pathname === path;
@@ -61,7 +68,11 @@ const Header = () => {
         </nav>
 
         {/* Mobile Menu Button */}
-        <button className="md:hidden" onClick={toggleMenu} aria-label="Toggle menu">
+        <button 
+          className="md:hidden p-2 rounded-md hover:bg-gray-100" 
+          onClick={toggleMenu} 
+          aria-label="Toggle menu"
+        >
           {isMenuOpen ? (
             <X size={24} className="text-blue-800" />
           ) : (
