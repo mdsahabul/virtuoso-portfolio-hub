@@ -208,24 +208,24 @@ const Services = () => {
           <div className="max-w-3xl mx-auto">
             {[
               {
-                question: 'How long does a typical project take to complete?',
-                answer: 'Project timelines vary depending on scope and complexity. A simple website might take 2-4 weeks, while more complex projects can take several months. During our initial consultation, I'll provide a detailed timeline for your specific project.'
+                question: "How long does a typical project take to complete?",
+                answer: "Project timelines vary depending on scope and complexity. A simple website might take 2-4 weeks, while more complex projects can take several months. During our initial consultation, I'll provide a detailed timeline for your specific project."
               },
               {
-                question: 'What is your payment structure?',
-                answer: 'I typically work with a 50% upfront deposit to begin work, with the remaining balance due upon project completion. For larger projects, I can arrange milestone-based payments. All payment terms will be clearly outlined in our project proposal.'
+                question: "What is your payment structure?",
+                answer: "I typically work with a 50% upfront deposit to begin work, with the remaining balance due upon project completion. For larger projects, I can arrange milestone-based payments. All payment terms will be clearly outlined in our project proposal."
               },
               {
-                question: 'Do you provide ongoing support after project completion?',
-                answer: 'Yes, I offer various maintenance and support packages to ensure your digital assets continue to perform optimally. These can be tailored to your specific needs and budget.'
+                question: "Do you provide ongoing support after project completion?",
+                answer: "Yes, I offer various maintenance and support packages to ensure your digital assets continue to perform optimally. These can be tailored to your specific needs and budget."
               },
               {
-                question: 'Can you work with my existing team or systems?',
-                answer: 'Absolutely. I have experience collaborating with in-house teams and integrating with existing systems. My flexible approach allows me to adapt to your current setup while adding value through my expertise.'
+                question: "Can you work with my existing team or systems?",
+                answer: "Absolutely. I have experience collaborating with in-house teams and integrating with existing systems. My flexible approach allows me to adapt to your current setup while adding value through my expertise."
               },
               {
-                question: 'How do we get started?',
-                answer: 'The process begins with a consultation to discuss your needs and project requirements. Feel free to contact me through the contact form, and we can schedule a time to talk about your project in detail.'
+                question: "How do we get started?",
+                answer: "The process begins with a consultation to discuss your needs and project requirements. Feel free to contact me through the contact form, and we can schedule a time to talk about your project in detail."
               }
             ].map((faq, index) => (
               <div 
