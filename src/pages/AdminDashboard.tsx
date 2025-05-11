@@ -122,14 +122,14 @@ const AdminDashboard = () => {
       }
     ]);
     
-    // Sample messages data
+    // Sample messages data - Fixed the apostrophes in the message strings
     setMessages([
       {
         id: '1',
         name: 'John Smith',
         email: 'john@example.com',
         subject: 'Website Project Inquiry',
-        message: 'I'm interested in your web development services for my new business. Can we schedule a call to discuss the details?',
+        message: "I'm interested in your web development services for my new business. Can we schedule a call to discuss the details?",
         date: '2023-05-10',
         read: false
       },
@@ -138,7 +138,7 @@ const AdminDashboard = () => {
         name: 'Sarah Johnson',
         email: 'sarah@example.com',
         subject: 'Logo Design Project',
-        message: 'Hello, I need a new logo for my startup. I like your portfolio and would like to discuss working together.',
+        message: "Hello, I need a new logo for my startup. I like your portfolio and would like to discuss working together.",
         date: '2023-05-08',
         read: true
       },
@@ -147,7 +147,7 @@ const AdminDashboard = () => {
         name: 'Michael Brown',
         email: 'michael@example.com',
         subject: 'Mobile App Development',
-        message: 'We're looking for a developer to create a mobile app for our business. What's your availability in the coming months?',
+        message: "We're looking for a developer to create a mobile app for our business. What's your availability in the coming months?",
         date: '2023-05-05',
         read: true
       }
