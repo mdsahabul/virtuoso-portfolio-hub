@@ -1,16 +1,7 @@
 
 import { useState } from 'react';
 import PortfolioItem from '@/components/PortfolioItem';
-
-// Define the portfolio item type
-type PortfolioItemType = {
-  title: string;
-  category: string;
-  image: string;
-  description: string;
-  link?: string;
-  technologies: string[];
-};
+import { useData } from '../context/DataContext';
 
 const Portfolio = () => {
   // Categories for filtering
@@ -18,78 +9,13 @@ const Portfolio = () => {
   
   const [activeCategory, setActiveCategory] = useState('All');
   
-  // Portfolio items data
-  const portfolioItems: PortfolioItemType[] = [
-    {
-      title: 'E-commerce Platform',
-      category: 'Web Development',
-      image: '',
-      description: 'A fully-featured e-commerce platform with product management, cart functionality, and secure checkout integration.',
-      link: '#',
-      technologies: ['React', 'Node.js', 'MongoDB', 'Stripe']
-    },
-    {
-      title: 'Finance Dashboard UI',
-      category: 'UI/UX Design',
-      image: '',
-      description: 'A modern and intuitive dashboard design for a financial services company, focusing on data visualization and user experience.',
-      link: '#',
-      technologies: ['Figma', 'Adobe XD', 'Photoshop']
-    },
-    {
-      title: 'Travel Booking App',
-      category: 'Mobile Development',
-      image: '',
-      description: 'A cross-platform mobile application for booking travel accommodations with real-time availability and secure payment processing.',
-      link: '#',
-      technologies: ['React Native', 'Firebase', 'Google Maps API']
-    },
-    {
-      title: 'Corporate Rebrand',
-      category: 'Branding',
-      image: '',
-      description: 'A complete brand redesign for a tech company, including logo, color palette, typography, and brand guidelines.',
-      link: '#',
-      technologies: ['Illustrator', 'InDesign', 'After Effects']
-    },
-    {
-      title: 'Health & Fitness Tracker',
-      category: 'Mobile Development',
-      image: '',
-      description: 'A mobile app for tracking health metrics, workouts, and nutrition with personalized insights and goal setting.',
-      link: '#',
-      technologies: ['Swift', 'HealthKit', 'CoreData']
-    },
-    {
-      title: 'Real Estate Website',
-      category: 'Web Development',
-      image: '',
-      description: 'A comprehensive real estate platform with property listings, advanced search functionality, and agent profiles.',
-      link: '#',
-      technologies: ['Vue.js', 'Express', 'PostgreSQL', 'Google Maps API']
-    },
-    {
-      title: 'Social Media Dashboard',
-      category: 'UI/UX Design',
-      image: '',
-      description: 'A unified dashboard for managing multiple social media accounts with analytics and content scheduling.',
-      link: '#',
-      technologies: ['Figma', 'Sketch', 'Principle']
-    },
-    {
-      title: 'Eco-friendly Brand Identity',
-      category: 'Branding',
-      image: '',
-      description: 'A sustainable brand identity for an eco-conscious product line, emphasizing environmental responsibility.',
-      link: '#',
-      technologies: ['Illustrator', 'Photoshop', 'Procreate']
-    },
-  ];
+  // Get portfolio items from our data context
+  const { projects } = useData();
   
   // Filter portfolio items based on selected category
   const filteredItems = activeCategory === 'All' 
-    ? portfolioItems 
-    : portfolioItems.filter(item => item.category === activeCategory);
+    ? projects 
+    : projects.filter(item => item.category === activeCategory);
 
   return (
     <main className="pt-20">
@@ -128,7 +54,7 @@ const Portfolio = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredItems.map((item, index) => (
               <PortfolioItem
-                key={index}
+                key={item.id}
                 title={item.title}
                 category={item.category}
                 image={item.image}

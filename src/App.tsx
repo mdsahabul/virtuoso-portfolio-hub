@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Index from "./pages/Index";
@@ -13,6 +13,7 @@ import Contact from "./pages/Contact";
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
+import { DataProvider } from "./context/DataContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -37,24 +38,26 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Admin dashboard without header/footer */}
-            <Route path="/admin-dashboard" element={<AdminDashboard />} />
-            
-            {/* Main layout with header and footer */}
-            <Route path="/" element={<MainLayout><Index /></MainLayout>} />
-            <Route path="/services" element={<MainLayout><Services /></MainLayout>} />
-            <Route path="/portfolio" element={<MainLayout><Portfolio /></MainLayout>} />
-            <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
-            <Route path="/admin-login" element={<MainLayout><AdminLogin /></MainLayout>} />
-            <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+      <DataProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Admin dashboard without header/footer */}
+              <Route path="/admin-dashboard" element={<AdminDashboard />} />
+              
+              {/* Main layout with header and footer */}
+              <Route path="/" element={<MainLayout><Index /></MainLayout>} />
+              <Route path="/services" element={<MainLayout><Services /></MainLayout>} />
+              <Route path="/portfolio" element={<MainLayout><Portfolio /></MainLayout>} />
+              <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
+              <Route path="/admin-login" element={<MainLayout><AdminLogin /></MainLayout>} />
+              <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </DataProvider>
     </QueryClientProvider>
   );
 };

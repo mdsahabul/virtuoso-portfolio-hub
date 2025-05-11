@@ -3,50 +3,15 @@ import Hero from '@/components/Hero';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Monitor, Smartphone, Layout, Code, TrendingUp, LineChart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useData } from '../context/DataContext';
 
 const Index = () => {
   const navigate = useNavigate();
+  const { services, projects } = useData();
 
-  const services = [
-    {
-      icon: Monitor,
-      title: 'Web Development',
-      description: 'Custom websites that engage visitors and drive business growth.'
-    },
-    {
-      icon: Layout,
-      title: 'UI/UX Design',
-      description: 'User-friendly interfaces that create delightful digital experiences.'
-    },
-    {
-      icon: Smartphone,
-      title: 'Mobile Development',
-      description: 'Responsive apps that work flawlessly on any mobile device.'
-    },
-    {
-      icon: TrendingUp,
-      title: 'Digital Marketing',
-      description: 'Data-driven strategies to increase your online presence.'
-    }
-  ];
-
-  const portfolioItems = [
-    { 
-      title: 'E-commerce Website',
-      category: 'Web Development',
-      image: ''
-    },
-    { 
-      title: 'Mobile Banking App',
-      category: 'Mobile Development',
-      image: ''
-    },
-    { 
-      title: 'Brand Redesign',
-      category: 'UI/UX Design',
-      image: ''
-    }
-  ];
+  // We'll use a limited number of services and projects for the home page
+  const featuredServices = services.slice(0, 4);
+  const featuredProjects = projects.slice(0, 3);
 
   return (
     <main className="pt-16">
@@ -116,12 +81,24 @@ const Index = () => {
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {services.map((service, index) => {
-              const Icon = service.icon;
+            {featuredServices.map((service, index) => {
+              const Icons = { Monitor, Smartphone, Layout, TrendingUp };
+              // Select an icon based on the service title or index
+              let IconComponent;
+              if (service.title.includes('Web')) {
+                IconComponent = Monitor;
+              } else if (service.title.includes('Mobile')) {
+                IconComponent = Smartphone;
+              } else if (service.title.includes('UI') || service.title.includes('UX')) {
+                IconComponent = Layout;
+              } else {
+                IconComponent = TrendingUp;
+              }
+
               return (
-                <div key={index} className="card group hover:border-blue-500 border-2 border-transparent">
+                <div key={service.id} className="card group hover:border-blue-500 border-2 border-transparent">
                   <div className="mb-6 text-blue-500 group-hover:text-white group-hover:bg-blue-500 w-16 h-16 rounded-lg flex items-center justify-center transition-colors mx-auto">
-                    <Icon size={32} />
+                    <IconComponent size={32} />
                   </div>
                   <h3 className="text-xl font-bold mb-3">{service.title}</h3>
                   <p className="text-gray-600 mb-6">{service.description}</p>
@@ -149,9 +126,9 @@ const Index = () => {
           </p>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {portfolioItems.map((item, index) => (
+            {featuredProjects.map((item) => (
               <div 
-                key={index} 
+                key={item.id} 
                 className="card group cursor-pointer p-0 overflow-hidden"
                 onClick={() => navigate('/portfolio')}
               >

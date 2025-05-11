@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -7,34 +6,7 @@ import {
   Grid, PlusCircle, Edit, Trash2, Image, Package, MessageSquare,
   BarChart, RefreshCw, Search
 } from 'lucide-react';
-
-// Define types for our CMS data
-interface Project {
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  image: string;
-  technologies: string[];
-}
-
-interface Service {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  features: string[];
-}
-
-interface Message {
-  id: string;
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  date: string;
-  read: boolean;
-}
+import { useData } from '../context/DataContext';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -44,10 +16,14 @@ const AdminDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   
-  // CMS State
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [services, setServices] = useState<Service[]>([]);
-  const [messages, setMessages] = useState<Message[]>([]);
+  // Use our central data store
+  const { 
+    projects, services, messages,
+    addProject, updateProject, deleteProject,
+    addService, updateService, deleteService,
+    markMessageAsRead, deleteMessage
+  } = useData();
+  
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentItem, setCurrentItem] = useState<any>(null);
@@ -62,97 +38,9 @@ const AdminDashboard = () => {
       navigate('/admin-login');
     } else {
       setIsAuthenticated(true);
-      loadDemoData();
       setIsLoading(false);
     }
   }, [navigate]);
-
-  // Function to load demo data for the CMS
-  const loadDemoData = () => {
-    // Sample projects data
-    setProjects([
-      {
-        id: '1',
-        title: 'E-commerce Platform',
-        category: 'Web Development',
-        description: 'A fully-featured e-commerce platform with product management, cart functionality, and secure checkout integration.',
-        image: '',
-        technologies: ['React', 'Node.js', 'MongoDB', 'Stripe']
-      },
-      {
-        id: '2',
-        title: 'Finance Dashboard UI',
-        category: 'UI/UX Design',
-        description: 'A modern and intuitive dashboard design for a financial services company, focusing on data visualization and user experience.',
-        image: '',
-        technologies: ['Figma', 'Adobe XD', 'Photoshop']
-      },
-      {
-        id: '3',
-        title: 'Travel Booking App',
-        category: 'Mobile Development',
-        description: 'A cross-platform mobile application for booking travel accommodations with real-time availability and secure payment processing.',
-        image: '',
-        technologies: ['React Native', 'Firebase', 'Google Maps API']
-      }
-    ]);
-    
-    // Sample services data
-    setServices([
-      {
-        id: '1',
-        title: 'Web Development',
-        description: 'Custom websites built with the latest technologies to boost your online presence.',
-        price: 1499,
-        features: ['Responsive Design', 'SEO Optimization', 'Content Management System', 'Contact Form Integration', 'Google Analytics Setup']
-      },
-      {
-        id: '2',
-        title: 'UI/UX Design',
-        description: 'User-centered design solutions to enhance user experience and engagement.',
-        price: 1299,
-        features: ['User Research', 'Wireframing', 'Prototyping', 'User Testing', 'Design System Creation']
-      },
-      {
-        id: '3',
-        title: 'Mobile Development',
-        description: 'Native and cross-platform mobile applications for iOS and Android.',
-        price: 2499,
-        features: ['Cross-Platform Development', 'Native App Development', 'App Store Submission', 'Ongoing Maintenance', 'Performance Optimization']
-      }
-    ]);
-    
-    // Sample messages data - Fixed the apostrophes in the message strings
-    setMessages([
-      {
-        id: '1',
-        name: 'John Smith',
-        email: 'john@example.com',
-        subject: 'Website Project Inquiry',
-        message: "I'm interested in your web development services for my new business. Can we schedule a call to discuss the details?",
-        date: '2023-05-10',
-        read: false
-      },
-      {
-        id: '2',
-        name: 'Sarah Johnson',
-        email: 'sarah@example.com',
-        subject: 'Logo Design Project',
-        message: "Hello, I need a new logo for my startup. I like your portfolio and would like to discuss working together.",
-        date: '2023-05-08',
-        read: true
-      },
-      {
-        id: '3',
-        name: 'Michael Brown',
-        email: 'michael@example.com',
-        subject: 'Mobile App Development',
-        message: "We're looking for a developer to create a mobile app for our business. What's your availability in the coming months?",
-        date: '2023-05-05',
-        read: true
-      }
-    ]);
-  };
 
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
@@ -178,16 +66,15 @@ const AdminDashboard = () => {
   const handleDelete = (type: string, id: string) => {
     setIsUpdating(true);
     
-    // In a real application, this would be an API call
     setTimeout(() => {
       if (type === 'project') {
-        setProjects(projects.filter(project => project.id !== id));
+        deleteProject(id);
         toast.success('Project deleted successfully');
       } else if (type === 'service') {
-        setServices(services.filter(service => service.id !== id));
+        deleteService(id);
         toast.success('Service deleted successfully');
       } else if (type === 'message') {
-        setMessages(messages.filter(message => message.id !== id));
+        deleteMessage(id);
         toast.success('Message deleted successfully');
       }
       setIsUpdating(false);
@@ -195,9 +82,7 @@ const AdminDashboard = () => {
   };
   
   const handleMarkAsRead = (id: string) => {
-    setMessages(messages.map(message => 
-      message.id === id ? { ...message, read: true } : message
-    ));
+    markMessageAsRead(id);
     toast.success('Message marked as read');
   };
 
@@ -343,6 +228,7 @@ const AdminDashboard = () => {
             <Search size={18} className="absolute left-3 top-2.5 text-gray-400" />
           </div>
 
+          {/* Dashboard Tab */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold">Welcome to your Admin Dashboard</h2>
@@ -419,6 +305,7 @@ const AdminDashboard = () => {
             </div>
           )}
           
+          {/* Projects Tab */}
           {activeTab === 'projects' && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
@@ -498,6 +385,7 @@ const AdminDashboard = () => {
             </div>
           )}
           
+          {/* Services Tab */}
           {activeTab === 'services' && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
@@ -567,6 +455,7 @@ const AdminDashboard = () => {
             </div>
           )}
           
+          {/* Messages Tab */}
           {activeTab === 'messages' && (
             <div className="space-y-6">
               <h2 className="text-2xl font-bold">Messages</h2>
@@ -624,6 +513,7 @@ const AdminDashboard = () => {
             </div>
           )}
           
+          {/* Other tabs */}
           {(activeTab === 'profile' || activeTab === 'settings' || activeTab === 'analytics') && (
             <div className="bg-white p-8 rounded-lg shadow-md text-center">
               <h2 className="text-2xl font-bold mb-4">
@@ -637,7 +527,7 @@ const AdminDashboard = () => {
         </main>
       </div>
 
-      {/* Modals would be implemented here for adding/editing items */}
+      {/* Add/Edit Modal would be implemented here */}
       {/* In a complete implementation, we would add form modals for adding/editing projects, services, etc. */}
     </div>
   );
