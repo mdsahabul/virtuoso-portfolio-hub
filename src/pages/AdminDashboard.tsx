@@ -1,12 +1,17 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { 
   Home, User, FileText, Mail, Settings, LogOut, Menu, X, 
   Grid, PlusCircle, Edit, Trash2, Image, Package, MessageSquare,
-  BarChart, RefreshCw, Search
+  BarChart, RefreshCw, Search, Save
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
+
+// Define modal types
+type ModalType = 'add' | 'edit' | null;
+type ContentType = 'project' | 'service' | 'message' | 'profile' | 'siteSettings' | null;
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -24,10 +29,57 @@ const AdminDashboard = () => {
     markMessageAsRead, deleteMessage
   } = useData();
   
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
+  // Modal state
+  const [modalType, setModalType] = useState<ModalType>(null);
+  const [contentType, setContentType] = useState<ContentType>(null);
   const [currentItem, setCurrentItem] = useState<any>(null);
-  const [isUpdating, setIsUpdating] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Form data states
+  const [projectForm, setProjectForm] = useState({
+    id: '',
+    title: '',
+    category: '',
+    description: '',
+    image: '',
+    technologies: [] as string[],
+    link: ''
+  });
+
+  const [serviceForm, setServiceForm] = useState({
+    id: '',
+    title: '',
+    description: '',
+    price: 0,
+    features: [] as string[],
+    highlighted: false,
+    icon: ''
+  });
+
+  const [siteSettingsForm, setSettingsForm] = useState({
+    siteName: 'Portfolio',
+    siteDescription: 'Professional portfolio showcase',
+    contactEmail: 'contact@example.com',
+    socialLinks: {
+      twitter: '',
+      linkedin: '',
+      github: '',
+      instagram: ''
+    }
+  });
+
+  const [profileForm, setProfileForm] = useState({
+    name: 'Admin User',
+    email: 'admin@example.com',
+    bio: 'Website administrator',
+    password: '',
+    confirmPassword: ''
+  });
+
+  // Technology input for projects
+  const [techInput, setTechInput] = useState('');
+  // Feature input for services
+  const [featureInput, setFeatureInput] = useState('');
 
   useEffect(() => {
     // Check if user is authenticated
@@ -51,20 +103,268 @@ const AdminDashboard = () => {
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
-  
-  // CRUD Functions
-  const handleAdd = (type: string) => {
-    setCurrentItem({ type });
-    setShowAddModal(true);
+
+  // Modal handlers
+  const openModal = (type: ModalType, content: ContentType, item?: any) => {
+    setModalType(type);
+    setContentType(content);
+    
+    if (type === 'edit' && item) {
+      setCurrentItem(item);
+      
+      // Set form data based on content type
+      if (content === 'project') {
+        setProjectForm({
+          id: item.id,
+          title: item.title || '',
+          category: item.category || '',
+          description: item.description || '',
+          image: item.image || '',
+          technologies: [...(item.technologies || [])],
+          link: item.link || ''
+        });
+      } else if (content === 'service') {
+        setServiceForm({
+          id: item.id,
+          title: item.title || '',
+          description: item.description || '',
+          price: item.price || 0,
+          features: [...(item.features || [])],
+          highlighted: item.highlighted || false,
+          icon: item.icon || ''
+        });
+      }
+    } else if (type === 'add') {
+      // Reset forms for add operation
+      if (content === 'project') {
+        setProjectForm({
+          id: '',
+          title: '',
+          category: '',
+          description: '',
+          image: '',
+          technologies: [],
+          link: ''
+        });
+      } else if (content === 'service') {
+        setServiceForm({
+          id: '',
+          title: '',
+          description: '',
+          price: 0,
+          features: [],
+          highlighted: false,
+          icon: ''
+        });
+      }
+    }
+  };
+
+  const closeModal = () => {
+    setModalType(null);
+    setContentType(null);
+    setCurrentItem(null);
+  };
+
+  // Form handlers
+  const handleProjectChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setProjectForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleServiceChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target as HTMLInputElement;
+    setServiceForm(prev => ({ 
+      ...prev, 
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+      price: name === 'price' ? parseFloat(value) || 0 : prev.price
+    }));
+  };
+
+  const handleProfileChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setProfileForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSettingsChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      setSettingsForm(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent as keyof typeof prev],
+          [child]: value
+        }
+      }));
+    } else {
+      setSettingsForm(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  // Technology and feature handlers
+  const addTechnology = () => {
+    if (techInput && !projectForm.technologies.includes(techInput)) {
+      setProjectForm(prev => ({
+        ...prev,
+        technologies: [...prev.technologies, techInput]
+      }));
+      setTechInput('');
+    }
+  };
+
+  const removeTechnology = (tech: string) => {
+    setProjectForm(prev => ({
+      ...prev,
+      technologies: prev.technologies.filter(t => t !== tech)
+    }));
+  };
+
+  const addFeature = () => {
+    if (featureInput && !serviceForm.features.includes(featureInput)) {
+      setServiceForm(prev => ({
+        ...prev,
+        features: [...prev.features, featureInput]
+      }));
+      setFeatureInput('');
+    }
+  };
+
+  const removeFeature = (feature: string) => {
+    setServiceForm(prev => ({
+      ...prev,
+      features: prev.features.filter(f => f !== feature)
+    }));
+  };
+
+  // CRUD operations
+  const handleSubmitProject = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsProcessing(true);
+    
+    // Validate form
+    if (!projectForm.title || !projectForm.category || !projectForm.description) {
+      toast.error('Please fill in all required fields');
+      setIsProcessing(false);
+      return;
+    }
+
+    setTimeout(() => {
+      if (modalType === 'add') {
+        // Create new project
+        addProject({
+          title: projectForm.title,
+          category: projectForm.category,
+          description: projectForm.description,
+          image: projectForm.image,
+          technologies: projectForm.technologies,
+          link: projectForm.link,
+        });
+        toast.success('Project added successfully');
+      } else {
+        // Update existing project
+        updateProject(projectForm.id, {
+          title: projectForm.title,
+          category: projectForm.category,
+          description: projectForm.description,
+          image: projectForm.image,
+          technologies: projectForm.technologies,
+          link: projectForm.link,
+        });
+        toast.success('Project updated successfully');
+      }
+      
+      closeModal();
+      setIsProcessing(false);
+    }, 500);
+  };
+
+  const handleSubmitService = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsProcessing(true);
+    
+    // Validate form
+    if (!serviceForm.title || !serviceForm.description) {
+      toast.error('Please fill in all required fields');
+      setIsProcessing(false);
+      return;
+    }
+
+    setTimeout(() => {
+      if (modalType === 'add') {
+        // Create new service
+        addService({
+          title: serviceForm.title,
+          description: serviceForm.description,
+          price: serviceForm.price,
+          features: serviceForm.features,
+          highlighted: serviceForm.highlighted,
+          icon: serviceForm.icon,
+        });
+        toast.success('Service added successfully');
+      } else {
+        // Update existing service
+        updateService(serviceForm.id, {
+          title: serviceForm.title,
+          description: serviceForm.description,
+          price: serviceForm.price,
+          features: serviceForm.features,
+          highlighted: serviceForm.highlighted,
+          icon: serviceForm.icon,
+        });
+        toast.success('Service updated successfully');
+      }
+      
+      closeModal();
+      setIsProcessing(false);
+    }, 500);
+  };
+
+  const handleUpdateProfile = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsProcessing(true);
+
+    // Validate
+    if (!profileForm.name || !profileForm.email) {
+      toast.error('Please fill in all required fields');
+      setIsProcessing(false);
+      return;
+    }
+
+    if (profileForm.password && profileForm.password !== profileForm.confirmPassword) {
+      toast.error('Passwords do not match');
+      setIsProcessing(false);
+      return;
+    }
+
+    // In a real app, send this to the server
+    setTimeout(() => {
+      toast.success('Profile updated successfully');
+      setIsProcessing(false);
+    }, 500);
+  };
+
+  const handleUpdateSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsProcessing(true);
+
+    // Validate
+    if (!siteSettingsForm.siteName || !siteSettingsForm.contactEmail) {
+      toast.error('Please fill in all required fields');
+      setIsProcessing(false);
+      return;
+    }
+
+    // In a real app, send this to the server
+    setTimeout(() => {
+      toast.success('Settings updated successfully');
+      setIsProcessing(false);
+      // Here we'd actually save these settings to be used by the frontend
+    }, 500);
   };
   
-  const handleEdit = (type: string, item: any) => {
-    setCurrentItem({ ...item, type });
-    setShowEditModal(true);
-  };
-  
-  const handleDelete = (type: string, id: string) => {
-    setIsUpdating(true);
+  const handleDelete = (type: ContentType, id: string) => {
+    setIsProcessing(true);
     
     setTimeout(() => {
       if (type === 'project') {
@@ -77,7 +377,7 @@ const AdminDashboard = () => {
         deleteMessage(id);
         toast.success('Message deleted successfully');
       }
-      setIsUpdating(false);
+      setIsProcessing(false);
     }, 500);
   };
   
@@ -239,7 +539,7 @@ const AdminDashboard = () => {
                   { label: 'Projects', value: projects.length, icon: Grid, color: 'bg-blue-500' },
                   { label: 'Services', value: services.length, icon: Package, color: 'bg-green-500' },
                   { label: 'Unread Messages', value: messages.filter(m => !m.read).length, icon: Mail, color: 'bg-yellow-500' },
-                  { label: 'Total Orders', value: '26', icon: FileText, color: 'bg-purple-500' }
+                  { label: 'Total Pages', value: '4', icon: FileText, color: 'bg-purple-500' }
                 ].map((stat, index) => {
                   const StatIcon = stat.icon;
                   return (
@@ -263,10 +563,10 @@ const AdminDashboard = () => {
                 <h3 className="text-lg font-semibold mb-4">Quick Actions</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {[
-                    { label: 'Add Project', icon: PlusCircle, color: 'bg-blue-500', action: () => handleAdd('project') },
-                    { label: 'Add Service', icon: PlusCircle, color: 'bg-green-500', action: () => handleAdd('service') },
+                    { label: 'Add Project', icon: PlusCircle, color: 'bg-blue-500', action: () => openModal('add', 'project') },
+                    { label: 'Add Service', icon: PlusCircle, color: 'bg-green-500', action: () => openModal('add', 'service') },
                     { label: 'View Messages', icon: Mail, color: 'bg-yellow-500', action: () => setActiveTab('messages') },
-                    { label: 'Edit Profile', icon: User, color: 'bg-purple-500', action: () => setActiveTab('profile') }
+                    { label: 'Edit Settings', icon: Settings, color: 'bg-purple-500', action: () => setActiveTab('settings') }
                   ].map((action, index) => {
                     const ActionIcon = action.icon;
                     return (
@@ -289,17 +589,21 @@ const AdminDashboard = () => {
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                 <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
                 <div className="space-y-4">
-                  {[
-                    { action: 'New message received from Sarah Johnson', time: '10 minutes ago' },
-                    { action: 'Project "E-commerce Platform" updated', time: '1 hour ago' },
-                    { action: 'New service "SEO Optimization" added', time: '3 hours ago' },
-                    { action: 'Order #1082 completed', time: 'Yesterday' }
-                  ].map((activity, index) => (
-                    <div key={index} className="flex justify-between items-center border-b pb-2 last:border-0 last:pb-0">
-                      <p>{activity.action}</p>
-                      <span className="text-sm text-gray-500">{activity.time}</span>
+                  {messages.filter(m => !m.read).slice(0, 4).map((message, index) => (
+                    <div key={message.id} className="flex justify-between items-center border-b pb-2 last:border-0 last:pb-0">
+                      <p>New message received from {message.name}</p>
+                      <button 
+                        onClick={() => handleMarkAsRead(message.id)}
+                        className="text-sm text-blue-500 hover:text-blue-700"
+                      >
+                        Mark as read
+                      </button>
                     </div>
                   ))}
+                  
+                  {messages.filter(m => !m.read).length === 0 && (
+                    <p className="text-gray-500">No unread messages</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -311,7 +615,7 @@ const AdminDashboard = () => {
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Projects Management</h2>
                 <button 
-                  onClick={() => handleAdd('project')} 
+                  onClick={() => openModal('add', 'project')} 
                   className="btn-primary flex items-center gap-2"
                 >
                   <PlusCircle size={16} />
@@ -356,7 +660,7 @@ const AdminDashboard = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div className="flex space-x-2">
                               <button 
-                                onClick={() => handleEdit('project', project)} 
+                                onClick={() => openModal('edit', 'project', project)} 
                                 className="text-blue-600 hover:text-blue-800"
                               >
                                 <Edit size={16} />
@@ -364,7 +668,7 @@ const AdminDashboard = () => {
                               <button 
                                 onClick={() => handleDelete('project', project.id)} 
                                 className="text-red-600 hover:text-red-800"
-                                disabled={isUpdating}
+                                disabled={isProcessing}
                               >
                                 <Trash2 size={16} />
                               </button>
@@ -391,7 +695,7 @@ const AdminDashboard = () => {
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Services Management</h2>
                 <button 
-                  onClick={() => handleAdd('service')} 
+                  onClick={() => openModal('add', 'service')} 
                   className="btn-primary flex items-center gap-2"
                 >
                   <PlusCircle size={16} />
@@ -426,7 +730,7 @@ const AdminDashboard = () => {
                           <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             <div className="flex space-x-2">
                               <button 
-                                onClick={() => handleEdit('service', service)} 
+                                onClick={() => openModal('edit', 'service', service)} 
                                 className="text-blue-600 hover:text-blue-800"
                               >
                                 <Edit size={16} />
@@ -434,7 +738,7 @@ const AdminDashboard = () => {
                               <button 
                                 onClick={() => handleDelete('service', service.id)} 
                                 className="text-red-600 hover:text-red-800"
-                                disabled={isUpdating}
+                                disabled={isProcessing}
                               >
                                 <Trash2 size={16} />
                               </button>
@@ -495,7 +799,7 @@ const AdminDashboard = () => {
                         <button 
                           onClick={() => handleDelete('message', message.id)} 
                           className="px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
-                          disabled={isUpdating}
+                          disabled={isProcessing}
                         >
                           Delete
                         </button>
@@ -513,22 +817,502 @@ const AdminDashboard = () => {
             </div>
           )}
           
-          {/* Other tabs */}
-          {(activeTab === 'profile' || activeTab === 'settings' || activeTab === 'analytics') && (
-            <div className="bg-white p-8 rounded-lg shadow-md text-center">
-              <h2 className="text-2xl font-bold mb-4">
-                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Section
-              </h2>
-              <p className="text-gray-600">
-                This section would contain {activeTab} management functionality in a complete application.
-              </p>
+          {/* Profile Tab */}
+          {activeTab === 'profile' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold">Profile Settings</h2>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <form onSubmit={handleUpdateProfile} className="space-y-6">
+                  <div className="flex items-center space-x-6 mb-6">
+                    <div className="w-16 h-16 rounded-full bg-blue-500 text-white flex items-center justify-center text-2xl font-bold">
+                      A
+                    </div>
+                    <div>
+                      <h3 className="font-medium text-lg">Profile Picture</h3>
+                      <button type="button" className="text-blue-600 text-sm hover:text-blue-700">
+                        Change Picture
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={profileForm.name}
+                        onChange={handleProfileChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <input
+                        type="email"
+                        name="email"
+                        value={profileForm.email}
+                        onChange={handleProfileChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                      <textarea
+                        name="bio"
+                        value={profileForm.bio}
+                        onChange={handleProfileChange}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      ></textarea>
+                    </div>
+                  </div>
+                  
+                  <hr className="my-6" />
+                  
+                  <h3 className="font-medium text-lg mb-4">Change Password</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                      <input
+                        type="password"
+                        name="password"
+                        value={profileForm.password}
+                        onChange={handleProfileChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        value={profileForm.confirmPassword}
+                        onChange={handleProfileChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium flex items-center gap-2"
+                      disabled={isProcessing}
+                    >
+                      <Save size={16} />
+                      <span>{isProcessing ? 'Saving...' : 'Save Changes'}</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+          
+          {/* Settings Tab */}
+          {activeTab === 'settings' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold">Website Settings</h2>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <form onSubmit={handleUpdateSettings} className="space-y-6">
+                  <h3 className="font-medium text-lg mb-4">General Settings</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Site Name</label>
+                      <input
+                        type="text"
+                        name="siteName"
+                        value={siteSettingsForm.siteName}
+                        onChange={handleSettingsChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
+                      <input
+                        type="email"
+                        name="contactEmail"
+                        value={siteSettingsForm.contactEmail}
+                        onChange={handleSettingsChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Site Description</label>
+                      <textarea
+                        name="siteDescription"
+                        value={siteSettingsForm.siteDescription}
+                        onChange={handleSettingsChange}
+                        rows={3}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      ></textarea>
+                    </div>
+                  </div>
+                  
+                  <hr className="my-6" />
+                  
+                  <h3 className="font-medium text-lg mb-4">Social Media Links</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Twitter</label>
+                      <input
+                        type="text"
+                        name="socialLinks.twitter"
+                        value={siteSettingsForm.socialLinks.twitter}
+                        onChange={handleSettingsChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn</label>
+                      <input
+                        type="text"
+                        name="socialLinks.linkedin"
+                        value={siteSettingsForm.socialLinks.linkedin}
+                        onChange={handleSettingsChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">GitHub</label>
+                      <input
+                        type="text"
+                        name="socialLinks.github"
+                        value={siteSettingsForm.socialLinks.github}
+                        onChange={handleSettingsChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Instagram</label>
+                      <input
+                        type="text"
+                        name="socialLinks.instagram"
+                        value={siteSettingsForm.socialLinks.instagram}
+                        onChange={handleSettingsChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium flex items-center gap-2"
+                      disabled={isProcessing}
+                    >
+                      <Save size={16} />
+                      <span>{isProcessing ? 'Saving...' : 'Save Changes'}</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+          
+          {/* Analytics Tab */}
+          {activeTab === 'analytics' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold">Analytics</h2>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <div className="text-center py-8">
+                  <p className="text-gray-500">Analytics functionality would be implemented in a full application</p>
+                </div>
+              </div>
             </div>
           )}
         </main>
       </div>
 
-      {/* Add/Edit Modal would be implemented here */}
-      {/* In a complete implementation, we would add form modals for adding/editing projects, services, etc. */}
+      {/* Project Modal */}
+      {modalType && contentType === 'project' && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold">
+                  {modalType === 'add' ? 'Add New Project' : 'Edit Project'}
+                </h3>
+                <button 
+                  onClick={closeModal}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <form onSubmit={handleSubmitProject} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                    <input
+                      type="text"
+                      name="title"
+                      value={projectForm.title}
+                      onChange={handleProjectChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                    <select
+                      name="category"
+                      value={projectForm.category}
+                      onChange={handleProjectChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    >
+                      <option value="">Select Category</option>
+                      <option value="Web Development">Web Development</option>
+                      <option value="Mobile Development">Mobile Development</option>
+                      <option value="UI/UX Design">UI/UX Design</option>
+                      <option value="Graphic Design">Graphic Design</option>
+                      <option value="Branding">Branding</option>
+                      <option value="Marketing">Marketing</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Project Link (Optional)</label>
+                    <input
+                      type="text"
+                      name="link"
+                      value={projectForm.link}
+                      onChange={handleProjectChange}
+                      placeholder="https://example.com"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    name="description"
+                    value={projectForm.description}
+                    onChange={handleProjectChange}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  ></textarea>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                  <input
+                    type="text"
+                    name="image"
+                    value={projectForm.image}
+                    onChange={handleProjectChange}
+                    placeholder="https://example.com/image.jpg"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Technologies</label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={techInput}
+                      onChange={(e) => setTechInput(e.target.value)}
+                      placeholder="e.g. React"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={addTechnology}
+                      className="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {projectForm.technologies.map((tech, index) => (
+                      <div key={index} className="flex items-center bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                        <span className="text-sm">{tech}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeTechnology(tech)}
+                          className="ml-2 text-blue-500 hover:text-blue-700"
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? 'Processing...' : modalType === 'add' ? 'Add Project' : 'Update Project'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Service Modal */}
+      {modalType && contentType === 'service' && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold">
+                  {modalType === 'add' ? 'Add New Service' : 'Edit Service'}
+                </h3>
+                <button 
+                  onClick={closeModal}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <form onSubmit={handleSubmitService} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                    <input
+                      type="text"
+                      name="title"
+                      value={serviceForm.title}
+                      onChange={handleServiceChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Price ($)</label>
+                    <input
+                      type="number"
+                      name="price"
+                      value={serviceForm.price}
+                      onChange={handleServiceChange}
+                      min="0"
+                      step="0.01"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      required
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Icon (Optional)</label>
+                    <input
+                      type="text"
+                      name="icon"
+                      value={serviceForm.icon}
+                      onChange={handleServiceChange}
+                      placeholder="Icon name or URL"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                  <textarea
+                    name="description"
+                    value={serviceForm.description}
+                    onChange={handleServiceChange}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  ></textarea>
+                </div>
+                
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="highlighted"
+                    name="highlighted"
+                    checked={serviceForm.highlighted}
+                    onChange={handleServiceChange}
+                    className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <label htmlFor="highlighted" className="ml-2 block text-sm text-gray-700">
+                    Highlight this service (display prominently)
+                  </label>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Features</label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={featureInput}
+                      onChange={(e) => setFeatureInput(e.target.value)}
+                      placeholder="e.g. Responsive Design"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={addFeature}
+                      className="px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  
+                  <div className="flex flex-col gap-2 mt-2">
+                    {serviceForm.features.map((feature, index) => (
+                      <div key={index} className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded">
+                        <span className="text-sm">{feature}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeFeature(feature)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="flex justify-end space-x-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? 'Processing...' : modalType === 'add' ? 'Add Service' : 'Update Service'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

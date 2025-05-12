@@ -62,9 +62,6 @@ const Header = () => {
               {path === '/' ? 'Home' : path.substring(1).charAt(0).toUpperCase() + path.substring(1).slice(1)}
             </Link>
           ))}
-          <Link to="/admin-login" className="btn-primary">
-            Admin
-          </Link>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -97,13 +94,6 @@ const Header = () => {
                 {path === '/' ? 'Home' : path.substring(1).charAt(0).toUpperCase() + path.substring(1).slice(1)}
               </Link>
             ))}
-            <Link 
-              to="/admin-login" 
-              className="btn-primary text-center"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Admin
-            </Link>
           </div>
         </div>
       )}

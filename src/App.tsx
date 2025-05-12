@@ -44,15 +44,15 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              {/* Admin dashboard without header/footer */}
+              {/* Admin routes without header/footer */}
               <Route path="/admin-dashboard" element={<AdminDashboard />} />
+              <Route path="/admin-login" element={<AdminLogin />} />
               
               {/* Main layout with header and footer */}
               <Route path="/" element={<MainLayout><Index /></MainLayout>} />
               <Route path="/services" element={<MainLayout><Services /></MainLayout>} />
               <Route path="/portfolio" element={<MainLayout><Portfolio /></MainLayout>} />
               <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
-              <Route path="/admin-login" element={<MainLayout><AdminLogin /></MainLayout>} />
               <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
             </Routes>
           </BrowserRouter>
