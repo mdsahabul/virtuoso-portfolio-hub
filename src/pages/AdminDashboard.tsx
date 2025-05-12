@@ -8,6 +8,12 @@ import {
   BarChart, RefreshCw, Search, Save, Linkedin, Github, Link, Calendar
 } from 'lucide-react';
 import { useData, Project, Service, Message } from '../context/DataContext';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 // Define modal types
 type ModalType = 'add' | 'edit' | null;
@@ -65,6 +71,7 @@ const AdminDashboard = () => {
   } = useData();
   
   // Modal state
+  const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [contentType, setContentType] = useState<ContentType>(null);
   const [currentItem, setCurrentItem] = useState<any>(null);
@@ -150,6 +157,25 @@ const AdminDashboard = () => {
       setIsAuthenticated(true);
       setIsLoading(false);
     }
+    
+    // Load saved profile and settings if available
+    const savedProfile = localStorage.getItem('adminProfile');
+    if (savedProfile) {
+      try {
+        setProfileForm(JSON.parse(savedProfile));
+      } catch (e) {
+        console.error('Error parsing stored profile', e);
+      }
+    }
+    
+    const savedSettings = localStorage.getItem('siteSettings');
+    if (savedSettings) {
+      try {
+        setSettingsForm(JSON.parse(savedSettings));
+      } catch (e) {
+        console.error('Error parsing stored settings', e);
+      }
+    }
   }, [navigate]);
 
   const handleLogout = () => {
@@ -216,9 +242,12 @@ const AdminDashboard = () => {
         });
       }
     }
+    
+    setModalOpen(true);
   };
 
   const closeModal = () => {
+    setModalOpen(false);
     setModalType(null);
     setContentType(null);
     setCurrentItem(null);
@@ -333,7 +362,7 @@ const AdminDashboard = () => {
       return;
     }
 
-    setTimeout(() => {
+    try {
       if (modalType === 'add') {
         // Create new project
         addProject({
@@ -359,8 +388,12 @@ const AdminDashboard = () => {
       }
       
       closeModal();
+    } catch (error) {
+      toast.error('Error saving project');
+      console.error(error);
+    } finally {
       setIsProcessing(false);
-    }, 500);
+    }
   };
 
   const handleSubmitService = (e: React.FormEvent) => {
@@ -374,7 +407,7 @@ const AdminDashboard = () => {
       return;
     }
 
-    setTimeout(() => {
+    try {
       if (modalType === 'add') {
         // Create new service
         addService({
@@ -400,8 +433,12 @@ const AdminDashboard = () => {
       }
       
       closeModal();
+    } catch (error) {
+      toast.error('Error saving service');
+      console.error(error);
+    } finally {
       setIsProcessing(false);
-    }, 500);
+    }
   };
 
   const handleUpdateProfile = (e: React.FormEvent) => {
@@ -415,13 +452,16 @@ const AdminDashboard = () => {
       return;
     }
 
-    // In a real app, send this to the server
-    setTimeout(() => {
-      toast.success('Profile updated successfully');
+    try {
       // Store profile data in localStorage
       localStorage.setItem('adminProfile', JSON.stringify(profileForm));
+      toast.success('Profile updated successfully');
+    } catch (error) {
+      toast.error('Error updating profile');
+      console.error(error);
+    } finally {
       setIsProcessing(false);
-    }, 500);
+    }
   };
 
   const handleUpdatePassword = (e: React.FormEvent) => {
@@ -441,17 +481,30 @@ const AdminDashboard = () => {
       return;
     }
 
-    // In a real app, verify current password and update with new password
-    setTimeout(() => {
+    try {
+      // For demo purposes, we just validate against 'admin'
+      if (credentials.currentPassword !== 'admin') {
+        toast.error('Current password is incorrect');
+        setIsProcessing(false);
+        return;
+      }
+      
+      // In a real app, we would update the password in the backend
+      localStorage.setItem('adminPassword', credentials.newPassword);
       toast.success('Password updated successfully');
+      
       setCredentials(prev => ({
         ...prev,
         currentPassword: '',
         newPassword: '',
         confirmPassword: ''
       }));
+    } catch (error) {
+      toast.error('Error updating password');
+      console.error(error);
+    } finally {
       setIsProcessing(false);
-    }, 500);
+    }
   };
 
   const handleUpdateSettings = (e: React.FormEvent) => {
@@ -465,19 +518,22 @@ const AdminDashboard = () => {
       return;
     }
 
-    // In a real app, send this to the server
-    setTimeout(() => {
+    try {
       // Store settings in localStorage
       localStorage.setItem('siteSettings', JSON.stringify(siteSettingsForm));
       toast.success('Settings updated successfully');
+    } catch (error) {
+      toast.error('Error updating settings');
+      console.error(error);
+    } finally {
       setIsProcessing(false);
-    }, 500);
+    }
   };
   
   const handleDelete = (type: ContentType, id: string) => {
     setIsProcessing(true);
     
-    setTimeout(() => {
+    try {
       if (type === 'project') {
         deleteProject(id);
         toast.success('Project deleted successfully');
@@ -488,13 +544,22 @@ const AdminDashboard = () => {
         deleteMessage(id);
         toast.success('Message deleted successfully');
       }
+    } catch (error) {
+      toast.error(`Error deleting ${type}`);
+      console.error(error);
+    } finally {
       setIsProcessing(false);
-    }, 500);
+    }
   };
   
   const handleMarkAsRead = (id: string) => {
-    markMessageAsRead(id);
-    toast.success('Message marked as read');
+    try {
+      markMessageAsRead(id);
+      toast.success('Message marked as read');
+    } catch (error) {
+      toast.error('Error updating message');
+      console.error(error);
+    }
   };
 
   // Filter function based on search query
@@ -524,6 +589,239 @@ const AdminDashboard = () => {
   const filteredProjects = filterItems(projects, ['title', 'category', 'description']);
   const filteredServices = filterItems(services, ['title', 'description']);
   const filteredMessages = filterItems(messages, ['name', 'email', 'subject', 'message']);
+
+  // Project Modal
+  const renderProjectModal = () => (
+    <Dialog open={modalOpen && contentType === 'project'} onOpenChange={closeModal}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{modalType === 'add' ? 'Add New Project' : 'Edit Project'}</DialogTitle>
+          <DialogDescription>
+            {modalType === 'add' ? 'Fill the form to add a new project to your portfolio.' : 'Update project information.'}
+          </DialogDescription>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmitProject} className="space-y-4 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Project Title*</Label>
+              <Input 
+                id="title"
+                name="title"
+                value={projectForm.title}
+                onChange={handleProjectChange}
+                placeholder="Enter project title"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="category">Category*</Label>
+              <Input 
+                id="category"
+                name="category"
+                value={projectForm.category}
+                onChange={handleProjectChange}
+                placeholder="E.g. Web Development, Mobile App"
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="description">Description*</Label>
+            <Textarea 
+              id="description"
+              name="description"
+              value={projectForm.description}
+              onChange={handleProjectChange}
+              placeholder="Describe the project"
+              rows={4}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="image">Image URL</Label>
+            <Input 
+              id="image"
+              name="image"
+              value={projectForm.image}
+              onChange={handleProjectChange}
+              placeholder="https://example.com/image.jpg"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="link">Project Link</Label>
+            <Input 
+              id="link"
+              name="link"
+              value={projectForm.link}
+              onChange={handleProjectChange}
+              placeholder="https://example.com"
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Technologies</Label>
+            <div className="flex items-center space-x-2">
+              <Input 
+                value={techInput}
+                onChange={(e) => setTechInput(e.target.value)}
+                placeholder="Add technology"
+              />
+              <Button type="button" onClick={addTechnology}>Add</Button>
+            </div>
+            
+            <div className="flex flex-wrap gap-2 mt-2">
+              {projectForm.technologies.map((tech, i) => (
+                <div 
+                  key={i} 
+                  className="bg-blue-100 text-blue-800 px-2 py-1 rounded-md flex items-center gap-1"
+                >
+                  <span>{tech}</span>
+                  <button 
+                    type="button"
+                    onClick={() => removeTechnology(tech)}
+                    className="text-blue-800 hover:text-blue-900"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={closeModal} disabled={isProcessing}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isProcessing}>
+              {isProcessing ? 'Saving...' : modalType === 'add' ? 'Add Project' : 'Update Project'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+
+  // Service Modal
+  const renderServiceModal = () => (
+    <Dialog open={modalOpen && contentType === 'service'} onOpenChange={closeModal}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>{modalType === 'add' ? 'Add New Service' : 'Edit Service'}</DialogTitle>
+          <DialogDescription>
+            {modalType === 'add' ? 'Fill the form to add a new service to your offering.' : 'Update service information.'}
+          </DialogDescription>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmitService} className="space-y-4 py-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">Service Title*</Label>
+              <Input 
+                id="title"
+                name="title"
+                value={serviceForm.title}
+                onChange={handleServiceChange}
+                placeholder="Enter service title"
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="price">Price ($)</Label>
+              <Input 
+                id="price"
+                name="price"
+                type="number"
+                value={serviceForm.price.toString()}
+                onChange={handleServiceChange}
+                placeholder="0"
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="description">Description*</Label>
+            <Textarea 
+              id="description"
+              name="description"
+              value={serviceForm.description}
+              onChange={handleServiceChange}
+              placeholder="Describe the service"
+              rows={4}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="icon">Icon</Label>
+            <Input 
+              id="icon"
+              name="icon"
+              value={serviceForm.icon}
+              onChange={handleServiceChange}
+              placeholder="icon-name"
+            />
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="highlighted"
+              name="highlighted"
+              checked={serviceForm.highlighted}
+              onCheckedChange={(checked) => 
+                setServiceForm(prev => ({ ...prev, highlighted: checked }))
+              }
+            />
+            <Label htmlFor="highlighted">Highlight this service</Label>
+          </div>
+          
+          <div className="space-y-2">
+            <Label>Features</Label>
+            <div className="flex items-center space-x-2">
+              <Input 
+                value={featureInput}
+                onChange={(e) => setFeatureInput(e.target.value)}
+                placeholder="Add feature"
+              />
+              <Button type="button" onClick={addFeature}>Add</Button>
+            </div>
+            
+            <div className="flex flex-col space-y-2 mt-2">
+              {serviceForm.features.map((feature, i) => (
+                <div 
+                  key={i} 
+                  className="bg-gray-100 p-2 rounded-md flex items-center justify-between"
+                >
+                  <span>{feature}</span>
+                  <button 
+                    type="button"
+                    onClick={() => removeFeature(feature)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={closeModal} disabled={isProcessing}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isProcessing}>
+              {isProcessing ? 'Saving...' : modalType === 'add' ? 'Add Service' : 'Update Service'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
 
   return (
     <div className="min-h-screen bg-gray-100 flex">
@@ -734,7 +1032,7 @@ const AdminDashboard = () => {
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                 <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
                 <div className="space-y-4">
-                  {messages.filter(m => !m.read).slice(0, 4).map((message, index) => (
+                  {messages.filter(m => !m.read).slice(0, 4).map((message) => (
                     <div key={message.id} className="flex justify-between items-center border-b pb-2 last:border-0 last:pb-0">
                       <p>New message received from {message.name}</p>
                       <button 
@@ -759,13 +1057,13 @@ const AdminDashboard = () => {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Projects Management</h2>
-                <button 
-                  onClick={() => openModal('add', 'project')} 
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+                <Button 
+                  onClick={() => openModal('add', 'project')}
+                  className="flex items-center gap-2"
                 >
                   <PlusCircle size={16} />
                   <span>Add Project</span>
-                </button>
+                </Button>
               </div>
               
               {/* Projects Table */}
@@ -839,13 +1137,13 @@ const AdminDashboard = () => {
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Services Management</h2>
-                <button 
-                  onClick={() => openModal('add', 'service')} 
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+                <Button 
+                  onClick={() => openModal('add', 'service')}
+                  className="flex items-center gap-2"
                 >
                   <PlusCircle size={16} />
                   <span>Add Service</span>
-                </button>
+                </Button>
               </div>
               
               {/* Services Table */}
@@ -1005,70 +1303,70 @@ const AdminDashboard = () => {
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
-                        <input 
+                        <Label htmlFor="name">Name</Label>
+                        <Input 
                           type="text" 
+                          id="name"
                           name="name" 
                           value={profileForm.name}
                           onChange={handleProfileChange}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input 
+                        <Label htmlFor="email">Email</Label>
+                        <Input 
                           type="email" 
+                          id="email"
                           name="email" 
                           value={profileForm.email}
                           onChange={handleProfileChange}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                     </div>
                     
                     <div className="mb-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
-                      <textarea 
+                      <Label htmlFor="bio">Bio</Label>
+                      <Textarea 
+                        id="bio"
                         name="bio" 
                         value={profileForm.bio}
                         onChange={handleProfileChange}
                         rows={4}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                        <input 
+                        <Label htmlFor="role">Role</Label>
+                        <Input 
                           type="text" 
+                          id="role"
                           name="role" 
                           value={profileForm.role}
                           onChange={handleProfileChange}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                        <input 
+                        <Label htmlFor="location">Location</Label>
+                        <Input 
                           type="text" 
+                          id="location"
                           name="location" 
                           value={profileForm.location}
                           onChange={handleProfileChange}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                        <input 
+                        <Label htmlFor="phone">Phone</Label>
+                        <Input 
                           type="text" 
+                          id="phone"
                           name="phone" 
                           value={profileForm.phone}
                           onChange={handleProfileChange}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                     </div>
@@ -1077,42 +1375,42 @@ const AdminDashboard = () => {
                     
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn</label>
-                        <input 
+                        <Label htmlFor="linkedIn">LinkedIn</Label>
+                        <Input 
                           type="text" 
+                          id="linkedIn"
                           name="linkedIn" 
                           value={profileForm.linkedIn}
                           onChange={handleProfileChange}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">GitHub</label>
-                        <input 
+                        <Label htmlFor="github">GitHub</Label>
+                        <Input 
                           type="text" 
+                          id="github"
                           name="github" 
                           value={profileForm.github}
                           onChange={handleProfileChange}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Behance</label>
-                        <input 
+                        <Label htmlFor="behance">Behance</Label>
+                        <Input 
                           type="text" 
+                          id="behance"
                           name="behance" 
                           value={profileForm.behance}
                           onChange={handleProfileChange}
-                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                       </div>
                     </div>
                     
                     <div className="mt-6">
-                      <button 
+                      <Button 
                         type="submit" 
-                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
                         disabled={isProcessing}
+                        className="flex items-center gap-2"
                       >
                         {isProcessing ? (
                           <>
@@ -1125,7 +1423,7 @@ const AdminDashboard = () => {
                             <span>Save Profile</span>
                           </>
                         )}
-                      </button>
+                      </Button>
                     </div>
                   </form>
                 </div>
@@ -1137,45 +1435,45 @@ const AdminDashboard = () => {
                     <form onSubmit={handleUpdatePassword}>
                       <div className="space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-                          <input 
+                          <Label htmlFor="currentPassword">Current Password</Label>
+                          <Input 
                             type="password" 
+                            id="currentPassword"
                             name="currentPassword" 
                             value={credentials.currentPassword}
                             onChange={handleCredentialsChange}
-                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                          <input 
+                          <Label htmlFor="newPassword">New Password</Label>
+                          <Input 
                             type="password" 
+                            id="newPassword"
                             name="newPassword" 
                             value={credentials.newPassword}
                             onChange={handleCredentialsChange}
-                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                          <input 
+                          <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                          <Input 
                             type="password" 
+                            id="confirmPassword"
                             name="confirmPassword" 
                             value={credentials.confirmPassword}
                             onChange={handleCredentialsChange}
-                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         </div>
                       </div>
                       
                       <div className="mt-6">
-                        <button 
+                        <Button 
                           type="submit" 
-                          className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 flex items-center justify-center gap-2"
+                          className="w-full"
                           disabled={isProcessing}
                         >
                           {isProcessing ? 'Updating...' : 'Update Password'}
-                        </button>
+                        </Button>
                       </div>
                     </form>
                   </div>
@@ -1194,35 +1492,35 @@ const AdminDashboard = () => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Site Name</label>
-                    <input 
+                    <Label htmlFor="siteName">Site Name</Label>
+                    <Input 
                       type="text" 
+                      id="siteName"
                       name="siteName" 
                       value={siteSettingsForm.siteName}
                       onChange={handleSettingsChange}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
-                    <input 
+                    <Label htmlFor="contactEmail">Contact Email</Label>
+                    <Input 
                       type="email" 
+                      id="contactEmail"
                       name="contactEmail" 
                       value={siteSettingsForm.contactEmail}
                       onChange={handleSettingsChange}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
                 
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Site Description</label>
-                  <textarea 
+                  <Label htmlFor="siteDescription">Site Description</Label>
+                  <Textarea 
+                    id="siteDescription"
                     name="siteDescription" 
                     value={siteSettingsForm.siteDescription}
                     onChange={handleSettingsChange}
                     rows={3}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 
@@ -1230,43 +1528,43 @@ const AdminDashboard = () => {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn</label>
-                    <input 
+                    <Label htmlFor="socialLinks.linkedin">LinkedIn</Label>
+                    <Input 
                       type="text" 
+                      id="socialLinks.linkedin"
                       name="socialLinks.linkedin" 
                       value={siteSettingsForm.socialLinks.linkedin}
                       onChange={handleSettingsChange}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">GitHub</label>
-                    <input 
+                    <Label htmlFor="socialLinks.github">GitHub</Label>
+                    <Input 
                       type="text" 
+                      id="socialLinks.github"
                       name="socialLinks.github" 
                       value={siteSettingsForm.socialLinks.github}
                       onChange={handleSettingsChange}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Twitter</label>
-                    <input 
+                    <Label htmlFor="socialLinks.twitter">Twitter</Label>
+                    <Input 
                       type="text" 
+                      id="socialLinks.twitter"
                       name="socialLinks.twitter" 
                       value={siteSettingsForm.socialLinks.twitter}
                       onChange={handleSettingsChange}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Behance</label>
-                    <input 
+                    <Label htmlFor="socialLinks.behance">Behance</Label>
+                    <Input 
                       type="text" 
+                      id="socialLinks.behance"
                       name="socialLinks.behance" 
                       value={siteSettingsForm.socialLinks.behance}
                       onChange={handleSettingsChange}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -1275,33 +1573,33 @@ const AdminDashboard = () => {
                 
                 <div className="space-y-4 mb-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
-                    <input 
+                    <Label htmlFor="seo.metaTitle">Meta Title</Label>
+                    <Input 
                       type="text" 
+                      id="seo.metaTitle"
                       name="seo.metaTitle" 
                       value={siteSettingsForm.seo.metaTitle}
                       onChange={handleSettingsChange}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
-                    <textarea 
+                    <Label htmlFor="seo.metaDescription">Meta Description</Label>
+                    <Textarea 
+                      id="seo.metaDescription"
                       name="seo.metaDescription" 
                       value={siteSettingsForm.seo.metaDescription}
                       onChange={handleSettingsChange}
                       rows={3}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Keywords</label>
-                    <input 
+                    <Label htmlFor="seo.keywords">Keywords</Label>
+                    <Input 
                       type="text" 
+                      id="seo.keywords"
                       name="seo.keywords" 
                       value={siteSettingsForm.seo.keywords}
                       onChange={handleSettingsChange}
-                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                     <p className="text-xs text-gray-500 mt-1">Separate keywords with commas</p>
                   </div>
@@ -1310,22 +1608,22 @@ const AdminDashboard = () => {
                 <h3 className="text-lg font-semibold mb-4">Google Analytics</h3>
                 
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Analytics ID</label>
-                  <input 
+                  <Label htmlFor="analytics.googleAnalyticsId">Analytics ID</Label>
+                  <Input 
                     type="text" 
+                    id="analytics.googleAnalyticsId"
                     name="analytics.googleAnalyticsId" 
                     value={siteSettingsForm.analytics.googleAnalyticsId}
                     onChange={handleSettingsChange}
                     placeholder="UA-XXXXXXXXX-X or G-XXXXXXXXXX"
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 
                 <div className="mt-6">
-                  <button 
+                  <Button 
                     type="submit" 
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
                     disabled={isProcessing}
+                    className="flex items-center gap-2"
                   >
                     {isProcessing ? (
                       <>
@@ -1338,7 +1636,7 @@ const AdminDashboard = () => {
                         <span>Save Settings</span>
                       </>
                     )}
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>
@@ -1349,13 +1647,18 @@ const AdminDashboard = () => {
             <div className="space-y-6">
               <h2 className="text-2xl font-bold">Analytics</h2>
               
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 text-center">
-                <p className="text-gray-500">Analytics features coming soon.</p>
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <h3 className="text-lg font-semibold mb-4">Website Traffic</h3>
+                <p className="text-center py-10 text-gray-500">Analytics features will be implemented soon.</p>
               </div>
             </div>
           )}
         </main>
       </div>
+      
+      {/* Modals */}
+      {renderProjectModal()}
+      {renderServiceModal()}
     </div>
   );
 };

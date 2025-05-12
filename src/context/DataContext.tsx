@@ -49,6 +49,8 @@ interface DataContextType {
   updateMessage: (id: string, message: Partial<Message>) => void;
   deleteMessage: (id: string) => void;
   markMessageAsRead: (id: string) => void;
+  clearData: () => void;
+  resetToInitialData: () => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -60,7 +62,7 @@ const initialProjects: Project[] = [
     title: 'E-commerce Platform',
     category: 'Web Development',
     description: 'A fully-featured e-commerce platform with product management, cart functionality, and secure checkout integration.',
-    image: '',
+    image: 'https://images.unsplash.com/photo-1561997968-aa846c2bf255?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
     technologies: ['React', 'Node.js', 'MongoDB', 'Stripe']
   },
   {
@@ -68,7 +70,7 @@ const initialProjects: Project[] = [
     title: 'Finance Dashboard UI',
     category: 'UI/UX Design',
     description: 'A modern and intuitive dashboard design for a financial services company, focusing on data visualization and user experience.',
-    image: '',
+    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
     technologies: ['Figma', 'Adobe XD', 'Photoshop']
   },
   {
@@ -76,7 +78,7 @@ const initialProjects: Project[] = [
     title: 'Travel Booking App',
     category: 'Mobile Development',
     description: 'A cross-platform mobile application for booking travel accommodations with real-time availability and secure payment processing.',
-    image: '',
+    image: 'https://images.unsplash.com/photo-1476900543704-4312b78632f8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
     technologies: ['React Native', 'Firebase', 'Google Maps API']
   }
 ];
@@ -87,21 +89,25 @@ const initialServices: Service[] = [
     title: 'Web Development',
     description: 'Custom websites built with the latest technologies to boost your online presence.',
     price: 1499,
-    features: ['Responsive Design', 'SEO Optimization', 'Content Management System', 'Contact Form Integration', 'Google Analytics Setup']
+    features: ['Responsive Design', 'SEO Optimization', 'Content Management System', 'Contact Form Integration', 'Google Analytics Setup'],
+    icon: 'code'
   },
   {
     id: '2',
     title: 'UI/UX Design',
     description: 'User-centered design solutions to enhance user experience and engagement.',
     price: 1299,
-    features: ['User Research', 'Wireframing', 'Prototyping', 'User Testing', 'Design System Creation']
+    features: ['User Research', 'Wireframing', 'Prototyping', 'User Testing', 'Design System Creation'],
+    highlighted: true,
+    icon: 'layout'
   },
   {
     id: '3',
     title: 'Mobile Development',
     description: 'Native and cross-platform mobile applications for iOS and Android.',
     price: 2499,
-    features: ['Cross-Platform Development', 'Native App Development', 'App Store Submission', 'Ongoing Maintenance', 'Performance Optimization']
+    features: ['Cross-Platform Development', 'Native App Development', 'App Store Submission', 'Ongoing Maintenance', 'Performance Optimization'],
+    icon: 'smartphone'
   }
 ];
 
@@ -166,11 +172,16 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('messages', JSON.stringify(messages));
   }, [messages]);
 
+  // Generate a unique ID
+  const generateId = () => {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+  };
+
   // CRUD functions for projects
   const addProject = (project: Omit<Project, "id">) => {
     const newProject = {
       ...project,
-      id: Math.random().toString(36).substr(2, 9), // Generate a random ID
+      id: generateId(),
     };
     setProjects(prev => [...prev, newProject]);
   };
@@ -189,7 +200,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addService = (service: Omit<Service, "id">) => {
     const newService = {
       ...service,
-      id: Math.random().toString(36).substr(2, 9),
+      id: generateId(),
     };
     setServices(prev => [...prev, newService]);
   };
@@ -208,7 +219,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addMessage = (message: Omit<Message, "id" | "date" | "read">) => {
     const newMessage = {
       ...message,
-      id: Math.random().toString(36).substr(2, 9),
+      id: generateId(),
       date: new Date().toISOString().split('T')[0],
       read: false,
     };
@@ -227,6 +238,26 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const markMessageAsRead = (id: string) => {
     updateMessage(id, { read: true });
+  };
+  
+  // Function to clear all data
+  const clearData = () => {
+    setProjects([]);
+    setServices([]);
+    setMessages([]);
+    localStorage.removeItem('projects');
+    localStorage.removeItem('services');
+    localStorage.removeItem('messages');
+  };
+  
+  // Function to reset to initial data
+  const resetToInitialData = () => {
+    setProjects(initialProjects);
+    setServices(initialServices);
+    setMessages(initialMessages);
+    localStorage.setItem('projects', JSON.stringify(initialProjects));
+    localStorage.setItem('services', JSON.stringify(initialServices));
+    localStorage.setItem('messages', JSON.stringify(initialMessages));
   };
 
   return (
@@ -247,6 +278,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateMessage,
       deleteMessage,
       markMessageAsRead,
+      clearData,
+      resetToInitialData,
     }}>
       {children}
     </DataContext.Provider>
