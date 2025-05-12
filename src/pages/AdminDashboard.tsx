@@ -5,13 +5,48 @@ import { toast } from 'sonner';
 import { 
   Home, User, FileText, Mail, Settings, LogOut, Menu, X, 
   Grid, PlusCircle, Edit, Trash2, Image, Package, MessageSquare,
-  BarChart, RefreshCw, Search, Save
+  BarChart, RefreshCw, Search, Save, Linkedin, GitHub, Link, Calendar
 } from 'lucide-react';
-import { useData } from '../context/DataContext';
+import { useData, Project, Service, Message } from '../context/DataContext';
 
 // Define modal types
 type ModalType = 'add' | 'edit' | null;
 type ContentType = 'project' | 'service' | 'message' | 'profile' | 'siteSettings' | null;
+
+// Admin profile type
+interface AdminProfile {
+  name: string;
+  email: string;
+  bio: string;
+  role: string;
+  avatar: string;
+  linkedIn: string;
+  github: string;
+  behance: string;
+  phone: string;
+  location: string;
+}
+
+// Site settings type
+interface SiteSettings {
+  siteName: string;
+  siteDescription: string;
+  contactEmail: string;
+  socialLinks: {
+    twitter: string;
+    linkedin: string;
+    github: string;
+    behance: string;
+  };
+  analytics: {
+    googleAnalyticsId: string;
+  };
+  seo: {
+    metaTitle: string;
+    metaDescription: string;
+    keywords: string;
+  };
+}
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -56,23 +91,46 @@ const AdminDashboard = () => {
     icon: ''
   });
 
-  const [siteSettingsForm, setSettingsForm] = useState({
-    siteName: 'Portfolio',
-    siteDescription: 'Professional portfolio showcase',
-    contactEmail: 'contact@example.com',
+  // Updated admin profile with more fields
+  const [profileForm, setProfileForm] = useState<AdminProfile>({
+    name: 'Md Sahabul Islam',
+    email: 'contact@mdsahabul.com',
+    bio: 'Professional Web Developer & UX Designer',
+    role: 'Web Developer',
+    avatar: '',
+    linkedIn: 'https://www.linkedin.com/in/mdsahabul',
+    github: 'https://github.com/mdsahabul',
+    behance: 'https://www.behance.net/md_sahabul',
+    phone: '+880 1700000000',
+    location: 'Dhaka, Bangladesh'
+  });
+
+  // Enhanced site settings
+  const [siteSettingsForm, setSettingsForm] = useState<SiteSettings>({
+    siteName: 'Md Sahabul - Portfolio',
+    siteDescription: 'Professional Web Developer & Designer Portfolio',
+    contactEmail: 'contact@mdsahabul.com',
     socialLinks: {
-      twitter: '',
-      linkedin: '',
-      github: '',
-      instagram: ''
+      twitter: 'https://twitter.com/mdsahabul',
+      linkedin: 'https://www.linkedin.com/in/mdsahabul',
+      github: 'https://github.com/mdsahabul',
+      behance: 'https://www.behance.net/md_sahabul'
+    },
+    analytics: {
+      googleAnalyticsId: ''
+    },
+    seo: {
+      metaTitle: 'Md Sahabul - Web Developer & Designer Portfolio',
+      metaDescription: 'Portfolio of Md Sahabul, showcasing web development and design projects.',
+      keywords: 'web developer, UX designer, portfolio, projects, services, contact'
     }
   });
 
-  const [profileForm, setProfileForm] = useState({
-    name: 'Admin User',
-    email: 'admin@example.com',
-    bio: 'Website administrator',
-    password: '',
+  // Login credentials
+  const [credentials, setCredentials] = useState({
+    username: 'admin',
+    currentPassword: '',
+    newPassword: '',
     confirmPassword: ''
   });
 
@@ -186,6 +244,11 @@ const AdminDashboard = () => {
     setProfileForm(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleCredentialsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setCredentials(prev => ({ ...prev, [name]: value }));
+  };
+
   const handleSettingsChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     if (name.includes('.')) {
@@ -196,6 +259,22 @@ const AdminDashboard = () => {
             ...prev,
             socialLinks: {
               ...prev.socialLinks,
+              [child]: value
+            }
+          };
+        } else if (parent === 'analytics') {
+          return {
+            ...prev,
+            analytics: {
+              ...prev.analytics,
+              [child]: value
+            }
+          };
+        } else if (parent === 'seo') {
+          return {
+            ...prev,
+            seo: {
+              ...prev.seo,
               [child]: value
             }
           };
@@ -336,15 +415,41 @@ const AdminDashboard = () => {
       return;
     }
 
-    if (profileForm.password && profileForm.password !== profileForm.confirmPassword) {
+    // In a real app, send this to the server
+    setTimeout(() => {
+      toast.success('Profile updated successfully');
+      // Store profile data in localStorage
+      localStorage.setItem('adminProfile', JSON.stringify(profileForm));
+      setIsProcessing(false);
+    }, 500);
+  };
+
+  const handleUpdatePassword = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsProcessing(true);
+
+    // Validate
+    if (!credentials.currentPassword) {
+      toast.error('Please enter your current password');
+      setIsProcessing(false);
+      return;
+    }
+
+    if (credentials.newPassword !== credentials.confirmPassword) {
       toast.error('Passwords do not match');
       setIsProcessing(false);
       return;
     }
 
-    // In a real app, send this to the server
+    // In a real app, verify current password and update with new password
     setTimeout(() => {
-      toast.success('Profile updated successfully');
+      toast.success('Password updated successfully');
+      setCredentials(prev => ({
+        ...prev,
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }));
       setIsProcessing(false);
     }, 500);
   };
@@ -362,9 +467,10 @@ const AdminDashboard = () => {
 
     // In a real app, send this to the server
     setTimeout(() => {
+      // Store settings in localStorage
+      localStorage.setItem('siteSettings', JSON.stringify(siteSettingsForm));
       toast.success('Settings updated successfully');
       setIsProcessing(false);
-      // Here we'd actually save these settings to be used by the frontend
     }, 500);
   };
   
@@ -443,10 +549,10 @@ const AdminDashboard = () => {
               { id: 'dashboard', label: 'Dashboard', icon: Home },
               { id: 'projects', label: 'Projects', icon: Grid },
               { id: 'services', label: 'Services', icon: Package },
-              { id: 'messages', label: 'Messages', icon: MessageSquare },
+              { id: 'messages', label: 'Sales & Messages', icon: MessageSquare },
               { id: 'analytics', label: 'Analytics', icon: BarChart },
               { id: 'profile', label: 'Profile', icon: User },
-              { id: 'settings', label: 'Settings', icon: Settings }
+              { id: 'settings', label: 'Site Settings', icon: Settings }
             ].map(item => {
               const Icon = item.icon;
               return (
@@ -510,10 +616,10 @@ const AdminDashboard = () => {
                 <RefreshCw size={20} className="text-gray-600" />
               </button>
               <div className="text-sm font-medium text-gray-700 hidden sm:block">
-                Admin User
+                {profileForm.name}
               </div>
               <div className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center">
-                A
+                {profileForm.name.charAt(0)}
               </div>
             </div>
           </div>
@@ -590,6 +696,40 @@ const AdminDashboard = () => {
                 </div>
               </div>
               
+              {/* Social Links Preview */}
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <h3 className="text-lg font-semibold mb-4">Your Social Profiles</h3>
+                <div className="flex flex-wrap gap-4">
+                  <a 
+                    href={profileForm.linkedIn} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100"
+                  >
+                    <Linkedin size={18} />
+                    <span>LinkedIn</span>
+                  </a>
+                  <a 
+                    href={profileForm.github} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700"
+                  >
+                    <GitHub size={18} />
+                    <span>GitHub</span>
+                  </a>
+                  <a 
+                    href={profileForm.behance} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-900 text-white rounded-lg hover:bg-blue-800"
+                  >
+                    <Link size={18} />
+                    <span>Behance</span>
+                  </a>
+                </div>
+              </div>
+
               {/* Recent Activity */}
               <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
                 <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
@@ -621,7 +761,7 @@ const AdminDashboard = () => {
                 <h2 className="text-2xl font-bold">Projects Management</h2>
                 <button 
                   onClick={() => openModal('add', 'project')} 
-                  className="btn-primary flex items-center gap-2"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
                 >
                   <PlusCircle size={16} />
                   <span>Add Project</span>
@@ -701,7 +841,7 @@ const AdminDashboard = () => {
                 <h2 className="text-2xl font-bold">Services Management</h2>
                 <button 
                   onClick={() => openModal('add', 'service')} 
-                  className="btn-primary flex items-center gap-2"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
                 >
                   <PlusCircle size={16} />
                   <span>Add Service</span>
@@ -764,10 +904,57 @@ const AdminDashboard = () => {
             </div>
           )}
           
-          {/* Messages Tab */}
+          {/* Messages/Sales Tab */}
           {activeTab === 'messages' && (
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold">Messages</h2>
+              <h2 className="text-2xl font-bold">Sales & Message Management</h2>
+              
+              {/* Stats for messages */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-gray-500 text-sm font-medium">Total Messages</h3>
+                      <p className="text-2xl font-bold text-gray-800">{messages.length}</p>
+                    </div>
+                    <div className="bg-blue-100 p-2 rounded-lg">
+                      <MessageSquare size={24} className="text-blue-500" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-gray-500 text-sm font-medium">Unread Messages</h3>
+                      <p className="text-2xl font-bold text-yellow-600">{messages.filter(m => !m.read).length}</p>
+                    </div>
+                    <div className="bg-yellow-100 p-2 rounded-lg">
+                      <Mail size={24} className="text-yellow-500" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="text-gray-500 text-sm font-medium">Recent Messages</h3>
+                      <p className="text-2xl font-bold text-green-600">
+                        {messages.filter(m => {
+                          const date = new Date(m.date);
+                          const now = new Date();
+                          const diffTime = Math.abs(now.getTime() - date.getTime());
+                          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                          return diffDays <= 7;
+                        }).length}
+                      </p>
+                    </div>
+                    <div className="bg-green-100 p-2 rounded-lg">
+                      <Calendar size={24} className="text-green-500" />
+                    </div>
+                  </div>
+                </div>
+              </div>
               
               {/* Messages List */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-100">
@@ -789,6 +976,18 @@ const AdminDashboard = () => {
                           </div>
                           <p className="text-sm text-gray-600 mt-1">From: {message.name} ({message.email})</p>
                           <p className="text-sm text-gray-800 mt-2">{message.message}</p>
+                          
+                          {/* Additional contact details */}
+                          <div className="mt-3 p-3 bg-gray-50 rounded-md">
+                            <h4 className="text-xs font-semibold text-gray-500 uppercase mb-2">Contact Details</h4>
+                            <p className="text-sm"><span className="font-medium">Email:</span> {message.email}</p>
+                            <p className="text-sm"><span className="font-medium">Date:</span> {message.date}</p>
+                            <p className="text-sm"><span className="font-medium">Status:</span> 
+                              <span className={`ml-1 ${message.read ? 'text-green-600' : 'text-yellow-600'}`}>
+                                {message.read ? 'Read' : 'Unread'}
+                              </span>
+                            </p>
+                          </div>
                         </div>
                         <div className="text-xs text-gray-500">{message.date}</div>
                       </div>
@@ -831,7 +1030,7 @@ const AdminDashboard = () => {
                 <form onSubmit={handleUpdateProfile} className="space-y-6">
                   <div className="flex items-center space-x-6 mb-6">
                     <div className="w-16 h-16 rounded-full bg-blue-500 text-white flex items-center justify-center text-2xl font-bold">
-                      A
+                      {profileForm.name.charAt(0)}
                     </div>
                     <div>
                       <h3 className="font-medium text-lg">Profile Picture</h3>
@@ -864,6 +1063,36 @@ const AdminDashboard = () => {
                         required
                       />
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                      <input
+                        type="text"
+                        name="role"
+                        value={profileForm.role}
+                        onChange={handleProfileChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                      <input
+                        type="text"
+                        name="phone"
+                        value={profileForm.phone}
+                        onChange={handleProfileChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                      <input
+                        type="text"
+                        name="location"
+                        value={profileForm.location}
+                        onChange={handleProfileChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
                       <textarea
@@ -878,27 +1107,52 @@ const AdminDashboard = () => {
                   
                   <hr className="my-6" />
                   
-                  <h3 className="font-medium text-lg mb-4">Change Password</h3>
+                  <h3 className="font-medium text-lg mb-4">Social Media Links</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-                      <input
-                        type="password"
-                        name="password"
-                        value={profileForm.password}
-                        onChange={handleProfileChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
+                      <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn</label>
+                      <div className="flex">
+                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
+                          <Linkedin size={16} />
+                        </span>
+                        <input
+                          type="url"
+                          name="linkedIn"
+                          value={profileForm.linkedIn}
+                          onChange={handleProfileChange}
+                          className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-                      <input
-                        type="password"
-                        name="confirmPassword"
-                        value={profileForm.confirmPassword}
-                        onChange={handleProfileChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
+                      <label className="block text-sm font-medium text-gray-700 mb-1">GitHub</label>
+                      <div className="flex">
+                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
+                          <GitHub size={16} />
+                        </span>
+                        <input
+                          type="url"
+                          name="github"
+                          value={profileForm.github}
+                          onChange={handleProfileChange}
+                          className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Behance</label>
+                      <div className="flex">
+                        <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 bg-gray-50 text-gray-500">
+                          <Link size={16} />
+                        </span>
+                        <input
+                          type="url"
+                          name="behance"
+                          value={profileForm.behance}
+                          onChange={handleProfileChange}
+                          className="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-r-md border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
                     </div>
                   </div>
                   
@@ -910,6 +1164,57 @@ const AdminDashboard = () => {
                     >
                       <Save size={16} />
                       <span>{isProcessing ? 'Saving...' : 'Save Changes'}</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Security Section */}
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <h3 className="font-medium text-lg mb-4">Security Settings</h3>
+                <form onSubmit={handleUpdatePassword}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                      <input
+                        type="password"
+                        name="currentPassword"
+                        value={credentials.currentPassword}
+                        onChange={handleCredentialsChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div></div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                      <input
+                        type="password"
+                        name="newPassword"
+                        value={credentials.newPassword}
+                        onChange={handleCredentialsChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                      <input
+                        type="password"
+                        name="confirmPassword"
+                        value={credentials.confirmPassword}
+                        onChange={handleCredentialsChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex justify-end mt-6">
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-medium flex items-center gap-2"
+                      disabled={isProcessing}
+                    >
+                      <Save size={16} />
+                      <span>{isProcessing ? 'Updating...' : 'Update Password'}</span>
                     </button>
                   </div>
                 </form>
@@ -962,6 +1267,54 @@ const AdminDashboard = () => {
                   
                   <hr className="my-6" />
                   
+                  <h3 className="font-medium text-lg mb-4">SEO Settings</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
+                      <input
+                        type="text"
+                        name="seo.metaTitle"
+                        value={siteSettingsForm.seo.metaTitle}
+                        onChange={handleSettingsChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
+                      <textarea
+                        name="seo.metaDescription"
+                        value={siteSettingsForm.seo.metaDescription}
+                        onChange={handleSettingsChange}
+                        rows={2}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      ></textarea>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Keywords</label>
+                      <input
+                        type="text"
+                        name="seo.keywords"
+                        value={siteSettingsForm.seo.keywords}
+                        onChange={handleSettingsChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Separate keywords with commas"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Google Analytics ID</label>
+                      <input
+                        type="text"
+                        name="analytics.googleAnalyticsId"
+                        value={siteSettingsForm.analytics.googleAnalyticsId}
+                        onChange={handleSettingsChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="e.g. UA-XXXXXXXXX-X"
+                      />
+                    </div>
+                  </div>
+                  
+                  <hr className="my-6" />
+                  
                   <h3 className="font-medium text-lg mb-4">Social Media Links</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -995,11 +1348,11 @@ const AdminDashboard = () => {
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Instagram</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Behance</label>
                       <input
                         type="text"
-                        name="socialLinks.instagram"
-                        value={siteSettingsForm.socialLinks.instagram}
+                        name="socialLinks.behance"
+                        value={siteSettingsForm.socialLinks.behance}
                         onChange={handleSettingsChange}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />

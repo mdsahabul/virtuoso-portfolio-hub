@@ -36,6 +36,14 @@ const Header = () => {
     return location.pathname === path;
   };
 
+  // Navigation links - removed admin link
+  const navLinks = [
+    { path: '/', label: 'Home' },
+    { path: '/services', label: 'Services' },
+    { path: '/portfolio', label: 'Portfolio' },
+    { path: '/contact', label: 'Contact' }
+  ];
+
   return (
     <header 
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
@@ -49,17 +57,17 @@ const Header = () => {
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
-          {['/', '/services', '/portfolio', '/contact'].map((path, i) => (
+          {navLinks.map((link, i) => (
             <Link 
               key={i} 
-              to={path} 
+              to={link.path} 
               className={`text-base font-medium transition-colors hover:text-blue-500 relative after:absolute after:left-0 after:bottom-0 after:h-0.5 after:bg-blue-500 after:transition-all ${
-                isCurrentPath(path) 
+                isCurrentPath(link.path) 
                   ? 'text-blue-600 after:w-full' 
                   : 'text-gray-700 after:w-0 hover:after:w-full'
               }`}
             >
-              {path === '/' ? 'Home' : path.substring(1).charAt(0).toUpperCase() + path.substring(1).slice(1)}
+              {link.label}
             </Link>
           ))}
         </nav>
@@ -82,16 +90,16 @@ const Header = () => {
       {isMenuOpen && (
         <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-5 animate-fade-in">
           <div className="container-custom flex flex-col space-y-4">
-            {['/', '/services', '/portfolio', '/contact'].map((path, i) => (
+            {navLinks.map((link, i) => (
               <Link
                 key={i}
-                to={path}
+                to={link.path}
                 className={`text-lg font-medium py-2 ${
-                  isCurrentPath(path) ? 'text-blue-600' : 'text-gray-700'
+                  isCurrentPath(link.path) ? 'text-blue-600' : 'text-gray-700'
                 }`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                {path === '/' ? 'Home' : path.substring(1).charAt(0).toUpperCase() + path.substring(1).slice(1)}
+                {link.label}
               </Link>
             ))}
           </div>
