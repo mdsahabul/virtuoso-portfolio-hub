@@ -190,13 +190,18 @@ const AdminDashboard = () => {
     const { name, value } = e.target;
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
-      setSettingsForm(prev => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent as keyof typeof prev],
-          [child]: value
+      setSettingsForm(prev => {
+        if (parent === 'socialLinks') {
+          return {
+            ...prev,
+            socialLinks: {
+              ...prev.socialLinks,
+              [child]: value
+            }
+          };
         }
-      }));
+        return prev;
+      });
     } else {
       setSettingsForm(prev => ({ ...prev, [name]: value }));
     }
