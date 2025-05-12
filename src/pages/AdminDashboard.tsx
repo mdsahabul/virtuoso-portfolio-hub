@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -862,3 +863,501 @@ const AdminDashboard = () => {
                     <tbody className="bg-white divide-y divide-gray-200">
                       {filteredServices.map(service => (
                         <tr key={service.id}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-10 w-10 bg-gray-200 rounded-md flex items-center justify-center">
+                                <Package size={16} className="text-gray-500" />
+                              </div>
+                              <div className="ml-4">
+                                <div className="font-medium text-gray-900">{service.title}</div>
+                                <div className="text-xs text-gray-500">
+                                  {service.highlighted && <span className="text-green-600">★ Featured</span>}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm font-medium text-gray-900">
+                              ${service.price}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900 max-w-xs truncate">{service.description}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div className="flex space-x-2">
+                              <button 
+                                onClick={() => openModal('edit', 'service', service)} 
+                                className="text-blue-600 hover:text-blue-800"
+                              >
+                                <Edit size={16} />
+                              </button>
+                              <button 
+                                onClick={() => handleDelete('service', service.id)} 
+                                className="text-red-600 hover:text-red-800"
+                                disabled={isProcessing}
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {filteredServices.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No services found</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Messages Tab */}
+          {activeTab === 'messages' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-2xl font-bold">Sales & Messages</h2>
+              </div>
+              
+              <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">From</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredMessages.map(message => (
+                        <tr key={message.id} className={message.read ? '' : 'bg-blue-50'}>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div className="ml-4">
+                                <div className="font-medium text-gray-900">{message.name}</div>
+                                <div className="text-xs text-gray-500">{message.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="text-sm text-gray-900">{message.subject}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="text-sm text-gray-500">{message.date}</div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {message.read ? (
+                              <span className="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-full">Read</span>
+                            ) : (
+                              <span className="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded-full">Unread</span>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <div className="flex space-x-2">
+                              {!message.read && (
+                                <button 
+                                  onClick={() => handleMarkAsRead(message.id)} 
+                                  className="text-blue-600 hover:text-blue-800"
+                                >
+                                  <Mail size={16} />
+                                </button>
+                              )}
+                              <button 
+                                onClick={() => handleDelete('message', message.id)} 
+                                className="text-red-600 hover:text-red-800"
+                                disabled={isProcessing}
+                              >
+                                <Trash2 size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {filteredMessages.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No messages found</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {/* Profile Tab */}
+          {activeTab === 'profile' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold">Profile Settings</h2>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                  <form onSubmit={handleUpdateProfile} className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                    <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                        <input 
+                          type="text" 
+                          name="name" 
+                          value={profileForm.name}
+                          onChange={handleProfileChange}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input 
+                          type="email" 
+                          name="email" 
+                          value={profileForm.email}
+                          onChange={handleProfileChange}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                      <textarea 
+                        name="bio" 
+                        value={profileForm.bio}
+                        onChange={handleProfileChange}
+                        rows={4}
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                        <input 
+                          type="text" 
+                          name="role" 
+                          value={profileForm.role}
+                          onChange={handleProfileChange}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                        <input 
+                          type="text" 
+                          name="location" 
+                          value={profileForm.location}
+                          onChange={handleProfileChange}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                        <input 
+                          type="text" 
+                          name="phone" 
+                          value={profileForm.phone}
+                          onChange={handleProfileChange}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                    
+                    <h3 className="text-lg font-semibold mb-4 mt-6">Social Profiles</h3>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn</label>
+                        <input 
+                          type="text" 
+                          name="linkedIn" 
+                          value={profileForm.linkedIn}
+                          onChange={handleProfileChange}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">GitHub</label>
+                        <input 
+                          type="text" 
+                          name="github" 
+                          value={profileForm.github}
+                          onChange={handleProfileChange}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Behance</label>
+                        <input 
+                          type="text" 
+                          name="behance" 
+                          value={profileForm.behance}
+                          onChange={handleProfileChange}
+                          className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="mt-6">
+                      <button 
+                        type="submit" 
+                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+                        disabled={isProcessing}
+                      >
+                        {isProcessing ? (
+                          <>
+                            <RefreshCw size={16} className="animate-spin" />
+                            <span>Saving...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Save size={16} />
+                            <span>Save Profile</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+                
+                <div>
+                  <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 mb-6">
+                    <h3 className="text-lg font-semibold mb-4">Change Password</h3>
+                    
+                    <form onSubmit={handleUpdatePassword}>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
+                          <input 
+                            type="password" 
+                            name="currentPassword" 
+                            value={credentials.currentPassword}
+                            onChange={handleCredentialsChange}
+                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
+                          <input 
+                            type="password" 
+                            name="newPassword" 
+                            value={credentials.newPassword}
+                            onChange={handleCredentialsChange}
+                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
+                          <input 
+                            type="password" 
+                            name="confirmPassword" 
+                            value={credentials.confirmPassword}
+                            onChange={handleCredentialsChange}
+                            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="mt-6">
+                        <button 
+                          type="submit" 
+                          className="w-full px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 flex items-center justify-center gap-2"
+                          disabled={isProcessing}
+                        >
+                          {isProcessing ? 'Updating...' : 'Update Password'}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          {/* Settings Tab */}
+          {activeTab === 'settings' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold">Site Settings</h2>
+              
+              <form onSubmit={handleUpdateSettings} className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <h3 className="text-lg font-semibold mb-4">General Settings</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Site Name</label>
+                    <input 
+                      type="text" 
+                      name="siteName" 
+                      value={siteSettingsForm.siteName}
+                      onChange={handleSettingsChange}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
+                    <input 
+                      type="email" 
+                      name="contactEmail" 
+                      value={siteSettingsForm.contactEmail}
+                      onChange={handleSettingsChange}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Site Description</label>
+                  <textarea 
+                    name="siteDescription" 
+                    value={siteSettingsForm.siteDescription}
+                    onChange={handleSettingsChange}
+                    rows={3}
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <h3 className="text-lg font-semibold mb-4">Social Media Links</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">LinkedIn</label>
+                    <input 
+                      type="text" 
+                      name="socialLinks.linkedin" 
+                      value={siteSettingsForm.socialLinks.linkedin}
+                      onChange={handleSettingsChange}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">GitHub</label>
+                    <input 
+                      type="text" 
+                      name="socialLinks.github" 
+                      value={siteSettingsForm.socialLinks.github}
+                      onChange={handleSettingsChange}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Twitter</label>
+                    <input 
+                      type="text" 
+                      name="socialLinks.twitter" 
+                      value={siteSettingsForm.socialLinks.twitter}
+                      onChange={handleSettingsChange}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Behance</label>
+                    <input 
+                      type="text" 
+                      name="socialLinks.behance" 
+                      value={siteSettingsForm.socialLinks.behance}
+                      onChange={handleSettingsChange}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+                
+                <h3 className="text-lg font-semibold mb-4">SEO Settings</h3>
+                
+                <div className="space-y-4 mb-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Meta Title</label>
+                    <input 
+                      type="text" 
+                      name="seo.metaTitle" 
+                      value={siteSettingsForm.seo.metaTitle}
+                      onChange={handleSettingsChange}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Meta Description</label>
+                    <textarea 
+                      name="seo.metaDescription" 
+                      value={siteSettingsForm.seo.metaDescription}
+                      onChange={handleSettingsChange}
+                      rows={3}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Keywords</label>
+                    <input 
+                      type="text" 
+                      name="seo.keywords" 
+                      value={siteSettingsForm.seo.keywords}
+                      onChange={handleSettingsChange}
+                      className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Separate keywords with commas</p>
+                  </div>
+                </div>
+                
+                <h3 className="text-lg font-semibold mb-4">Google Analytics</h3>
+                
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Analytics ID</label>
+                  <input 
+                    type="text" 
+                    name="analytics.googleAnalyticsId" 
+                    value={siteSettingsForm.analytics.googleAnalyticsId}
+                    onChange={handleSettingsChange}
+                    placeholder="UA-XXXXXXXXX-X or G-XXXXXXXXXX"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                
+                <div className="mt-6">
+                  <button 
+                    type="submit" 
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+                    disabled={isProcessing}
+                  >
+                    {isProcessing ? (
+                      <>
+                        <RefreshCw size={16} className="animate-spin" />
+                        <span>Saving...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Save size={16} />
+                        <span>Save Settings</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+          
+          {/* Analytics Tab */}
+          {activeTab === 'analytics' && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold">Analytics</h2>
+              
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 text-center">
+                <p className="text-gray-500">Analytics features coming soon.</p>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+};
+
+export default AdminDashboard;
