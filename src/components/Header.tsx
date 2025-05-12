@@ -36,12 +36,13 @@ const Header = () => {
     return location.pathname === path;
   };
 
-  // Navigation links - removed admin link
+  // Navigation links - added admin link
   const navLinks = [
     { path: '/', label: 'Home' },
     { path: '/services', label: 'Services' },
     { path: '/portfolio', label: 'Portfolio' },
-    { path: '/contact', label: 'Contact' }
+    { path: '/contact', label: 'Contact' },
+    { path: '/admin-dashboard', label: 'Admin' }
   ];
 
   return (
