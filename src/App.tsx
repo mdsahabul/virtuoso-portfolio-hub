@@ -11,7 +11,7 @@ import Services from "./pages/Services";
 import Portfolio from "./pages/Portfolio";
 import Contact from "./pages/Contact";
 import AdminLogin from "./pages/AdminLogin";
-import AdminDashboard from "./pages/AdminDashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import { DataProvider } from "./context/DataContext";
 
@@ -29,7 +29,9 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <Header />
-      {children}
+      <main className="min-h-screen flex flex-col">
+        {children}
+      </main>
       <Footer />
     </>
   );
@@ -41,12 +43,12 @@ const App = () => {
       <DataProvider>
         <TooltipProvider>
           <Toaster />
-          <Sonner />
+          <Sonner position="top-right" closeButton richColors />
           <BrowserRouter>
             <Routes>
               {/* Admin routes without header/footer */}
               <Route path="/admin-login" element={<AdminLogin />} />
-              <Route path="/admin-dashboard" element={<AdminDashboard />} />
+              <Route path="/admin-dashboard/*" element={<AdminDashboard />} />
               
               {/* Main layout with header and footer */}
               <Route path="/" element={<MainLayout><Index /></MainLayout>} />

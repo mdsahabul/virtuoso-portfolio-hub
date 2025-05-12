@@ -32,23 +32,117 @@ export interface Message {
   read: boolean;
 }
 
+export interface HeroSection {
+  title: string;
+  subtitle: string;
+  ctaButton: string;
+  ctaLink: string;
+  secondaryButton: string;
+  secondaryLink: string;
+  backgroundImage: string;
+}
+
+export interface AboutSection {
+  title: string;
+  description: string[];
+  image: string;
+  skills: string[];
+}
+
+export interface FooterContent {
+  copyrightText: string;
+  quickLinks: {
+    title: string;
+    url: string;
+  }[];
+  contactInfo: {
+    email: string;
+    phone: string;
+    address: string;
+  };
+  socialLinks: {
+    platform: string;
+    url: string;
+    icon: string;
+  }[];
+}
+
+export interface HeaderContent {
+  logo: string;
+  menuItems: {
+    title: string;
+    url: string;
+  }[];
+}
+
+export interface SeoSettings {
+  siteTitle: string;
+  siteDescription: string;
+  keywords: string[];
+  ogImage: string;
+  favicon: string;
+}
+
+export interface ContactPageContent {
+  title: string;
+  subtitle: string;
+  contactInfo: {
+    email: string;
+    phone: string;
+    address: string;
+  };
+  mapLocation: string;
+}
+
 interface DataContextType {
+  // Project related state and functions
   projects: Project[];
-  services: Service[];
-  messages: Message[];
   setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
-  setServices: React.Dispatch<React.SetStateAction<Service[]>>;
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   addProject: (project: Omit<Project, "id">) => void;
   updateProject: (id: string, project: Partial<Project>) => void;
   deleteProject: (id: string) => void;
+  
+  // Service related state and functions
+  services: Service[];
+  setServices: React.Dispatch<React.SetStateAction<Service[]>>;
   addService: (service: Omit<Service, "id">) => void;
   updateService: (id: string, service: Partial<Service>) => void;
   deleteService: (id: string) => void;
+  
+  // Message related state and functions
+  messages: Message[];
+  setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   addMessage: (message: Omit<Message, "id" | "date" | "read">) => void;
   updateMessage: (id: string, message: Partial<Message>) => void;
   deleteMessage: (id: string) => void;
   markMessageAsRead: (id: string) => void;
+  
+  // Website content related state and functions
+  heroSection: HeroSection;
+  setHeroSection: React.Dispatch<React.SetStateAction<HeroSection>>;
+  updateHeroSection: (data: Partial<HeroSection>) => void;
+  
+  aboutSection: AboutSection;
+  setAboutSection: React.Dispatch<React.SetStateAction<AboutSection>>;
+  updateAboutSection: (data: Partial<AboutSection>) => void;
+  
+  footerContent: FooterContent;
+  setFooterContent: React.Dispatch<React.SetStateAction<FooterContent>>;
+  updateFooterContent: (data: Partial<FooterContent>) => void;
+  
+  headerContent: HeaderContent;
+  setHeaderContent: React.Dispatch<React.SetStateAction<HeaderContent>>;
+  updateHeaderContent: (data: Partial<HeaderContent>) => void;
+  
+  seoSettings: SeoSettings;
+  setSeoSettings: React.Dispatch<React.SetStateAction<SeoSettings>>;
+  updateSeoSettings: (data: Partial<SeoSettings>) => void;
+  
+  contactPageContent: ContactPageContent;
+  setContactPageContent: React.Dispatch<React.SetStateAction<ContactPageContent>>;
+  updateContactPageContent: (data: Partial<ContactPageContent>) => void;
+  
+  // General functions
   clearData: () => void;
   resetToInitialData: () => void;
 }
@@ -141,6 +235,76 @@ const initialMessages: Message[] = [
   }
 ];
 
+const initialHeroSection: HeroSection = {
+  title: "Creative Solutions for Your Digital Presence",
+  subtitle: "Expert web development and design services to help your business grow online",
+  ctaButton: "View My Work",
+  ctaLink: "/portfolio",
+  secondaryButton: "Contact Me",
+  secondaryLink: "/contact",
+  backgroundImage: "https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+};
+
+const initialAboutSection: AboutSection = {
+  title: "About Me",
+  description: [
+    "As a passionate professional with over 5 years of experience, I specialize in creating digital solutions that help businesses grow and thrive in the online world.",
+    "My approach combines technical expertise with creative thinking to deliver results that exceed client expectations. I believe in building long-term relationships and providing exceptional value with every project."
+  ],
+  image: "https://images.unsplash.com/photo-1585076641399-5c06d1b3365f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
+  skills: ["Web Development", "UI/UX Design", "Mobile Development", "SEO Optimization"]
+};
+
+const initialFooterContent: FooterContent = {
+  copyrightText: "© 2023 Portfolio. All rights reserved.",
+  quickLinks: [
+    { title: "Home", url: "/" },
+    { title: "Services", url: "/services" },
+    { title: "Portfolio", url: "/portfolio" },
+    { title: "Contact", url: "/contact" }
+  ],
+  contactInfo: {
+    email: "contact@example.com",
+    phone: "+1 (123) 456-7890",
+    address: "123 Main St, City, Country"
+  },
+  socialLinks: [
+    { platform: "Twitter", url: "https://twitter.com", icon: "twitter" },
+    { platform: "LinkedIn", url: "https://linkedin.com", icon: "linkedin" },
+    { platform: "GitHub", url: "https://github.com", icon: "github" }
+  ]
+};
+
+const initialHeaderContent: HeaderContent = {
+  logo: "Portfolio",
+  menuItems: [
+    { title: "Home", url: "/" },
+    { title: "Services", url: "/services" },
+    { title: "Portfolio", url: "/portfolio" },
+    { title: "Contact", url: "/contact" },
+    { title: "Admin", url: "/admin-login" }
+  ]
+};
+
+const initialSeoSettings: SeoSettings = {
+  siteTitle: "Professional Portfolio & Services",
+  siteDescription: "Expert web development, design and digital services to help your business grow online",
+  keywords: ["web development", "UI/UX design", "portfolio", "services", "digital solutions"],
+  ogImage: "/og-image.jpg",
+  favicon: "/favicon.ico"
+};
+
+const initialContactPageContent: ContactPageContent = {
+  title: "Get In Touch",
+  subtitle: "Have a project in mind? Let's discuss how I can help bring your ideas to life.",
+  contactInfo: {
+    email: "contact@example.com",
+    phone: "+1 (123) 456-7890",
+    address: "123 Main St, City, Country"
+  },
+  mapLocation: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.215288354323!2d-73.98778868459314!3d40.757978942830474!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c258f07d5da561%3A0x61f6aa300ba8339d!2sGrand%20Central%20Terminal!5e0!3m2!1sen!2sus!4v1654883745021!5m2!1sen!2sus"
+};
+
 // Create a provider component
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Initialize state with data from localStorage or fallback to initial data
@@ -159,6 +323,37 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return savedMessages ? JSON.parse(savedMessages) : initialMessages;
   });
 
+  // Website content sections
+  const [heroSection, setHeroSection] = useState<HeroSection>(() => {
+    const saved = localStorage.getItem('heroSection');
+    return saved ? JSON.parse(saved) : initialHeroSection;
+  });
+
+  const [aboutSection, setAboutSection] = useState<AboutSection>(() => {
+    const saved = localStorage.getItem('aboutSection');
+    return saved ? JSON.parse(saved) : initialAboutSection;
+  });
+
+  const [footerContent, setFooterContent] = useState<FooterContent>(() => {
+    const saved = localStorage.getItem('footerContent');
+    return saved ? JSON.parse(saved) : initialFooterContent;
+  });
+
+  const [headerContent, setHeaderContent] = useState<HeaderContent>(() => {
+    const saved = localStorage.getItem('headerContent');
+    return saved ? JSON.parse(saved) : initialHeaderContent;
+  });
+
+  const [seoSettings, setSeoSettings] = useState<SeoSettings>(() => {
+    const saved = localStorage.getItem('seoSettings');
+    return saved ? JSON.parse(saved) : initialSeoSettings;
+  });
+
+  const [contactPageContent, setContactPageContent] = useState<ContactPageContent>(() => {
+    const saved = localStorage.getItem('contactPageContent');
+    return saved ? JSON.parse(saved) : initialContactPageContent;
+  });
+
   // Save to localStorage whenever data changes
   useEffect(() => {
     localStorage.setItem('projects', JSON.stringify(projects));
@@ -171,6 +366,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     localStorage.setItem('messages', JSON.stringify(messages));
   }, [messages]);
+
+  useEffect(() => {
+    localStorage.setItem('heroSection', JSON.stringify(heroSection));
+  }, [heroSection]);
+
+  useEffect(() => {
+    localStorage.setItem('aboutSection', JSON.stringify(aboutSection));
+  }, [aboutSection]);
+
+  useEffect(() => {
+    localStorage.setItem('footerContent', JSON.stringify(footerContent));
+  }, [footerContent]);
+
+  useEffect(() => {
+    localStorage.setItem('headerContent', JSON.stringify(headerContent));
+  }, [headerContent]);
+
+  useEffect(() => {
+    localStorage.setItem('seoSettings', JSON.stringify(seoSettings));
+  }, [seoSettings]);
+
+  useEffect(() => {
+    localStorage.setItem('contactPageContent', JSON.stringify(contactPageContent));
+  }, [contactPageContent]);
 
   // Generate a unique ID
   const generateId = () => {
@@ -240,14 +459,52 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateMessage(id, { read: true });
   };
   
+  // Update functions for website content sections
+  const updateHeroSection = (data: Partial<HeroSection>) => {
+    setHeroSection(prev => ({ ...prev, ...data }));
+  };
+
+  const updateAboutSection = (data: Partial<AboutSection>) => {
+    setAboutSection(prev => ({ ...prev, ...data }));
+  };
+
+  const updateFooterContent = (data: Partial<FooterContent>) => {
+    setFooterContent(prev => ({ ...prev, ...data }));
+  };
+
+  const updateHeaderContent = (data: Partial<HeaderContent>) => {
+    setHeaderContent(prev => ({ ...prev, ...data }));
+  };
+
+  const updateSeoSettings = (data: Partial<SeoSettings>) => {
+    setSeoSettings(prev => ({ ...prev, ...data }));
+  };
+
+  const updateContactPageContent = (data: Partial<ContactPageContent>) => {
+    setContactPageContent(prev => ({ ...prev, ...data }));
+  };
+  
   // Function to clear all data
   const clearData = () => {
     setProjects([]);
     setServices([]);
     setMessages([]);
+    setHeroSection(initialHeroSection);
+    setAboutSection(initialAboutSection);
+    setFooterContent(initialFooterContent);
+    setHeaderContent(initialHeaderContent);
+    setSeoSettings(initialSeoSettings);
+    setContactPageContent(initialContactPageContent);
+    
     localStorage.removeItem('projects');
     localStorage.removeItem('services');
     localStorage.removeItem('messages');
+    localStorage.removeItem('heroSection');
+    localStorage.removeItem('aboutSection');
+    localStorage.removeItem('footerContent');
+    localStorage.removeItem('headerContent');
+    localStorage.removeItem('seoSettings');
+    localStorage.removeItem('contactPageContent');
   };
   
   // Function to reset to initial data
@@ -255,9 +512,22 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setProjects(initialProjects);
     setServices(initialServices);
     setMessages(initialMessages);
+    setHeroSection(initialHeroSection);
+    setAboutSection(initialAboutSection);
+    setFooterContent(initialFooterContent);
+    setHeaderContent(initialHeaderContent);
+    setSeoSettings(initialSeoSettings);
+    setContactPageContent(initialContactPageContent);
+    
     localStorage.setItem('projects', JSON.stringify(initialProjects));
     localStorage.setItem('services', JSON.stringify(initialServices));
     localStorage.setItem('messages', JSON.stringify(initialMessages));
+    localStorage.setItem('heroSection', JSON.stringify(initialHeroSection));
+    localStorage.setItem('aboutSection', JSON.stringify(initialAboutSection));
+    localStorage.setItem('footerContent', JSON.stringify(initialFooterContent));
+    localStorage.setItem('headerContent', JSON.stringify(initialHeaderContent));
+    localStorage.setItem('seoSettings', JSON.stringify(initialSeoSettings));
+    localStorage.setItem('contactPageContent', JSON.stringify(initialContactPageContent));
   };
 
   return (
@@ -280,6 +550,24 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       markMessageAsRead,
       clearData,
       resetToInitialData,
+      heroSection,
+      setHeroSection,
+      updateHeroSection,
+      aboutSection,
+      setAboutSection,
+      updateAboutSection,
+      footerContent,
+      setFooterContent,
+      updateFooterContent,
+      headerContent,
+      setHeaderContent,
+      updateHeaderContent,
+      seoSettings,
+      setSeoSettings,
+      updateSeoSettings,
+      contactPageContent,
+      setContactPageContent,
+      updateContactPageContent
     }}>
       {children}
     </DataContext.Provider>

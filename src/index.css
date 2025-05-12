@@ -94,60 +94,103 @@
 
   body {
     @apply bg-background text-foreground font-sans;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading font-semibold;
+    @apply font-heading font-semibold tracking-tight;
   }
   
   h1 {
-    @apply text-4xl md:text-5xl lg:text-6xl;
+    @apply text-3xl sm:text-4xl md:text-5xl lg:text-6xl;
   }
   
   h2 {
-    @apply text-3xl md:text-4xl;
+    @apply text-2xl sm:text-3xl md:text-4xl;
   }
   
   h3 {
-    @apply text-2xl md:text-3xl;
+    @apply text-xl sm:text-2xl md:text-3xl;
   }
   
   p {
     @apply leading-relaxed;
   }
+
+  /* Improve accessibility */
+  a:focus, button:focus, input:focus, textarea:focus, select:focus, [tabindex]:not([tabindex="-1"]):focus {
+    @apply outline-none ring-2 ring-primary ring-offset-2;
+  }
 }
 
 @layer components {
   .section {
-    @apply py-16 md:py-24;
+    @apply py-12 sm:py-16 md:py-20 lg:py-24;
   }
   
   .container-custom {
-    @apply container px-4 md:px-8 max-w-7xl mx-auto;
+    @apply container px-4 sm:px-6 md:px-8 max-w-7xl mx-auto;
   }
   
   .btn-primary {
-    @apply bg-blue-500 text-white hover:bg-blue-600 px-6 py-3 rounded-md font-medium transition-all inline-block;
+    @apply bg-blue-500 text-white hover:bg-blue-600 px-4 sm:px-6 py-2 sm:py-3 rounded-md font-medium transition-all inline-block;
   }
   
   .btn-secondary {
-    @apply border-2 border-blue-500 text-blue-500 hover:bg-blue-50 px-6 py-3 rounded-md font-medium transition-all inline-block;
+    @apply border-2 border-blue-500 text-blue-500 hover:bg-blue-50 px-4 sm:px-6 py-2 sm:py-3 rounded-md font-medium transition-all inline-block;
   }
   
   .card {
-    @apply bg-white rounded-xl shadow-lg p-6 transition-all hover:shadow-xl;
+    @apply bg-white rounded-xl shadow-lg p-4 sm:p-6 transition-all hover:shadow-xl;
   }
   
   .section-title {
-    @apply text-3xl md:text-4xl font-bold mb-6 relative;
+    @apply text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 relative;
   }
   
   .section-title::after {
     content: '';
-    @apply absolute left-0 -bottom-3 w-24 h-1 bg-blue-500;
+    @apply absolute left-0 -bottom-2 sm:-bottom-3 w-16 sm:w-24 h-1 bg-blue-500;
   }
   
   .section-subtitle {
-    @apply text-gray-500 max-w-2xl mt-6 mb-12;
+    @apply text-gray-500 max-w-2xl mt-4 sm:mt-6 mb-8 sm:mb-12;
+  }
+
+  /* Animation classes */
+  .animate-fade-in {
+    @apply opacity-0 animate-[fadeIn_0.5s_ease-out_forwards];
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Responsive utilities */
+  .responsive-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6;
+  }
+}
+
+/* Add additional utility classes */
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .text-shadow-lg {
+    text-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08);
+  }
+  
+  .image-fade-overlay {
+    position: relative;
+  }
+  
+  .image-fade-overlay::after {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-t from-black/70 to-transparent;
   }
 }
