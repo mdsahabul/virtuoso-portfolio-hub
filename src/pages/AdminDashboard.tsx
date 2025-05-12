@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import { 
   Home, User, FileText, Mail, Settings, LogOut, Menu, X, 
   Grid, PlusCircle, Edit, Trash2, Image, Package, MessageSquare,
-  BarChart, RefreshCw, Search, Save, Linkedin, GitHub, Link, Calendar
+  BarChart, RefreshCw, Search, Save, Linkedin, Github, Link, Calendar
 } from 'lucide-react';
 import { useData, Project, Service, Message } from '../context/DataContext';
 
