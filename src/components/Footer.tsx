@@ -1,13 +1,9 @@
-
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Github, Linkedin, Twitter } from 'lucide-react';
-
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  
-  return (
-    <footer className="bg-blue-800 text-white pt-16 pb-8">
-      <div className="container-custom">
+  return <footer className="bg-blue-800 text-white pt-16 pb-8">
+      <div className="">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Brand */}
           <div>
@@ -16,28 +12,13 @@ const Footer = () => {
               Providing high-quality services and exceptional results for all your needs.
             </p>
             <div className="flex space-x-4">
-              <a 
-                href="https://github.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-white hover:text-blue-200 transition-colors"
-              >
+              <a href="https://github.com" target="_blank" rel="noopener noreferrer" className="text-white hover:text-blue-200 transition-colors">
                 <Github size={24} />
               </a>
-              <a 
-                href="https://linkedin.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-white hover:text-blue-200 transition-colors"
-              >
+              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-white hover:text-blue-200 transition-colors">
                 <Linkedin size={24} />
               </a>
-              <a 
-                href="https://twitter.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-white hover:text-blue-200 transition-colors"
-              >
+              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-white hover:text-blue-200 transition-colors">
                 <Twitter size={24} />
               </a>
             </div>
@@ -129,8 +110,6 @@ const Footer = () => {
           </p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
