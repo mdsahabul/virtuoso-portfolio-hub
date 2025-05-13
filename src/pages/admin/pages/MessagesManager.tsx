@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Trash2, Mail, Eye, X } from 'lucide-react';
 import { useData, Message } from '../../../context/DataContext';
@@ -14,7 +15,7 @@ interface MessagesManagerProps {
 }
 
 const MessagesManager = ({ searchQuery }: MessagesManagerProps) => {
-  const { messages, deleteMessage, markMessageAsRead } = useData();
+  const { messages, deleteMessage, markMessageAsRead, addMessage } = useData();
   const [viewingMessage, setViewingMessage] = useState<Message | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -35,12 +36,11 @@ const MessagesManager = ({ searchQuery }: MessagesManagerProps) => {
         if (data) {
           // Map database messages to our application Message type
           const mappedMessages = data.map(mapDbMessageToMessage);
-          // Update context with messages from database
-          // We're using the existing context functions to maintain compatibility
-          // This approach allows the app to work with both local and database storage
-          // A better approach would be to refactor DataContext to use Supabase directly
+          
+          // Update context with messages from database that don't exist in the current state
           mappedMessages.forEach(msg => {
             if (!messages.find(m => m.id === msg.id)) {
+              // Use addMessage from context
               addMessage({
                 name: msg.name,
                 email: msg.email,
@@ -59,7 +59,7 @@ const MessagesManager = ({ searchQuery }: MessagesManagerProps) => {
     };
 
     fetchMessages();
-  }, []);
+  }, [messages, addMessage]);
   
   // Filter messages based on search query
   const filteredMessages = searchQuery 
