@@ -1,343 +1,299 @@
 
 import { useState } from 'react';
+import { useData } from '../../../context/DataContext';
 import { toast } from 'sonner';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { RefreshCw, Save, AlertTriangle } from 'lucide-react';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { useData } from '../../../context/DataContext';
-
-interface SiteSettings {
-  siteName: string;
-  siteDescription: string;
-  contactEmail: string;
-  socialLinks: {
-    twitter: string;
-    linkedin: string;
-    github: string;
-    behance: string;
-  };
-  analytics: {
-    googleAnalyticsId: string;
-  };
-}
+import { Switch } from '@/components/ui/switch';
+import { Save } from 'lucide-react';
 
 const SiteSettings = () => {
-  const { resetToInitialData, clearData } = useData();
-  
-  // Initialize settings from localStorage or with default values
-  const [settings, setSettings] = useState<SiteSettings>(() => {
-    const savedSettings = localStorage.getItem('siteSettings');
-    return savedSettings ? JSON.parse(savedSettings) : {
-      siteName: 'Portfolio Website',
-      siteDescription: 'Professional portfolio website showcasing my work and services',
-      contactEmail: 'contact@example.com',
-      socialLinks: {
-        twitter: 'https://twitter.com',
-        linkedin: 'https://linkedin.com',
-        github: 'https://github.com',
-        behance: 'https://behance.com'
-      },
-      analytics: {
-        googleAnalyticsId: ''
-      }
-    };
+  const { siteSettings, updateSiteSettings } = useData();
+  const [formData, setFormData] = useState({
+    siteName: siteSettings.siteName,
+    siteDescription: siteSettings.siteDescription,
+    contactEmail: siteSettings.contactEmail,
+    contactPhone: siteSettings.contactPhone,
+    socialLinks: {...siteSettings.socialLinks},
+    analytics: {
+      googleAnalyticsId: siteSettings.analytics.googleAnalyticsId,
+      enableTracking: siteSettings.analytics.enableTracking
+    },
+    appearance: {
+      primaryColor: siteSettings.appearance.primaryColor,
+      secondaryColor: siteSettings.appearance.secondaryColor,
+      fontFamily: siteSettings.appearance.fontFamily
+    }
   });
-
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
-  const [isClearDialogOpen, setIsClearDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const handleSettingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, type, checked } = e.target;
     
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
-      setSettings(prev => ({
+      setFormData(prev => ({
         ...prev,
         [parent]: {
           ...prev[parent as keyof typeof prev],
-          [child]: value
+          [child]: type === 'checkbox' ? checked : value
         }
       }));
     } else {
-      setSettings(prev => ({ ...prev, [name]: value }));
+      setFormData(prev => ({
+        ...prev,
+        [name]: type === 'checkbox' ? checked : value
+      }));
     }
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSocialLinkChange = (platform: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      socialLinks: {
+        ...prev.socialLinks,
+        [platform]: value
+      }
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsProcessing(true);
+    setIsSubmitting(true);
     
     try {
-      // In a real app, you would send this data to the server
-      localStorage.setItem('siteSettings', JSON.stringify(settings));
-      
-      toast.success('Site settings updated successfully');
+      await updateSiteSettings(formData);
+      toast.success("Site settings updated successfully!");
     } catch (error) {
-      toast.error('An error occurred while updating site settings');
-      console.error(error);
+      console.error("Error updating site settings:", error);
+      toast.error("Failed to update site settings. Please try again.");
     } finally {
-      setIsProcessing(false);
+      setIsSubmitting(false);
     }
   };
-  
-  const handleResetData = () => {
-    try {
-      resetToInitialData();
-      toast.success('All data has been reset to defaults');
-      setIsResetDialogOpen(false);
-    } catch (error) {
-      toast.error('An error occurred during reset');
-      console.error(error);
-    }
-  };
-  
-  const handleClearData = () => {
-    try {
-      clearData();
-      toast.success('All data has been cleared');
-      setIsClearDialogOpen(false);
-    } catch (error) {
-      toast.error('An error occurred during data clearing');
-      console.error(error);
-    }
-  };
-  
+
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Site Settings</h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Site Settings</h2>
+      </div>
       
-      <Tabs defaultValue="general" className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="general" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">
-            General
-          </TabsTrigger>
-          <TabsTrigger value="data" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">
-            Data Management
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="general">
+      <form onSubmit={handleSubmit}>
+        <div className="grid gap-6">
           <Card>
-            <CardContent className="pt-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="siteName">Site Name</Label>
-                    <Input
-                      id="siteName"
-                      name="siteName"
-                      value={settings.siteName}
-                      onChange={handleSettingsChange}
-                      placeholder="Your site name"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="siteDescription">Site Description</Label>
-                    <Input
-                      id="siteDescription"
-                      name="siteDescription"
-                      value={settings.siteDescription}
-                      onChange={handleSettingsChange}
-                      placeholder="Brief description of your site"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="contactEmail">Contact Email</Label>
-                    <Input
-                      id="contactEmail"
-                      name="contactEmail"
-                      type="email"
-                      value={settings.contactEmail}
-                      onChange={handleSettingsChange}
-                      placeholder="contact@example.com"
-                    />
-                  </div>
+            <CardHeader>
+              <CardTitle>General Settings</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="siteName">Site Name</Label>
+                  <Input 
+                    id="siteName"
+                    name="siteName"
+                    value={formData.siteName}
+                    onChange={handleInputChange}
+                  />
                 </div>
-                
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Social Media Links</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="socialLinks.twitter">Twitter</Label>
-                      <Input
-                        id="socialLinks.twitter"
-                        name="socialLinks.twitter"
-                        value={settings.socialLinks.twitter}
-                        onChange={handleSettingsChange}
-                        placeholder="https://twitter.com/username"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="socialLinks.linkedin">LinkedIn</Label>
-                      <Input
-                        id="socialLinks.linkedin"
-                        name="socialLinks.linkedin"
-                        value={settings.socialLinks.linkedin}
-                        onChange={handleSettingsChange}
-                        placeholder="https://linkedin.com/in/username"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="socialLinks.github">GitHub</Label>
-                      <Input
-                        id="socialLinks.github"
-                        name="socialLinks.github"
-                        value={settings.socialLinks.github}
-                        onChange={handleSettingsChange}
-                        placeholder="https://github.com/username"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="socialLinks.behance">Behance</Label>
-                      <Input
-                        id="socialLinks.behance"
-                        name="socialLinks.behance"
-                        value={settings.socialLinks.behance}
-                        onChange={handleSettingsChange}
-                        placeholder="https://behance.net/username"
-                      />
-                    </div>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="siteDescription">Site Description</Label>
+                  <Input 
+                    id="siteDescription"
+                    name="siteDescription"
+                    value={formData.siteDescription}
+                    onChange={handleInputChange}
+                  />
                 </div>
-                
-                <div className="space-y-4">
-                  <h3 className="text-lg font-medium">Analytics</h3>
-                  <div className="space-y-2">
-                    <Label htmlFor="analytics.googleAnalyticsId">Google Analytics ID</Label>
-                    <Input
-                      id="analytics.googleAnalyticsId"
-                      name="analytics.googleAnalyticsId"
-                      value={settings.analytics.googleAnalyticsId}
-                      onChange={handleSettingsChange}
-                      placeholder="UA-XXXXX-X or G-XXXXXXXX"
-                    />
-                    <p className="text-sm text-gray-500">
-                      Enter your Google Analytics tracking ID to enable website analytics
-                    </p>
-                  </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="contactEmail">Contact Email</Label>
+                  <Input 
+                    id="contactEmail"
+                    name="contactEmail"
+                    type="email"
+                    value={formData.contactEmail}
+                    onChange={handleInputChange}
+                  />
                 </div>
-                
-                <Button type="submit" disabled={isProcessing} className="w-full md:w-auto">
-                  {isProcessing ? 'Saving...' : (
-                    <>
-                      <Save size={16} className="mr-2" />
-                      Save Settings
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="data">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-8">
-                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-md">
-                  <div className="flex">
-                    <div className="flex-shrink-0">
-                      <AlertTriangle className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-yellow-700">
-                        The actions below will affect all your website data. Please proceed with caution.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="border rounded-lg p-6 space-y-4">
-                    <h3 className="text-lg font-semibold">Reset to Default Data</h3>
-                    <p className="text-gray-600">
-                      This will reset all your content to the initial demo data. This is useful if you want to start fresh but keep the demo content.
-                    </p>
-                    <Button 
-                      variant="outline"
-                      className="w-full gap-2"
-                      onClick={() => setIsResetDialogOpen(true)}
-                    >
-                      <RefreshCw size={16} />
-                      Reset to Default Data
-                    </Button>
-                  </div>
-                  
-                  <div className="border rounded-lg p-6 space-y-4">
-                    <h3 className="text-lg font-semibold">Clear All Data</h3>
-                    <p className="text-gray-600">
-                      This will remove all content from your website. Use this if you want to start completely fresh.
-                    </p>
-                    <Button 
-                      variant="destructive"
-                      className="w-full gap-2"
-                      onClick={() => setIsClearDialogOpen(true)}
-                    >
-                      <AlertTriangle size={16} />
-                      Clear All Data
-                    </Button>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="contactPhone">Contact Phone</Label>
+                  <Input 
+                    id="contactPhone"
+                    name="contactPhone"
+                    value={formData.contactPhone}
+                    onChange={handleInputChange}
+                  />
                 </div>
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
-      
-      {/* Reset Data Confirmation Dialog */}
-      <AlertDialog open={isResetDialogOpen} onOpenChange={setIsResetDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will reset all your content to the initial demo data. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleResetData}>
-              Reset Data
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      
-      {/* Clear Data Confirmation Dialog */}
-      <AlertDialog open={isClearDialogOpen} onOpenChange={setIsClearDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete All Data?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently remove ALL content from your website. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleClearData}>
-              Delete All Data
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Social Links</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="facebook">Facebook</Label>
+                  <Input 
+                    id="facebook"
+                    value={formData.socialLinks.facebook}
+                    onChange={(e) => handleSocialLinkChange('facebook', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="twitter">Twitter</Label>
+                  <Input 
+                    id="twitter"
+                    value={formData.socialLinks.twitter}
+                    onChange={(e) => handleSocialLinkChange('twitter', e.target.value)}
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="instagram">Instagram</Label>
+                  <Input 
+                    id="instagram"
+                    value={formData.socialLinks.instagram}
+                    onChange={(e) => handleSocialLinkChange('instagram', e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="linkedin">LinkedIn</Label>
+                  <Input 
+                    id="linkedin"
+                    value={formData.socialLinks.linkedin}
+                    onChange={(e) => handleSocialLinkChange('linkedin', e.target.value)}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Analytics</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="enableTracking">Enable Analytics Tracking</Label>
+                <Switch 
+                  id="enableTracking"
+                  name="analytics.enableTracking"
+                  checked={formData.analytics.enableTracking}
+                  onCheckedChange={(checked) => {
+                    setFormData(prev => ({
+                      ...prev,
+                      analytics: {
+                        ...prev.analytics,
+                        enableTracking: checked
+                      }
+                    }))
+                  }}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="googleAnalyticsId">Google Analytics ID</Label>
+                <Input 
+                  id="googleAnalyticsId"
+                  name="analytics.googleAnalyticsId"
+                  value={formData.analytics.googleAnalyticsId}
+                  onChange={handleInputChange}
+                  disabled={!formData.analytics.enableTracking}
+                />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader>
+              <CardTitle>Appearance</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="primaryColor">Primary Color</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      id="primaryColor"
+                      name="appearance.primaryColor"
+                      type="color"
+                      value={formData.appearance.primaryColor}
+                      onChange={handleInputChange}
+                      className="w-12 h-9 p-1"
+                    />
+                    <Input 
+                      type="text"
+                      value={formData.appearance.primaryColor}
+                      onChange={(e) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          appearance: {
+                            ...prev.appearance,
+                            primaryColor: e.target.value
+                          }
+                        }))
+                      }}
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="secondaryColor">Secondary Color</Label>
+                  <div className="flex gap-2">
+                    <Input 
+                      id="secondaryColor"
+                      name="appearance.secondaryColor"
+                      type="color"
+                      value={formData.appearance.secondaryColor}
+                      onChange={handleInputChange}
+                      className="w-12 h-9 p-1"
+                    />
+                    <Input 
+                      type="text"
+                      value={formData.appearance.secondaryColor}
+                      onChange={(e) => {
+                        setFormData(prev => ({
+                          ...prev,
+                          appearance: {
+                            ...prev.appearance,
+                            secondaryColor: e.target.value
+                          }
+                        }))
+                      }}
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="fontFamily">Font Family</Label>
+                  <Input 
+                    id="fontFamily"
+                    name="appearance.fontFamily"
+                    value={formData.appearance.fontFamily}
+                    onChange={handleInputChange}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Button type="submit" disabled={isSubmitting}>
+            <Save className="mr-2 h-4 w-4" />
+            {isSubmitting ? 'Saving...' : 'Save Changes'}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };

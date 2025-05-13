@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Routes, Route, NavLink, useNavigate } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Palette, Image, Home, User, Contact, LinkIcon, FooterIcon, Settings } from 'lucide-react';
+import { Palette, Image, Home, User, Contact, LinkIcon, Footer, Settings } from 'lucide-react';
 import HeroEditor from './content/HeroEditor';
 import AboutEditor from './content/AboutEditor';
 import FooterEditor from './content/FooterEditor';
@@ -36,7 +36,7 @@ const ContentManager = () => {
               <LinkIcon className="mr-2 h-4 w-4" /> Header
             </TabsTrigger>
             <TabsTrigger value="footer" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">
-              <FooterIcon className="mr-2 h-4 w-4" /> Footer
+              <Footer className="mr-2 h-4 w-4" /> Footer
             </TabsTrigger>
             <TabsTrigger value="contact" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">
               <Contact className="mr-2 h-4 w-4" /> Contact
