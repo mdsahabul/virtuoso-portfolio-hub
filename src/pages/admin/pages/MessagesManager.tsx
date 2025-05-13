@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Trash2, Mail, Eye, X } from 'lucide-react';
 import { useData, Message } from '../../../context/DataContext';
 import { toast } from 'sonner';
@@ -7,6 +6,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
+import { mapDbMessageToMessage } from '@/types/appTypes';
 
 interface MessagesManagerProps {
   searchQuery: string;
@@ -16,6 +17,49 @@ const MessagesManager = ({ searchQuery }: MessagesManagerProps) => {
   const { messages, deleteMessage, markMessageAsRead } = useData();
   const [viewingMessage, setViewingMessage] = useState<Message | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Load messages from Supabase when component mounts
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('messages')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          throw error;
+        }
+
+        if (data) {
+          // Map database messages to our application Message type
+          const mappedMessages = data.map(mapDbMessageToMessage);
+          // Update context with messages from database
+          // We're using the existing context functions to maintain compatibility
+          // This approach allows the app to work with both local and database storage
+          // A better approach would be to refactor DataContext to use Supabase directly
+          mappedMessages.forEach(msg => {
+            if (!messages.find(m => m.id === msg.id)) {
+              addMessage({
+                name: msg.name,
+                email: msg.email,
+                subject: msg.subject,
+                message: msg.message
+              });
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+        toast.error('Failed to load messages');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMessages();
+  }, []);
   
   // Filter messages based on search query
   const filteredMessages = searchQuery 
@@ -33,13 +77,27 @@ const MessagesManager = ({ searchQuery }: MessagesManagerProps) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 
-  const openViewModal = (message: Message) => {
+  const openViewModal = async (message: Message) => {
     setViewingMessage(message);
     setIsViewModalOpen(true);
     
-    // Mark as read when viewing
+    // Mark as read when viewing - both in Supabase and context
     if (!message.read) {
-      markMessageAsRead(message.id);
+      try {
+        const { error } = await supabase
+          .from('messages')
+          .update({ read: true })
+          .eq('id', message.id);
+          
+        if (error) {
+          throw error;
+        }
+        
+        // Also update in context
+        markMessageAsRead(message.id);
+      } catch (error) {
+        console.error('Error marking message as read:', error);
+      }
     }
   };
 
@@ -48,9 +106,20 @@ const MessagesManager = ({ searchQuery }: MessagesManagerProps) => {
     setViewingMessage(null);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this message?')) {
       try {
+        // Delete from Supabase
+        const { error } = await supabase
+          .from('messages')
+          .delete()
+          .eq('id', id);
+          
+        if (error) {
+          throw error;
+        }
+        
+        // Also delete from context
         deleteMessage(id);
         toast.success('Message deleted successfully');
         

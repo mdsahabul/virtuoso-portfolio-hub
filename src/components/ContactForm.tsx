@@ -1,7 +1,8 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useData } from '@/context/DataContext';
+import { supabase } from '@/integrations/supabase/client';
+import { NewMessage } from '@/types/appTypes';
 
 const ContactForm = () => {
   const [formData, setFormData] = useState({
@@ -18,7 +19,7 @@ const ContactForm = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
@@ -29,26 +30,49 @@ const ContactForm = () => {
       return;
     }
 
-    // Add the message to our data context
-    addMessage({
-      name: formData.name,
-      email: formData.email,
-      subject: formData.subject,
-      message: formData.message
-    });
+    try {
+      // Save the message to Supabase
+      const { error } = await supabase
+        .from('messages')
+        .insert([
+          {
+            name: formData.name,
+            email: formData.email,
+            subject: formData.subject,
+            message: formData.message
+          }
+        ]);
+      
+      if (error) {
+        throw error;
+      }
 
-    // Show success message
-    toast.success('Message sent successfully! We will contact you soon.');
-    
-    // Reset form
-    setFormData({
-      name: '',
-      email: '',
-      subject: '',
-      message: ''
-    });
-    
-    setIsSubmitting(false);
+      // Also add the message to our context for immediate display
+      const newMessage: NewMessage = {
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message
+      };
+      
+      addMessage(newMessage);
+
+      // Show success message
+      toast.success('Message sent successfully! We will contact you soon.');
+      
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: ''
+      });
+    } catch (error) {
+      console.error('Error submitting message:', error);
+      toast.error('Failed to send message. Please try again later.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
