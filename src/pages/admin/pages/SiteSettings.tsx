@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useData } from '../../../context/DataContext';
 import { toast } from 'sonner';
@@ -73,7 +74,7 @@ const SiteSettings = () => {
       setFormData(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof typeof prev],
+          ...(prev[parent as keyof SiteSettings] as object),
           [child]: type === 'checkbox' ? checked : value
         }
       }));

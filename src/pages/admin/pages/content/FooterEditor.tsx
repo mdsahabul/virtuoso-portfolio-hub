@@ -7,17 +7,39 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Save, Eye, Plus, X, Twitter, Linkedin, Github } from 'lucide-react';
 
+interface SocialLink {
+  platform: string;
+  url: string;
+  icon: string;
+}
+
+interface QuickLink {
+  title: string;
+  url: string;
+}
+
+interface FooterContentState {
+  copyrightText: string;
+  quickLinks: QuickLink[];
+  contactInfo: {
+    email: string;
+    phone: string;
+    address: string;
+  };
+  socialLinks: SocialLink[];
+}
+
 const FooterEditor = () => {
   const { footerContent, updateFooterContent } = useData();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FooterContentState>({
     copyrightText: footerContent.copyrightText,
-    quickLinks: [...footerContent.quickLinks],
+    quickLinks: [...(footerContent.quickLinks || [])],
     contactInfo: {
       email: footerContent.contactInfo.email,
       phone: footerContent.contactInfo.phone,
       address: footerContent.contactInfo.address
     },
-    socialLinks: [...footerContent.socialLinks]
+    socialLinks: [...(footerContent.socialLinks || [])]
   });
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
@@ -39,7 +61,7 @@ const FooterEditor = () => {
       setFormData(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof typeof prev],
+          ...(prev[parent as keyof typeof prev] as object),
           [child]: value
         }
       }));

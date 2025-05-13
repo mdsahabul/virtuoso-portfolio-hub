@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useData } from '../../../../context/DataContext';
 import { toast } from 'sonner';
@@ -9,9 +8,20 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Save, Eye } from 'lucide-react';
 
+interface ContactPageContentState {
+  title: string;
+  subtitle: string;
+  contactInfo: {
+    email: string;
+    phone: string;
+    address: string;
+  };
+  mapLocation: string;
+}
+
 const ContactPageEditor = () => {
   const { contactPageContent, updateContactPageContent } = useData();
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ContactPageContentState>({
     title: contactPageContent.title,
     subtitle: contactPageContent.subtitle,
     contactInfo: {
@@ -32,7 +42,7 @@ const ContactPageEditor = () => {
       setFormData(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof typeof prev],
+          ...(prev[parent as keyof typeof prev] as object),
           [child]: value
         }
       }));
