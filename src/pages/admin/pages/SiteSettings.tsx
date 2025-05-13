@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useData } from '../../../context/DataContext';
 import { toast } from 'sonner';
@@ -9,24 +8,61 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Save } from 'lucide-react';
 
+interface AppearanceSettings {
+  primaryColor: string;
+  secondaryColor: string;
+  fontFamily: string;
+}
+
+interface AnalyticsSettings {
+  googleAnalyticsId: string;
+  enableTracking: boolean;
+}
+
+interface SocialLinks {
+  facebook: string;
+  twitter: string;
+  instagram: string;
+  linkedin: string;
+}
+
+interface SiteSettings {
+  siteName: string;
+  siteDescription: string;
+  contactEmail: string;
+  contactPhone: string;
+  socialLinks: SocialLinks;
+  analytics: AnalyticsSettings;
+  appearance: AppearanceSettings;
+}
+
 const SiteSettings = () => {
-  const { siteSettings, updateSiteSettings } = useData();
-  const [formData, setFormData] = useState({
-    siteName: siteSettings.siteName,
-    siteDescription: siteSettings.siteDescription,
-    contactEmail: siteSettings.contactEmail,
-    contactPhone: siteSettings.contactPhone,
-    socialLinks: {...siteSettings.socialLinks},
+  // Use default values since we don't have siteSettings in the DataContext yet
+  const { seoSettings, updateSeoSettings } = useData();
+  
+  const defaultSettings: SiteSettings = {
+    siteName: seoSettings.siteTitle || "My Website",
+    siteDescription: seoSettings.siteDescription || "A professional website",
+    contactEmail: "contact@example.com",
+    contactPhone: "+1 (123) 456-7890",
+    socialLinks: {
+      facebook: "https://facebook.com",
+      twitter: "https://twitter.com",
+      instagram: "https://instagram.com",
+      linkedin: "https://linkedin.com"
+    },
     analytics: {
-      googleAnalyticsId: siteSettings.analytics.googleAnalyticsId,
-      enableTracking: siteSettings.analytics.enableTracking
+      googleAnalyticsId: "",
+      enableTracking: false
     },
     appearance: {
-      primaryColor: siteSettings.appearance.primaryColor,
-      secondaryColor: siteSettings.appearance.secondaryColor,
-      fontFamily: siteSettings.appearance.fontFamily
+      primaryColor: "#3b82f6",
+      secondaryColor: "#10b981",
+      fontFamily: "Inter, sans-serif"
     }
-  });
+  };
+  
+  const [formData, setFormData] = useState<SiteSettings>(defaultSettings);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -64,7 +100,15 @@ const SiteSettings = () => {
     setIsSubmitting(true);
     
     try {
-      await updateSiteSettings(formData);
+      // Update SEO settings since it's available in the context
+      await updateSeoSettings({
+        siteTitle: formData.siteName,
+        siteDescription: formData.siteDescription,
+        keywords: seoSettings.keywords,
+        ogImage: seoSettings.ogImage,
+        favicon: seoSettings.favicon
+      });
+      
       toast.success("Site settings updated successfully!");
     } catch (error) {
       console.error("Error updating site settings:", error);

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useData } from '../../../../context/DataContext';
 import { toast } from 'sonner';
@@ -10,7 +9,16 @@ import { Save, Eye, Plus, X, Twitter, Linkedin, Github } from 'lucide-react';
 
 const FooterEditor = () => {
   const { footerContent, updateFooterContent } = useData();
-  const [formData, setFormData] = useState({ ...footerContent });
+  const [formData, setFormData] = useState({
+    copyrightText: footerContent.copyrightText,
+    quickLinks: [...footerContent.quickLinks],
+    contactInfo: {
+      email: footerContent.contactInfo.email,
+      phone: footerContent.contactInfo.phone,
+      address: footerContent.contactInfo.address
+    },
+    socialLinks: [...footerContent.socialLinks]
+  });
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   

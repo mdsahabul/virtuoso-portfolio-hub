@@ -11,7 +11,16 @@ import { Save, Eye } from 'lucide-react';
 
 const ContactPageEditor = () => {
   const { contactPageContent, updateContactPageContent } = useData();
-  const [formData, setFormData] = useState({ ...contactPageContent });
+  const [formData, setFormData] = useState({
+    title: contactPageContent.title,
+    subtitle: contactPageContent.subtitle,
+    contactInfo: {
+      email: contactPageContent.contactInfo.email,
+      phone: contactPageContent.contactInfo.phone,
+      address: contactPageContent.contactInfo.address
+    },
+    mapLocation: contactPageContent.mapLocation
+  });
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   
