@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Define types for our data
@@ -29,6 +28,7 @@ export interface Message {
   subject: string;
   message: string;
   date: string;
+  createdAt: string; // Added this property
   read: boolean;
 }
 
@@ -112,7 +112,7 @@ interface DataContextType {
   // Message related state and functions
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
-  addMessage: (message: Omit<Message, "id" | "date" | "read">) => void;
+  addMessage: (message: Omit<Message, "id" | "date" | "createdAt" | "read">, id?: string) => void;
   updateMessage: (id: string, message: Partial<Message>) => void;
   deleteMessage: (id: string) => void;
   markMessageAsRead: (id: string) => void;
@@ -213,6 +213,7 @@ const initialMessages: Message[] = [
     subject: 'Website Project Inquiry',
     message: "I'm interested in your web development services for my new business. Can we schedule a call to discuss the details?",
     date: '2023-05-10',
+    createdAt: '2023-05-10T12:00:00Z',
     read: false
   },
   {
@@ -222,6 +223,7 @@ const initialMessages: Message[] = [
     subject: 'Logo Design Project',
     message: "Hello, I need a new logo for my startup. I like your portfolio and would like to discuss working together.",
     date: '2023-05-08',
+    createdAt: '2023-05-08T12:00:00Z',
     read: true
   },
   {
@@ -231,6 +233,7 @@ const initialMessages: Message[] = [
     subject: 'Mobile App Development',
     message: "We're looking for a developer to create a mobile app for our business. What's your availability in the coming months?",
     date: '2023-05-05',
+    createdAt: '2023-05-05T12:00:00Z',
     read: true
   }
 ];
@@ -435,11 +438,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // CRUD functions for messages
-  const addMessage = (message: Omit<Message, "id" | "date" | "read">) => {
+  const addMessage = (message: Omit<Message, "id" | "date" | "createdAt" | "read">, id?: string) => {
+    const now = new Date();
     const newMessage = {
       ...message,
-      id: generateId(),
-      date: new Date().toISOString().split('T')[0],
+      id: id || generateId(),
+      date: now.toISOString().split('T')[0],
+      createdAt: now.toISOString(),
       read: false,
     };
     setMessages(prev => [...prev, newMessage]);

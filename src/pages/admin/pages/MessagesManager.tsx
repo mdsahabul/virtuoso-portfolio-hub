@@ -1,20 +1,10 @@
 
 import { useState, useEffect } from 'react';
 import { Trash2, Mail, Eye, X } from 'lucide-react';
-import { useData, Message } from '../../../context/DataContext';
+import { useData, Message } from '@/context/DataContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-// Map database message to our application Message type
-const mapDbMessageToMessage = (dbMessage: any): Message => ({
-  id: dbMessage.id,
-  name: dbMessage.name,
-  email: dbMessage.email,
-  subject: dbMessage.subject,
-  message: dbMessage.message,
-  read: dbMessage.read || false,
-  createdAt: new Date(dbMessage.created_at).toISOString()
-});
+import { mapDbMessageToMessage } from '@/types/appTypes';
 
 interface MessagesManagerProps {
   searchQuery: string;
@@ -52,7 +42,7 @@ const MessagesManager = ({ searchQuery }: MessagesManagerProps) => {
                 email: msg.email,
                 subject: msg.subject,
                 message: msg.message
-              }, msg.id, new Date(msg.createdAt));
+              }, msg.id);
             }
           });
         }
@@ -182,7 +172,7 @@ const MessagesManager = ({ searchQuery }: MessagesManagerProps) => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-500">
-                      {new Date(message.createdAt).toLocaleDateString()}
+                      {new Date(message.date).toLocaleDateString()}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -238,7 +228,7 @@ const MessagesManager = ({ searchQuery }: MessagesManagerProps) => {
                 
                 <div>
                   <p className="text-sm font-medium text-gray-500">Date</p>
-                  <p className="mt-1">{new Date(viewingMessage.createdAt).toLocaleString()}</p>
+                  <p className="mt-1">{new Date(viewingMessage.date).toLocaleString()}</p>
                 </div>
                 
                 <div>

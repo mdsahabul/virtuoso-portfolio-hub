@@ -10,6 +10,7 @@ export interface Message {
   subject: string;
   message: string;
   date: string;
+  createdAt: string; // Added to match the usage in MessagesManager
   read: boolean;
 }
 
@@ -22,9 +23,10 @@ export function mapDbMessageToMessage(dbMessage: Database['public']['Tables']['m
     subject: dbMessage.subject,
     message: dbMessage.message,
     date: dbMessage.created_at || new Date().toISOString().split('T')[0],
+    createdAt: dbMessage.created_at || new Date().toISOString(), // Added to match the usage in MessagesManager
     read: dbMessage.read || false
   };
 }
 
 // Type for new message submission
-export type NewMessage = Omit<Message, 'id' | 'date' | 'read'>;
+export type NewMessage = Omit<Message, 'id' | 'date' | 'createdAt' | 'read'>;
