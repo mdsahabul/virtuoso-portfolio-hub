@@ -48,7 +48,7 @@ const Header = () => {
     label: 'Admin'
   }];
   return <header className="">
-      <div className="container-custom flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
           <span className="text-2xl font-bold text-blue-700">Portfolio</span>
         </Link>
