@@ -1,174 +1,119 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Monitor, Smartphone, Layout, TrendingUp, Zap, Users, Clock, Award } from 'lucide-react';
-import ServiceCard from '@/components/ServiceCard';
-import { useData } from '@/context/DataContext';
-import { toast } from 'sonner';
-
-// Map service titles to icons for display
-const serviceIcons: Record<string, any> = {
-  'Web Development': Monitor,
-  'UI/UX Design': Layout,
-  'Mobile Development': Smartphone,
-  'Digital Marketing': TrendingUp,
-  'SEO Optimization': Zap,
-};
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import ServiceCard from '../components/ServiceCard';
+import { useData } from '../context/DataContext';
 
 const Services = () => {
-  const navigate = useNavigate();
   const { services } = useData();
+  const [filter, setFilter] = useState<string | null>(null);
   
-  const handleServiceAction = (serviceTitle: string) => {
-    toast.success(`Service "${serviceTitle}" selected! Redirecting to contact page...`);
-    setTimeout(() => navigate('/contact'), 1500);
-  };
-
+  // Get unique categories
+  const categories = Array.from(new Set(services.map(service => service.icon)));
+  
+  // Filter services based on selected category
+  const filteredServices = filter 
+    ? services.filter(service => service.icon === filter) 
+    : services;
+  
   return (
-    <main className="pt-20">
-      {/* Header */}
-      <section className="section pt-16 pb-12 bg-blue-50">
-        <div className="container-custom text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">My Services</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Professional solutions tailored to your needs. Browse my services and find the 
-            perfect match for your project requirements.
-          </p>
-        </div>
-      </section>
-
-      {/* Services Grid */}
-      <section className="section">
-        <div className="container-custom">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {services.map((service) => {
-              // Determine which icon to use based on service title
-              let IconComponent = serviceIcons[service.title] || TrendingUp;
-              
-              return (
-                <ServiceCard
-                  key={service.id}
-                  icon={IconComponent}
-                  title={service.title}
-                  description={service.description}
-                  price={service.price}
-                  features={service.features}
-                  cta="Choose Plan"
-                  highlighted={service.highlighted}
-                  onAction={() => handleServiceAction(service.title)}
-                />
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Me */}
-      <section className="section bg-blue-50">
-        <div className="container-custom">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Me</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              I deliver high-quality solutions with a focus on collaboration, 
-              transparency, and results that exceed expectations.
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      
+      {/* Hero Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">My Services</h1>
+            <p className="text-xl text-gray-600">
+              I offer a range of digital services to help your business grow and succeed online.
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { icon: Zap, title: 'Fast Delivery', description: 'Projects completed efficiently without sacrificing quality.' },
-              { icon: Users, title: 'Client-Focused', description: 'Your needs and goals are at the center of everything I do.' },
-              { icon: Clock, title: '24/7 Support', description: 'Responsive assistance whenever you need help or have questions.' },
-              { icon: Award, title: 'Quality Work', description: 'Attention to detail ensures exceptional results every time.' }
-            ].map((feature, index) => {
-              const FeatureIcon = feature.icon;
-              return (
-                <div key={index} className="card text-center">
-                  <div className="inline-flex p-3 rounded-lg bg-blue-100 text-blue-700 mb-6">
-                    <FeatureIcon size={28} />
-                  </div>
-                  <h3 className="text-xl font-bold mb-3">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
-                </div>
-              );
-            })}
-          </div>
         </div>
       </section>
-
-      {/* How I Work */}
-      <section className="section">
-        <div className="container-custom">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">My Work Process</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              A streamlined approach that delivers results efficiently and effectively.
-            </p>
-          </div>
-          
-          <div className="flex flex-col md:flex-row gap-8">
-            {[
-              { step: '01', title: 'Discovery', description: 'Understanding your requirements and project goals through in-depth consultation.' },
-              { step: '02', title: 'Planning', description: 'Developing a comprehensive strategy and roadmap for your project.' },
-              { step: '03', title: 'Execution', description: 'Bringing your vision to life with expert implementation and regular updates.' },
-              { step: '04', title: 'Delivery', description: 'Finalizing the project with thorough testing and your complete satisfaction.' }
-            ].map((process, index) => (
-              <div key={index} className="relative flex-1">
-                <div className="card relative z-10">
-                  <div className="text-4xl font-bold text-blue-200 mb-4">{process.step}</div>
-                  <h3 className="text-xl font-bold mb-3">{process.title}</h3>
-                  <p className="text-gray-600">{process.description}</p>
-                </div>
-                
-                {/* Connector line */}
-                {index < 3 && (
-                  <div className="hidden md:block absolute top-1/4 -right-4 w-8 border-t-2 border-dashed border-gray-300 z-0"></div>
-                )}
-              </div>
+      
+      {/* Services Section */}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          {/* Category Filters */}
+          <div className="flex flex-wrap justify-center gap-2 mb-12">
+            <button
+              className={`px-4 py-2 rounded-full transition-colors ${
+                filter === null
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 hover:bg-gray-200'
+              }`}
+              onClick={() => setFilter(null)}
+            >
+              All Services
+            </button>
+            
+            {categories.map((category) => (
+              <button
+                key={category}
+                className={`px-4 py-2 rounded-full transition-colors ${
+                  filter === category
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 hover:bg-gray-200'
+                }`}
+                onClick={() => setFilter(category)}
+              >
+                {category.charAt(0).toUpperCase() + category.slice(1)}
+              </button>
             ))}
           </div>
+          
+          {/* Services Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredServices.map((service) => (
+              <ServiceCard
+                key={service.id}
+                id={service.id}
+                title={service.title}
+                description={service.description}
+                icon={service.icon}
+                price={service.price}
+                featured={service.featured}
+              />
+            ))}
+          </div>
+          
+          {/* Empty State */}
+          {filteredServices.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500">No services found in this category.</p>
+              <button
+                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md"
+                onClick={() => setFilter(null)}
+              >
+                Show All Services
+              </button>
+            </div>
+          )}
         </div>
       </section>
-
-      {/* Testimonial */}
-      <section className="section bg-blue-800 text-white">
-        <div className="container-custom">
+      
+      {/* CTA Section */}
+      <section className="py-16 bg-blue-50">
+        <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <div className="text-5xl text-blue-300 mb-6">"</div>
-            <p className="text-xl md:text-2xl font-light mb-8">
-              Working with this developer was a game-changer for our business. 
-              The attention to detail, technical expertise, and commitment to our project's 
-              success exceeded our expectations. I highly recommend these services!
+            <h2 className="text-3xl font-bold mb-4">Ready to Start Your Project?</h2>
+            <p className="text-gray-600 mb-8">
+              Let's discuss your needs and create a custom solution that helps you achieve your goals.
             </p>
-            <div className="flex items-center justify-center">
-              <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center mr-4">
-                <span className="font-bold">JD</span>
-              </div>
-              <div className="text-left">
-                <h4 className="font-bold">Jane Doe</h4>
-                <p className="text-blue-300">CEO, Tech Innovations</p>
-              </div>
-            </div>
+            <a
+              href="/contact"
+              className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Get in Touch
+            </a>
           </div>
         </div>
       </section>
-
-      {/* CTA */}
-      <section className="section">
-        <div className="container-custom text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Get Started?</h2>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Contact me today to discuss your project needs and how I can help bring your ideas to life.
-          </p>
-          <button 
-            onClick={() => navigate('/contact')}
-            className="btn-primary"
-          >
-            Get in Touch
-          </button>
-        </div>
-      </section>
-    </main>
+      
+      <Footer />
+    </div>
   );
 };
 

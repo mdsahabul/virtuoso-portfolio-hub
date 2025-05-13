@@ -1,6 +1,45 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // Define types for our data
+export interface HeroSection {
+  title: string;
+  subtitle: string;
+  backgroundImage: string;
+  ctaButton: string;
+  ctaLink: string;
+  secondaryButton: string;
+  secondaryLink: string;
+}
+
+export interface AboutSection {
+  title: string;
+  description: string[];
+  image: string;
+  skills: string[];
+}
+
+export interface MenuItem {
+  title: string;
+  url: string;
+}
+
+export interface HeaderContent {
+  logo: string;
+  menuItems: MenuItem[];
+}
+
+export interface Message {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  date: string;
+  createdAt: string; // Added this property
+  read: boolean;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -15,72 +54,25 @@ export interface Service {
   id: string;
   title: string;
   description: string;
-  price: number;
-  features: string[];
-  highlighted?: boolean;
-  icon?: string;
-}
-
-export interface Message {
-  id: string;
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  date: string;
-  createdAt: string; // Added this property
-  read: boolean;
-}
-
-export interface HeroSection {
-  title: string;
-  subtitle: string;
-  ctaButton: string;
-  ctaLink: string;
-  secondaryButton: string;
-  secondaryLink: string;
-  backgroundImage: string;
-}
-
-export interface AboutSection {
-  title: string;
-  description: string[];
-  image: string;
-  skills: string[];
+  icon: string;
+  price: number; // Added price for payment functionality
+  featured: boolean;
 }
 
 export interface FooterContent {
-  copyrightText: string;
-  quickLinks: {
-    title: string;
-    url: string;
-  }[];
-  contactInfo: {
-    email: string;
-    phone: string;
-    address: string;
-  };
-  socialLinks: {
-    platform: string;
-    url: string;
-    icon: string;
-  }[];
-}
-
-export interface HeaderContent {
   logo: string;
-  menuItems: {
-    title: string;
-    url: string;
-  }[];
-}
-
-export interface SeoSettings {
-  siteTitle: string;
-  siteDescription: string;
-  keywords: string[];
-  ogImage: string;
-  favicon: string;
+  description: string;
+  contactEmail: string;
+  contactPhone: string;
+  address: string;
+  socialLinks: {
+    facebook: string;
+    twitter: string;
+    instagram: string;
+    linkedin: string;
+  };
+  menuItems: MenuItem[];
+  copyrightText: string;
 }
 
 export interface ContactPageContent {
@@ -94,13 +86,42 @@ export interface ContactPageContent {
   mapLocation: string;
 }
 
+export interface Review {
+  id: string;
+  name: string;
+  company?: string;
+  text: string;
+  rating: number;
+  image?: string;
+}
+
+export interface ReviewsSection {
+  title: string;
+  subtitle: string;
+  reviews: Review[];
+}
+
+export interface SEOSettings {
+  siteTitle: string;
+  siteDescription: string;
+  keywords: string;
+  ogImage: string;
+  favicon: string;
+}
+
+// Define context type
 interface DataContextType {
-  // Project related state and functions
-  projects: Project[];
-  setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
-  addProject: (project: Omit<Project, "id">) => void;
-  updateProject: (id: string, project: Partial<Project>) => void;
-  deleteProject: (id: string) => void;
+  // Hero section
+  heroSection: HeroSection;
+  updateHeroSection: (data: HeroSection) => void;
+  
+  // About section
+  aboutSection: AboutSection;
+  updateAboutSection: (data: AboutSection) => void;
+  
+  // Header content
+  headerContent: HeaderContent;
+  updateHeaderContent: (data: HeaderContent) => void;
   
   // Service related state and functions
   services: Service[];
@@ -108,6 +129,13 @@ interface DataContextType {
   addService: (service: Omit<Service, "id">) => void;
   updateService: (id: string, service: Partial<Service>) => void;
   deleteService: (id: string) => void;
+  
+  // Project related state and functions
+  projects: Project[];
+  setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
+  addProject: (project: Omit<Project, "id">) => void;
+  updateProject: (id: string, project: Partial<Project>) => void;
+  deleteProject: (id: string) => void;
   
   // Message related state and functions
   messages: Message[];
@@ -117,99 +145,67 @@ interface DataContextType {
   deleteMessage: (id: string) => void;
   markMessageAsRead: (id: string) => void;
   
-  // Website content related state and functions
-  heroSection: HeroSection;
-  setHeroSection: React.Dispatch<React.SetStateAction<HeroSection>>;
-  updateHeroSection: (data: Partial<HeroSection>) => void;
-  
-  aboutSection: AboutSection;
-  setAboutSection: React.Dispatch<React.SetStateAction<AboutSection>>;
-  updateAboutSection: (data: Partial<AboutSection>) => void;
-  
+  // Footer content
   footerContent: FooterContent;
-  setFooterContent: React.Dispatch<React.SetStateAction<FooterContent>>;
-  updateFooterContent: (data: Partial<FooterContent>) => void;
+  updateFooterContent: (data: FooterContent) => void;
   
-  headerContent: HeaderContent;
-  setHeaderContent: React.Dispatch<React.SetStateAction<HeaderContent>>;
-  updateHeaderContent: (data: Partial<HeaderContent>) => void;
-  
-  seoSettings: SeoSettings;
-  setSeoSettings: React.Dispatch<React.SetStateAction<SeoSettings>>;
-  updateSeoSettings: (data: Partial<SeoSettings>) => void;
-  
+  // Contact page content
   contactPageContent: ContactPageContent;
-  setContactPageContent: React.Dispatch<React.SetStateAction<ContactPageContent>>;
-  updateContactPageContent: (data: Partial<ContactPageContent>) => void;
+  updateContactPageContent: (data: ContactPageContent) => void;
   
-  // General functions
-  clearData: () => void;
-  resetToInitialData: () => void;
+  // Reviews section
+  reviewsSection: ReviewsSection;
+  updateReviewsSection: (data: ReviewsSection) => void;
+  
+  // SEO settings
+  seoSettings: SEOSettings;
+  updateSeoSettings: (settings: SEOSettings) => void;
 }
 
+// Create the context with a default value
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-// Sample initial data
-const initialProjects: Project[] = [
-  {
-    id: '1',
-    title: 'E-commerce Platform',
-    category: 'Web Development',
-    description: 'A fully-featured e-commerce platform with product management, cart functionality, and secure checkout integration.',
-    image: 'https://images.unsplash.com/photo-1561997968-aa846c2bf255?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-    technologies: ['React', 'Node.js', 'MongoDB', 'Stripe']
-  },
-  {
-    id: '2',
-    title: 'Finance Dashboard UI',
-    category: 'UI/UX Design',
-    description: 'A modern and intuitive dashboard design for a financial services company, focusing on data visualization and user experience.',
-    image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-    technologies: ['Figma', 'Adobe XD', 'Photoshop']
-  },
-  {
-    id: '3',
-    title: 'Travel Booking App',
-    category: 'Mobile Development',
-    description: 'A cross-platform mobile application for booking travel accommodations with real-time availability and secure payment processing.',
-    image: 'https://images.unsplash.com/photo-1476900543704-4312b78632f8?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
-    technologies: ['React Native', 'Firebase', 'Google Maps API']
-  }
-];
+// Helper function to generate a random ID
+const generateId = () => {
+  return Math.random().toString(36).substr(2, 9);
+};
 
-const initialServices: Service[] = [
-  {
-    id: '1',
-    title: 'Web Development',
-    description: 'Custom websites built with the latest technologies to boost your online presence.',
-    price: 1499,
-    features: ['Responsive Design', 'SEO Optimization', 'Content Management System', 'Contact Form Integration', 'Google Analytics Setup'],
-    icon: 'code'
-  },
-  {
-    id: '2',
-    title: 'UI/UX Design',
-    description: 'User-centered design solutions to enhance user experience and engagement.',
-    price: 1299,
-    features: ['User Research', 'Wireframing', 'Prototyping', 'User Testing', 'Design System Creation'],
-    highlighted: true,
-    icon: 'layout'
-  },
-  {
-    id: '3',
-    title: 'Mobile Development',
-    description: 'Native and cross-platform mobile applications for iOS and Android.',
-    price: 2499,
-    features: ['Cross-Platform Development', 'Native App Development', 'App Store Submission', 'Ongoing Maintenance', 'Performance Optimization'],
-    icon: 'smartphone'
-  }
-];
+// Default data values
+const defaultHeroSection: HeroSection = {
+  title: "Creative Solutions for Modern Businesses",
+  subtitle: "We build high-quality digital experiences that drive results and help businesses grow.",
+  backgroundImage: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
+  ctaButton: "Get Started",
+  ctaLink: "/contact",
+  secondaryButton: "Learn More",
+  secondaryLink: "/services"
+};
 
-const initialMessages: Message[] = [
+const defaultAboutSection: AboutSection = {
+  title: "About Me",
+  description: [
+    "I'm a passionate Web Developer with over 5 years of experience in creating beautiful and functional websites for businesses across various industries.",
+    "My goal is to help businesses establish a strong online presence through well-designed websites that engage visitors and convert them into customers."
+  ],
+  image: "https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
+  skills: ["HTML", "CSS", "JavaScript", "React", "Node.js", "UI/UX Design", "Responsive Design"]
+};
+
+const defaultHeaderContent: HeaderContent = {
+  logo: "YourName",
+  menuItems: [
+    { title: "Home", url: "/" },
+    { title: "Services", url: "/services" },
+    { title: "Portfolio", url: "/portfolio" },
+    { title: "Contact", url: "/contact" }
+  ]
+};
+
+const defaultMessages: Message[] = [
   {
-    id: '1',
-    name: 'John Smith',
-    email: 'john@example.com',
+    id: "msg1",
+    name: "John Smith",
+    email: "john.smith@example.com",
     subject: 'Website Project Inquiry',
     message: "I'm interested in your web development services for my new business. Can we schedule a call to discuss the details?",
     date: '2023-05-10',
@@ -217,9 +213,9 @@ const initialMessages: Message[] = [
     read: false
   },
   {
-    id: '2',
-    name: 'Sarah Johnson',
-    email: 'sarah@example.com',
+    id: "msg2",
+    name: "Sarah Johnson",
+    email: "sarah.j@example.com",
     subject: 'Logo Design Project',
     message: "Hello, I need a new logo for my startup. I like your portfolio and would like to discuss working together.",
     date: '2023-05-08',
@@ -227,9 +223,9 @@ const initialMessages: Message[] = [
     read: true
   },
   {
-    id: '3',
-    name: 'Michael Brown',
-    email: 'michael@example.com',
+    id: "msg3",
+    name: "Michael Brown",
+    email: "michael.b@example.com",
     subject: 'Mobile App Development',
     message: "We're looking for a developer to create a mobile app for our business. What's your availability in the coming months?",
     date: '2023-05-05',
@@ -238,186 +234,184 @@ const initialMessages: Message[] = [
   }
 ];
 
-const initialHeroSection: HeroSection = {
-  title: "Creative Solutions for Your Digital Presence",
-  subtitle: "Expert web development and design services to help your business grow online",
-  ctaButton: "View My Work",
-  ctaLink: "/portfolio",
-  secondaryButton: "Contact Me",
-  secondaryLink: "/contact",
-  backgroundImage: "https://images.unsplash.com/photo-1573164713988-8665fc963095?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
-};
+const defaultProjects: Project[] = [
+  {
+    id: "proj1",
+    title: "E-commerce Website",
+    category: "Web Development",
+    description: "A fully responsive e-commerce website with product catalog, shopping cart, and secure checkout.",
+    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
+    technologies: ["React", "Node.js", "MongoDB", "Stripe"],
+    link: "https://example.com"
+  },
+  {
+    id: "proj2",
+    title: "Fitness App",
+    category: "Mobile Development",
+    description: "A mobile app for tracking workouts, nutrition, and fitness goals with analytics and progress charts.",
+    image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
+    technologies: ["React Native", "Firebase", "Redux", "Chart.js"],
+  },
+  {
+    id: "proj3",
+    title: "Real Estate Platform",
+    category: "Web Development",
+    description: "A real estate listing website with property search, filters, and map integration.",
+    image: "https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1769&q=80",
+    technologies: ["Angular", "Node.js", "PostgreSQL", "Google Maps API"],
+    link: "https://example.com"
+  }
+];
 
-const initialAboutSection: AboutSection = {
-  title: "About Me",
-  description: [
-    "As a passionate professional with over 5 years of experience, I specialize in creating digital solutions that help businesses grow and thrive in the online world.",
-    "My approach combines technical expertise with creative thinking to deliver results that exceed client expectations. I believe in building long-term relationships and providing exceptional value with every project."
-  ],
-  image: "https://images.unsplash.com/photo-1585076641399-5c06d1b3365f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3",
-  skills: ["Web Development", "UI/UX Design", "Mobile Development", "SEO Optimization"]
-};
+const defaultServices: Service[] = [
+  {
+    id: "serv1",
+    title: "Web Development",
+    description: "Custom websites built from scratch to meet your specific business needs. Includes responsive design, optimization, and seamless user experience.",
+    icon: "code",
+    price: 1499,
+    featured: true
+  },
+  {
+    id: "serv2",
+    title: "UI/UX Design",
+    description: "Professional interface design that enhances user engagement and satisfaction. We create intuitive, aesthetically pleasing designs that convert visitors.",
+    icon: "layout",
+    price: 999,
+    featured: true
+  },
+  {
+    id: "serv3",
+    title: "Mobile App Development",
+    description: "Native and cross-platform mobile applications for iOS and Android. From concept to deployment, we handle the entire development process.",
+    icon: "smartphone",
+    price: 2499,
+    featured: true
+  },
+  {
+    id: "serv4",
+    title: "E-commerce Solutions",
+    description: "Complete online store setup with secure payment gateways, product management, and order processing systems.",
+    icon: "shopping-cart",
+    price: 1999,
+    featured: false
+  }
+];
 
-const initialFooterContent: FooterContent = {
-  copyrightText: "© 2023 Portfolio. All rights reserved.",
-  quickLinks: [
+const defaultFooterContent: FooterContent = {
+  logo: "YourName",
+  description: "Creating beautiful digital experiences that drive results and help businesses grow.",
+  contactEmail: "contact@example.com",
+  contactPhone: "+1 (123) 456-7890",
+  address: "123 Web Street, Digital City, 10001",
+  socialLinks: {
+    facebook: "https://facebook.com",
+    twitter: "https://twitter.com",
+    instagram: "https://instagram.com",
+    linkedin: "https://linkedin.com"
+  },
+  menuItems: [
     { title: "Home", url: "/" },
     { title: "Services", url: "/services" },
     { title: "Portfolio", url: "/portfolio" },
     { title: "Contact", url: "/contact" }
   ],
+  copyrightText: "© 2023 YourName. All rights reserved."
+};
+
+const defaultContactPageContent: ContactPageContent = {
+  title: "Get in Touch",
+  subtitle: "Have a project in mind or just want to say hello? I'd love to hear from you!",
   contactInfo: {
     email: "contact@example.com",
     phone: "+1 (123) 456-7890",
-    address: "123 Main St, City, Country"
+    address: "123 Web Street, Digital City, 10001"
   },
-  socialLinks: [
-    { platform: "Twitter", url: "https://twitter.com", icon: "twitter" },
-    { platform: "LinkedIn", url: "https://linkedin.com", icon: "linkedin" },
-    { platform: "GitHub", url: "https://github.com", icon: "github" }
+  mapLocation: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.216086753767!2d-74.00589448432352!3d40.71277704471201!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a22a3bda30d%3A0xb89d1fe6bc499443!2sDowntown%20Conference%20Center!5e0!3m2!1sen!2sus!4v1662046450305!5m2!1sen!2sus"
+};
+
+const defaultReviewsSection: ReviewsSection = {
+  title: "Client Testimonials",
+  subtitle: "See what our clients have to say about our work",
+  reviews: [
+    {
+      id: "rev1",
+      name: "Emily Johnson",
+      company: "Fashion Boutique",
+      text: "Working with this team was a game-changer for our online presence. The website they designed perfectly captures our brand identity and has significantly increased our sales.",
+      rating: 5,
+      image: "https://randomuser.me/api/portraits/women/32.jpg"
+    },
+    {
+      id: "rev2",
+      name: "Mark Wilson",
+      company: "Tech Startup",
+      text: "The mobile app they developed for us is impressive! The user experience is seamless, and they delivered the project on time and within budget.",
+      rating: 5,
+      image: "https://randomuser.me/api/portraits/men/41.jpg"
+    },
+    {
+      id: "rev3",
+      name: "Sophia Chen",
+      company: "Restaurant Chain",
+      text: "Our website redesign exceeded expectations. Not only does it look amazing, but it's also significantly faster and more user-friendly than our previous site.",
+      rating: 4,
+      image: "https://randomuser.me/api/portraits/women/64.jpg"
+    }
   ]
 };
 
-const initialHeaderContent: HeaderContent = {
-  logo: "Portfolio",
-  menuItems: [
-    { title: "Home", url: "/" },
-    { title: "Services", url: "/services" },
-    { title: "Portfolio", url: "/portfolio" },
-    { title: "Contact", url: "/contact" },
-    { title: "Admin", url: "/admin-login" }
-  ]
-};
-
-const initialSeoSettings: SeoSettings = {
-  siteTitle: "Professional Portfolio & Services",
-  siteDescription: "Expert web development, design and digital services to help your business grow online",
-  keywords: ["web development", "UI/UX design", "portfolio", "services", "digital solutions"],
-  ogImage: "/og-image.jpg",
+const defaultSeoSettings: SEOSettings = {
+  siteTitle: "Your Professional Portfolio",
+  siteDescription: "Professional web developer specializing in modern websites and applications",
+  keywords: "web development, web design, ui/ux, mobile apps, portfolio",
+  ogImage: "https://example.com/og-image.jpg",
   favicon: "/favicon.ico"
-};
-
-const initialContactPageContent: ContactPageContent = {
-  title: "Get In Touch",
-  subtitle: "Have a project in mind? Let's discuss how I can help bring your ideas to life.",
-  contactInfo: {
-    email: "contact@example.com",
-    phone: "+1 (123) 456-7890",
-    address: "123 Main St, City, Country"
-  },
-  mapLocation: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.215288354323!2d-73.98778868459314!3d40.757978942830474!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c258f07d5da561%3A0x61f6aa300ba8339d!2sGrand%20Central%20Terminal!5e0!3m2!1sen!2sus!4v1654883745021!5m2!1sen!2sus"
 };
 
 // Create a provider component
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Initialize state with data from localStorage or fallback to initial data
-  const [projects, setProjects] = useState<Project[]>(() => {
-    const savedProjects = localStorage.getItem('projects');
-    return savedProjects ? JSON.parse(savedProjects) : initialProjects;
-  });
+  // Set up state using the default values
+  const [heroSection, setHeroSection] = useState<HeroSection>(defaultHeroSection);
+  const [aboutSection, setAboutSection] = useState<AboutSection>(defaultAboutSection);
+  const [headerContent, setHeaderContent] = useState<HeaderContent>(defaultHeaderContent);
+  const [messages, setMessages] = useState<Message[]>(defaultMessages);
+  const [projects, setProjects] = useState<Project[]>(defaultProjects);
+  const [services, setServices] = useState<Service[]>(defaultServices);
+  const [footerContent, setFooterContent] = useState<FooterContent>(defaultFooterContent);
+  const [contactPageContent, setContactPageContent] = useState<ContactPageContent>(defaultContactPageContent);
+  const [reviewsSection, setReviewsSection] = useState<ReviewsSection>(defaultReviewsSection);
+  const [seoSettings, setSeoSettings] = useState<SEOSettings>(defaultSeoSettings);
   
-  const [services, setServices] = useState<Service[]>(() => {
-    const savedServices = localStorage.getItem('services');
-    return savedServices ? JSON.parse(savedServices) : initialServices;
-  });
+  // Update functions
+  const updateHeroSection = (data: HeroSection) => {
+    setHeroSection(data);
+  };
   
-  const [messages, setMessages] = useState<Message[]>(() => {
-    const savedMessages = localStorage.getItem('messages');
-    return savedMessages ? JSON.parse(savedMessages) : initialMessages;
-  });
-
-  // Website content sections
-  const [heroSection, setHeroSection] = useState<HeroSection>(() => {
-    const saved = localStorage.getItem('heroSection');
-    return saved ? JSON.parse(saved) : initialHeroSection;
-  });
-
-  const [aboutSection, setAboutSection] = useState<AboutSection>(() => {
-    const saved = localStorage.getItem('aboutSection');
-    return saved ? JSON.parse(saved) : initialAboutSection;
-  });
-
-  const [footerContent, setFooterContent] = useState<FooterContent>(() => {
-    const saved = localStorage.getItem('footerContent');
-    return saved ? JSON.parse(saved) : initialFooterContent;
-  });
-
-  const [headerContent, setHeaderContent] = useState<HeaderContent>(() => {
-    const saved = localStorage.getItem('headerContent');
-    return saved ? JSON.parse(saved) : initialHeaderContent;
-  });
-
-  const [seoSettings, setSeoSettings] = useState<SeoSettings>(() => {
-    const saved = localStorage.getItem('seoSettings');
-    return saved ? JSON.parse(saved) : initialSeoSettings;
-  });
-
-  const [contactPageContent, setContactPageContent] = useState<ContactPageContent>(() => {
-    const saved = localStorage.getItem('contactPageContent');
-    return saved ? JSON.parse(saved) : initialContactPageContent;
-  });
-
-  // Save to localStorage whenever data changes
-  useEffect(() => {
-    localStorage.setItem('projects', JSON.stringify(projects));
-  }, [projects]);
+  const updateAboutSection = (data: AboutSection) => {
+    setAboutSection(data);
+  };
   
-  useEffect(() => {
-    localStorage.setItem('services', JSON.stringify(services));
-  }, [services]);
+  const updateHeaderContent = (data: HeaderContent) => {
+    setHeaderContent(data);
+  };
   
-  useEffect(() => {
-    localStorage.setItem('messages', JSON.stringify(messages));
-  }, [messages]);
-
-  useEffect(() => {
-    localStorage.setItem('heroSection', JSON.stringify(heroSection));
-  }, [heroSection]);
-
-  useEffect(() => {
-    localStorage.setItem('aboutSection', JSON.stringify(aboutSection));
-  }, [aboutSection]);
-
-  useEffect(() => {
-    localStorage.setItem('footerContent', JSON.stringify(footerContent));
-  }, [footerContent]);
-
-  useEffect(() => {
-    localStorage.setItem('headerContent', JSON.stringify(headerContent));
-  }, [headerContent]);
-
-  useEffect(() => {
-    localStorage.setItem('seoSettings', JSON.stringify(seoSettings));
-  }, [seoSettings]);
-
-  useEffect(() => {
-    localStorage.setItem('contactPageContent', JSON.stringify(contactPageContent));
-  }, [contactPageContent]);
-
-  // Generate a unique ID
-  const generateId = () => {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+  const updateFooterContent = (data: FooterContent) => {
+    setFooterContent(data);
   };
-
-  // CRUD functions for projects
-  const addProject = (project: Omit<Project, "id">) => {
-    const newProject = {
-      ...project,
-      id: generateId(),
-    };
-    setProjects(prev => [...prev, newProject]);
+  
+  const updateContactPageContent = (data: ContactPageContent) => {
+    setContactPageContent(data);
   };
-
-  const updateProject = (id: string, project: Partial<Project>) => {
-    setProjects(prev => 
-      prev.map(item => item.id === id ? { ...item, ...project } : item)
-    );
+  
+  const updateReviewsSection = (data: ReviewsSection) => {
+    setReviewsSection(data);
   };
-
-  const deleteProject = (id: string) => {
-    setProjects(prev => prev.filter(item => item.id !== id));
+  
+  const updateSeoSettings = (settings: SEOSettings) => {
+    setSeoSettings(settings);
   };
-
+  
   // CRUD functions for services
   const addService = (service: Omit<Service, "id">) => {
     const newService = {
@@ -426,17 +420,40 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     setServices(prev => [...prev, newService]);
   };
-
+  
   const updateService = (id: string, service: Partial<Service>) => {
     setServices(prev => 
-      prev.map(item => item.id === id ? { ...item, ...service } : item)
+      prev.map(item => 
+        item.id === id ? { ...item, ...service } : item
+      )
     );
   };
-
+  
   const deleteService = (id: string) => {
     setServices(prev => prev.filter(item => item.id !== id));
   };
-
+  
+  // CRUD functions for projects
+  const addProject = (project: Omit<Project, "id">) => {
+    const newProject = {
+      ...project,
+      id: generateId(),
+    };
+    setProjects(prev => [...prev, newProject]);
+  };
+  
+  const updateProject = (id: string, project: Partial<Project>) => {
+    setProjects(prev => 
+      prev.map(item => 
+        item.id === id ? { ...item, ...project } : item
+      )
+    );
+  };
+  
+  const deleteProject = (id: string) => {
+    setProjects(prev => prev.filter(item => item.id !== id));
+  };
+  
   // CRUD functions for messages
   const addMessage = (message: Omit<Message, "id" | "date" | "createdAt" | "read">, id?: string) => {
     const now = new Date();
@@ -449,137 +466,65 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     setMessages(prev => [...prev, newMessage]);
   };
-
+  
   const updateMessage = (id: string, message: Partial<Message>) => {
     setMessages(prev => 
-      prev.map(item => item.id === id ? { ...item, ...message } : item)
+      prev.map(item => 
+        item.id === id ? { ...item, ...message } : item
+      )
     );
   };
-
+  
   const deleteMessage = (id: string) => {
     setMessages(prev => prev.filter(item => item.id !== id));
   };
-
+  
   const markMessageAsRead = (id: string) => {
     updateMessage(id, { read: true });
   };
   
-  // Update functions for website content sections
-  const updateHeroSection = (data: Partial<HeroSection>) => {
-    setHeroSection(prev => ({ ...prev, ...data }));
-  };
-
-  const updateAboutSection = (data: Partial<AboutSection>) => {
-    setAboutSection(prev => ({ ...prev, ...data }));
-  };
-
-  const updateFooterContent = (data: Partial<FooterContent>) => {
-    setFooterContent(prev => ({ ...prev, ...data }));
-  };
-
-  const updateHeaderContent = (data: Partial<HeaderContent>) => {
-    setHeaderContent(prev => ({ ...prev, ...data }));
-  };
-
-  const updateSeoSettings = (data: Partial<SeoSettings>) => {
-    setSeoSettings(prev => ({ ...prev, ...data }));
-  };
-
-  const updateContactPageContent = (data: Partial<ContactPageContent>) => {
-    setContactPageContent(prev => ({ ...prev, ...data }));
-  };
-  
-  // Function to clear all data
-  const clearData = () => {
-    setProjects([]);
-    setServices([]);
-    setMessages([]);
-    setHeroSection(initialHeroSection);
-    setAboutSection(initialAboutSection);
-    setFooterContent(initialFooterContent);
-    setHeaderContent(initialHeaderContent);
-    setSeoSettings(initialSeoSettings);
-    setContactPageContent(initialContactPageContent);
-    
-    localStorage.removeItem('projects');
-    localStorage.removeItem('services');
-    localStorage.removeItem('messages');
-    localStorage.removeItem('heroSection');
-    localStorage.removeItem('aboutSection');
-    localStorage.removeItem('footerContent');
-    localStorage.removeItem('headerContent');
-    localStorage.removeItem('seoSettings');
-    localStorage.removeItem('contactPageContent');
+  // Create the context value object
+  const contextValue: DataContextType = {
+    heroSection,
+    updateHeroSection,
+    aboutSection,
+    updateAboutSection,
+    headerContent,
+    updateHeaderContent,
+    messages,
+    setMessages,
+    addMessage,
+    updateMessage,
+    deleteMessage,
+    markMessageAsRead,
+    projects,
+    setProjects,
+    addProject,
+    updateProject,
+    deleteProject,
+    services,
+    setServices,
+    addService,
+    updateService,
+    deleteService,
+    footerContent,
+    updateFooterContent,
+    contactPageContent,
+    updateContactPageContent,
+    reviewsSection,
+    updateReviewsSection,
+    seoSettings,
+    updateSeoSettings,
   };
   
-  // Function to reset to initial data
-  const resetToInitialData = () => {
-    setProjects(initialProjects);
-    setServices(initialServices);
-    setMessages(initialMessages);
-    setHeroSection(initialHeroSection);
-    setAboutSection(initialAboutSection);
-    setFooterContent(initialFooterContent);
-    setHeaderContent(initialHeaderContent);
-    setSeoSettings(initialSeoSettings);
-    setContactPageContent(initialContactPageContent);
-    
-    localStorage.setItem('projects', JSON.stringify(initialProjects));
-    localStorage.setItem('services', JSON.stringify(initialServices));
-    localStorage.setItem('messages', JSON.stringify(initialMessages));
-    localStorage.setItem('heroSection', JSON.stringify(initialHeroSection));
-    localStorage.setItem('aboutSection', JSON.stringify(initialAboutSection));
-    localStorage.setItem('footerContent', JSON.stringify(initialFooterContent));
-    localStorage.setItem('headerContent', JSON.stringify(initialHeaderContent));
-    localStorage.setItem('seoSettings', JSON.stringify(initialSeoSettings));
-    localStorage.setItem('contactPageContent', JSON.stringify(initialContactPageContent));
-  };
-
   return (
-    <DataContext.Provider value={{
-      projects,
-      services,
-      messages,
-      setProjects,
-      setServices,
-      setMessages,
-      addProject,
-      updateProject,
-      deleteProject,
-      addService,
-      updateService,
-      deleteService,
-      addMessage,
-      updateMessage,
-      deleteMessage,
-      markMessageAsRead,
-      clearData,
-      resetToInitialData,
-      heroSection,
-      setHeroSection,
-      updateHeroSection,
-      aboutSection,
-      setAboutSection,
-      updateAboutSection,
-      footerContent,
-      setFooterContent,
-      updateFooterContent,
-      headerContent,
-      setHeaderContent,
-      updateHeaderContent,
-      seoSettings,
-      setSeoSettings,
-      updateSeoSettings,
-      contactPageContent,
-      setContactPageContent,
-      updateContactPageContent
-    }}>
+    <DataContext.Provider value={contextValue}>
       {children}
     </DataContext.Provider>
   );
 };
 
-// Custom hook to use the context
+// Custom hook to use the data context
 export const useData = () => {
   const context = useContext(DataContext);
   if (context === undefined) {

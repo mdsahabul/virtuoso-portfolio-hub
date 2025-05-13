@@ -1,13 +1,18 @@
+
 import { useState } from 'react';
 import { Routes, Route, NavLink, useNavigate } from 'react-router-dom';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Palette, Image, Home, User, Contact, LinkIcon, LayoutIcon, Settings } from 'lucide-react';
+import { 
+  Palette, Image, Home, User, Contact, LinkIcon, 
+  LayoutIcon, Settings, MessageSquare 
+} from 'lucide-react';
 import HeroEditor from './content/HeroEditor';
 import AboutEditor from './content/AboutEditor';
 import FooterEditor from './content/FooterEditor';
 import HeaderEditor from './content/HeaderEditor';
 import SeoEditor from './content/SeoEditor';
 import ContactPageEditor from './content/ContactPageEditor';
+import ReviewsEditor from './content/ReviewsEditor';
 
 const ContentManager = () => {
   const navigate = useNavigate();
@@ -24,7 +29,7 @@ const ContentManager = () => {
         <h2 className="text-2xl font-bold mb-6">Content Management</h2>
         
         <Tabs defaultValue="hero" value={activeTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="w-full grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 h-auto gap-2 bg-transparent">
+          <TabsList className="w-full grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 h-auto gap-2 bg-transparent">
             <TabsTrigger value="hero" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">
               <Home className="mr-2 h-4 w-4" /> Hero
             </TabsTrigger>
@@ -39,6 +44,9 @@ const ContentManager = () => {
             </TabsTrigger>
             <TabsTrigger value="contact" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">
               <Contact className="mr-2 h-4 w-4" /> Contact
+            </TabsTrigger>
+            <TabsTrigger value="reviews" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">
+              <MessageSquare className="mr-2 h-4 w-4" /> Reviews
             </TabsTrigger>
             <TabsTrigger value="seo" className="data-[state=active]:bg-blue-100 data-[state=active]:text-blue-800">
               <Settings className="mr-2 h-4 w-4" /> SEO
@@ -55,6 +63,7 @@ const ContentManager = () => {
           <Route path="/header" element={<HeaderEditor />} />
           <Route path="/footer" element={<FooterEditor />} />
           <Route path="/contact" element={<ContactPageEditor />} />
+          <Route path="/reviews" element={<ReviewsEditor />} />
           <Route path="/seo" element={<SeoEditor />} />
         </Routes>
       </div>

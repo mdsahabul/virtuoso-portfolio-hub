@@ -1,11 +1,15 @@
 
 import { useState } from 'react';
+import { supabase } from '../integrations/supabase/client';
+import { useData } from '../context/DataContext';
 import { toast } from 'sonner';
-import { useData } from '@/context/DataContext';
-import { supabase } from '@/integrations/supabase/client';
-import { NewMessage } from '@/types/appTypes';
 
-const ContactForm = () => {
+interface ContactFormProps {
+  onSuccess?: () => void;
+}
+
+const ContactForm = ({ onSuccess }: ContactFormProps) => {
+  const { addMessage } = useData();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -13,59 +17,46 @@ const ContactForm = () => {
     message: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { addMessage } = useData();
-
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-
+  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    // Validate form
-    if (!formData.name || !formData.email || !formData.subject || !formData.message) {
-      toast.error('Please fill in all fields');
-      setIsSubmitting(false);
+    
+    if (!formData.name || !formData.email || !formData.message) {
+      toast.error('Please fill in all required fields');
       return;
     }
-
+    
+    setIsSubmitting(true);
+    
     try {
-      // Save the message to Supabase
-      const { error, data } = await supabase
+      // Insert into Supabase
+      const { data, error } = await supabase
         .from('messages')
         .insert([
           {
             name: formData.name,
             email: formData.email,
-            subject: formData.subject,
-            message: formData.message
+            subject: formData.subject || 'Website Inquiry',
+            message: formData.message,
+            read: false
           }
         ])
         .select();
       
-      if (error) {
-        throw error;
-      }
-
-      // Also add the message to our context for immediate display
-      const newMessage: NewMessage = {
-        name: formData.name,
-        email: formData.email,
-        subject: formData.subject,
-        message: formData.message
-      };
+      if (error) throw error;
       
-      // Use the ID from the database response if available
+      // Add to DataContext with ID from Supabase response
       if (data && data[0]) {
-        addMessage(newMessage, data[0].id);
+        addMessage(formData, data[0].id);
       } else {
-        addMessage(newMessage);
+        // If no data returned, add with a generated ID
+        addMessage(formData);
       }
-
-      // Show success message
-      toast.success('Message sent successfully! We will contact you soon.');
       
       // Reset form
       setFormData({
@@ -74,87 +65,85 @@ const ContactForm = () => {
         subject: '',
         message: ''
       });
+      
+      toast.success('Message sent successfully!');
+      
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
+      
     } catch (error) {
-      console.error('Error submitting message:', error);
-      toast.error('Failed to send message. Please try again later.');
+      console.error('Error submitting form:', error);
+      toast.error('There was an error sending your message. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
   };
-
+  
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-            Your Name
+            Name *
           </label>
           <input
             type="text"
-            id="name"
             name="name"
+            id="name"
             value={formData.name}
             onChange={handleChange}
-            placeholder="John Doe"
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
         <div>
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-            Email Address
+            Email *
           </label>
           <input
             type="email"
-            id="email"
             name="email"
+            id="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="john@example.com"
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           />
         </div>
       </div>
-      
       <div>
         <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
           Subject
         </label>
         <input
           type="text"
-          id="subject"
           name="subject"
+          id="subject"
           value={formData.subject}
           onChange={handleChange}
-          placeholder="Project Inquiry"
-          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
-      
       <div>
         <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-          Message
+          Message *
         </label>
         <textarea
-          id="message"
           name="message"
+          id="message"
+          rows={5}
           value={formData.message}
           onChange={handleChange}
-          rows={5}
-          placeholder="Tell us about your project or inquiry..."
-          className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         ></textarea>
       </div>
-      
       <button
         type="submit"
         disabled={isSubmitting}
-        className={`w-full py-3 px-6 rounded-md font-medium text-white 
-          ${isSubmitting ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'} 
-          transition-colors flex justify-center items-center`}
+        className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
       >
         {isSubmitting ? 'Sending...' : 'Send Message'}
       </button>
