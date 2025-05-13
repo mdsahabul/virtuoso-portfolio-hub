@@ -2,13 +2,19 @@
 import { useState, useEffect } from 'react';
 import { Trash2, Mail, Eye, X } from 'lucide-react';
 import { useData, Message } from '../../../context/DataContext';
-import { toast } from 'sonner';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
-import { mapDbMessageToMessage } from '@/types/appTypes';
+import { toast } from 'sonner';
+
+// Map database message to our application Message type
+const mapDbMessageToMessage = (dbMessage: any): Message => ({
+  id: dbMessage.id,
+  name: dbMessage.name,
+  email: dbMessage.email,
+  subject: dbMessage.subject,
+  message: dbMessage.message,
+  read: dbMessage.read || false,
+  createdAt: new Date(dbMessage.created_at).toISOString()
+});
 
 interface MessagesManagerProps {
   searchQuery: string;
@@ -19,20 +25,21 @@ const MessagesManager = ({ searchQuery }: MessagesManagerProps) => {
   const [viewingMessage, setViewingMessage] = useState<Message | null>(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  
-  // Load messages from Supabase when component mounts
+
+  // Fetch messages from Supabase
   useEffect(() => {
     const fetchMessages = async () => {
       try {
+        setIsLoading(true);
+        
+        // Fetch all messages from the database
         const { data, error } = await supabase
           .from('messages')
           .select('*')
           .order('created_at', { ascending: false });
-
-        if (error) {
-          throw error;
-        }
-
+          
+        if (error) throw error;
+        
         if (data) {
           // Map database messages to our application Message type
           const mappedMessages = data.map(mapDbMessageToMessage);
@@ -40,13 +47,12 @@ const MessagesManager = ({ searchQuery }: MessagesManagerProps) => {
           // Update context with messages from database that don't exist in the current state
           mappedMessages.forEach(msg => {
             if (!messages.find(m => m.id === msg.id)) {
-              // Use addMessage from context
               addMessage({
                 name: msg.name,
                 email: msg.email,
                 subject: msg.subject,
                 message: msg.message
-              });
+              }, msg.id, new Date(msg.createdAt));
             }
           });
         }
@@ -59,44 +65,62 @@ const MessagesManager = ({ searchQuery }: MessagesManagerProps) => {
     };
 
     fetchMessages();
-  }, [messages, addMessage]);
+  // Only re-run when component mounts, not on every render
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   // Filter messages based on search query
-  const filteredMessages = searchQuery 
-    ? messages.filter(m => 
-        m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        m.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        m.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        m.message.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredMessages = searchQuery
+    ? messages.filter(
+        message =>
+          message.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          message.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          message.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          message.message.toLowerCase().includes(searchQuery.toLowerCase())
       )
     : messages;
 
-  // Sort messages by date (newest first) and unread messages at the top
-  const sortedMessages = [...filteredMessages].sort((a, b) => {
-    if (a.read !== b.read) return a.read ? 1 : -1;
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
-  });
-
-  const openViewModal = async (message: Message) => {
+  const handleViewMessage = async (message: Message) => {
     setViewingMessage(message);
     setIsViewModalOpen(true);
     
-    // Mark as read when viewing - both in Supabase and context
+    // If message is unread, mark it as read
     if (!message.read) {
+      await markMessageAsRead(message.id);
+      
+      // Also update in database
       try {
         const { error } = await supabase
           .from('messages')
           .update({ read: true })
           .eq('id', message.id);
           
-        if (error) {
-          throw error;
-        }
-        
-        // Also update in context
-        markMessageAsRead(message.id);
+        if (error) throw error;
       } catch (error) {
         console.error('Error marking message as read:', error);
+        toast.error('Failed to update message status');
+      }
+    }
+  };
+
+  const handleDeleteMessage = async (id: string) => {
+    // Confirm deletion
+    if (window.confirm('Are you sure you want to delete this message?')) {
+      try {
+        // Delete from database first
+        const { error } = await supabase
+          .from('messages')
+          .delete()
+          .eq('id', id);
+          
+        if (error) throw error;
+        
+        // If successful, remove from local state
+        deleteMessage(id);
+        toast.success('Message deleted successfully');
+      } catch (error) {
+        console.error('Error deleting message:', error);
+        toast.error('Failed to delete message');
       }
     }
   };
@@ -106,149 +130,146 @@ const MessagesManager = ({ searchQuery }: MessagesManagerProps) => {
     setViewingMessage(null);
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this message?')) {
-      try {
-        // Delete from Supabase
-        const { error } = await supabase
-          .from('messages')
-          .delete()
-          .eq('id', id);
-          
-        if (error) {
-          throw error;
-        }
-        
-        // Also delete from context
-        deleteMessage(id);
-        toast.success('Message deleted successfully');
-        
-        // Close modal if the deleted message was being viewed
-        if (viewingMessage && viewingMessage.id === id) {
-          closeViewModal();
-        }
-      } catch (error) {
-        toast.error('An error occurred while deleting the message');
-        console.error(error);
-      }
-    }
-  };
-
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Messages</h2>
-        <Badge variant="outline" className="px-2 py-1">
-          {messages.filter(m => !m.read).length} Unread
-        </Badge>
-      </div>
+    <div className="w-full">
+      <h2 className="text-2xl font-bold mb-6">Messages</h2>
       
-      {/* Messages List */}
-      <div className="space-y-4">
-        {sortedMessages.map(message => (
-          <Card 
-            key={message.id}
-            className={`transition-all hover:shadow-md ${!message.read ? 'border-l-4 border-l-blue-500' : ''}`}
-          >
-            <CardContent className="p-4 md:p-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="space-y-1 flex-grow">
-                  <div className="flex justify-between items-center">
-                    <h3 className={`text-lg font-medium flex items-center gap-2 ${!message.read ? 'font-semibold text-blue-800' : ''}`}>
-                      {!message.read && <div className="w-2 h-2 rounded-full bg-blue-500"></div>}
-                      {message.subject}
-                    </h3>
-                    <span className="text-sm text-gray-500">{message.date}</span>
-                  </div>
-                  <p className="text-sm text-gray-600">From: {message.name} ({message.email})</p>
-                  <p className="text-gray-600 line-clamp-2 mt-1">{message.message}</p>
-                </div>
-                <div className="flex items-center gap-2 self-end md:self-center">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => openViewModal(message)}
-                    className="gap-2"
-                  >
-                    <Eye size={16} />
-                    View
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleDelete(message.id)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50 gap-2"
-                  >
-                    <Trash2 size={16} />
-                    Delete
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-        
-        {filteredMessages.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-lg border">
-            <Mail className="mx-auto h-12 w-12 text-gray-400" />
-            <p className="mt-2 text-gray-500">No messages found</p>
-          </div>
-        )}
-      </div>
-
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      ) : filteredMessages.length === 0 ? (
+        <div className="text-center py-10">
+          <Mail className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-lg font-medium text-gray-900">No messages</h3>
+          <p className="mt-1 text-gray-500">No messages found in your inbox.</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  From
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Subject
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Date
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Status
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {filteredMessages.map((message) => (
+                <tr key={message.id} className={message.read ? "" : "font-semibold"}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">{message.name}</div>
+                        <div className="text-sm text-gray-500">{message.email}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">{message.subject}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">
+                      {new Date(message.createdAt).toLocaleDateString()}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      message.read ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"
+                    }`}>
+                      {message.read ? "Read" : "New"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <button
+                      onClick={() => handleViewMessage(message)}
+                      className="text-blue-600 hover:text-blue-900 mr-4"
+                    >
+                      <Eye className="h-5 w-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteMessage(message.id)}
+                      className="text-red-600 hover:text-red-900"
+                    >
+                      <Trash2 className="h-5 w-5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      
       {/* Message View Modal */}
-      <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <div className="flex justify-between items-center">
-              <DialogTitle>{viewingMessage?.subject}</DialogTitle>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={closeViewModal}
-                className="h-8 w-8 p-0"
-              >
-                <X size={16} />
-              </Button>
-            </div>
-          </DialogHeader>
-
-          {viewingMessage && (
-            <div className="space-y-4">
-              <div className="space-y-1 border-b pb-4">
-                <div className="flex justify-between">
-                  <p className="font-medium">From: <span className="font-normal">{viewingMessage.name}</span></p>
-                  <p className="text-sm text-gray-500">{viewingMessage.date}</p>
-                </div>
-                <p className="font-medium">Email: <span className="font-normal">{viewingMessage.email}</span></p>
+      {isViewModalOpen && viewingMessage && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold">Message Details</h3>
+                <button onClick={closeViewModal} className="text-gray-500 hover:text-gray-700">
+                  <X className="h-6 w-6" />
+                </button>
               </div>
               
-              <div className="py-2">
-                <p className="whitespace-pre-wrap">{viewingMessage.message}</p>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">From</p>
+                  <p className="mt-1">{viewingMessage.name} ({viewingMessage.email})</p>
+                </div>
+                
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Subject</p>
+                  <p className="mt-1">{viewingMessage.subject}</p>
+                </div>
+                
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Date</p>
+                  <p className="mt-1">{new Date(viewingMessage.createdAt).toLocaleString()}</p>
+                </div>
+                
+                <div>
+                  <p className="text-sm font-medium text-gray-500">Message</p>
+                  <div className="mt-1 p-4 bg-gray-50 rounded-md">
+                    <p className="whitespace-pre-line">{viewingMessage.message}</p>
+                  </div>
+                </div>
               </div>
-
-              <DialogFooter>
-                <Button
-                  variant="outline"
-                  onClick={() => handleDelete(viewingMessage.id)}
-                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
+              
+              <div className="mt-6 flex justify-end space-x-3">
+                <button
+                  onClick={closeViewModal}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded-md"
                 >
-                  <Trash2 size={16} className="mr-2" />
-                  Delete
-                </Button>
-                <Button
+                  Close
+                </button>
+                <button
                   onClick={() => {
-                    window.location.href = `mailto:${viewingMessage.email}?subject=Re: ${viewingMessage.subject}`;
+                    closeViewModal();
+                    handleDeleteMessage(viewingMessage.id);
                   }}
+                  className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-md"
                 >
-                  <Mail size={16} className="mr-2" />
-                  Reply
-                </Button>
-              </DialogFooter>
+                  Delete
+                </button>
+              </div>
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

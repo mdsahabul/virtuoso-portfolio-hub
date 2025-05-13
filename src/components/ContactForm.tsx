@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { useData } from '@/context/DataContext';
@@ -32,7 +33,7 @@ const ContactForm = () => {
 
     try {
       // Save the message to Supabase
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from('messages')
         .insert([
           {
@@ -41,7 +42,8 @@ const ContactForm = () => {
             subject: formData.subject,
             message: formData.message
           }
-        ]);
+        ])
+        .select();
       
       if (error) {
         throw error;
@@ -55,7 +57,12 @@ const ContactForm = () => {
         message: formData.message
       };
       
-      addMessage(newMessage);
+      // Use the ID from the database response if available
+      if (data && data[0]) {
+        addMessage(newMessage, data[0].id);
+      } else {
+        addMessage(newMessage);
+      }
 
       // Show success message
       toast.success('Message sent successfully! We will contact you soon.');
