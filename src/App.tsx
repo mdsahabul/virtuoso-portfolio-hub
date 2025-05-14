@@ -7,7 +7,7 @@ import Portfolio from './pages/Portfolio';
 import Services from './pages/Services';
 import NotFound from './pages/NotFound';
 import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import { DataProvider } from './context/DataContext';
 
 import './App.css';
