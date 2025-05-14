@@ -14,6 +14,9 @@ import {
   SEOSettings
 } from '../types/appTypes';
 
+// Re-export these types so they can be imported directly from DataContext
+export type { Message, Project, Service };
+
 // Define context type
 interface DataContextType {
   // Hero section
@@ -273,7 +276,7 @@ const defaultReviewsSection: ReviewsSection = {
 const defaultSeoSettings: SEOSettings = {
   siteTitle: "Your Professional Portfolio",
   siteDescription: "Professional web developer specializing in modern websites and applications",
-  keywords: "web development, web design, ui/ux, mobile apps, portfolio",
+  keywords: ["web development", "web design", "ui/ux", "mobile apps", "portfolio"],
   ogImage: "https://example.com/og-image.jpg",
   favicon: "/favicon.ico"
 };

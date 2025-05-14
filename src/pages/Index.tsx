@@ -24,15 +24,7 @@ const Index = () => {
       <Header />
       
       {/* Hero Section */}
-      <Hero 
-        title={heroSection.title}
-        subtitle={heroSection.subtitle}
-        backgroundImage={heroSection.backgroundImage}
-        ctaButton={heroSection.ctaButton}
-        ctaLink={heroSection.ctaLink}
-        secondaryButton={heroSection.secondaryButton}
-        secondaryLink={heroSection.secondaryLink}
-      />
+      <Hero /> {/* Using the Hero component without props will use the context data */}
       
       {/* About Section */}
       <section id="about" className="py-16 bg-white">
@@ -89,7 +81,7 @@ const Index = () => {
                 icon={service.icon}
                 price={service.price}
                 featured={service.featured}
-                features={service.features}
+                features={service.features || []} {/* Ensure features is provided */}
               />
             ))}
           </div>
@@ -122,7 +114,7 @@ const Index = () => {
                 title={project.title}
                 category={project.category}
                 image={project.image}
-                description={project.description}
+                description={project.description} {/* Ensure description is provided */}
                 technologies={project.technologies}
                 link={project.link}
               />
