@@ -4,7 +4,7 @@ import {
   PlusCircle, Edit, Trash2, X, Save, Plus,
   Code, Layout, Smartphone, TrendingUp
 } from 'lucide-react';
-import { useData, Service } from '../../../context/DataContext';
+import { useData } from '../../../context/DataContext';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { Service } from '@/types/appTypes';
 
 interface ServicesManagerProps {
   searchQuery: string;

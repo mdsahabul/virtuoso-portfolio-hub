@@ -34,7 +34,7 @@ export interface Message {
   subject: string;
   message: string;
   date: string;
-  createdAt: string; // Added to match the usage in MessagesManager
+  createdAt: string;
   read: boolean;
 }
 
@@ -55,7 +55,7 @@ export interface Service {
   icon: string;
   price: number;
   featured: boolean;
-  features?: string[]; // Add features property to match the usage
+  features: string[];
 }
 
 export interface FooterContent {
@@ -72,12 +72,6 @@ export interface FooterContent {
   };
   menuItems: MenuItem[];
   copyrightText: string;
-  quickLinks?: MenuItem[]; // Add quickLinks to match usage in FooterEditor
-  contactInfo?: {          // Add contactInfo to match usage in FooterEditor
-    email: string;
-    phone: string;
-    address: string;
-  };
 }
 
 export interface ContactPageContent {
@@ -109,7 +103,7 @@ export interface ReviewsSection {
 export interface SEOSettings {
   siteTitle: string;
   siteDescription: string;
-  keywords: string[];  // Change from string to string[] to match usage
+  keywords: string[];
   ogImage: string;
   favicon: string;
 }
@@ -123,7 +117,7 @@ export function mapDbMessageToMessage(dbMessage: any): Message {
     subject: dbMessage.subject,
     message: dbMessage.message,
     date: dbMessage.created_at || new Date().toISOString().split('T')[0],
-    createdAt: dbMessage.created_at || new Date().toISOString(), // Added to match the usage in MessagesManager
+    createdAt: dbMessage.created_at || new Date().toISOString(),
     read: dbMessage.read || false
   };
 }

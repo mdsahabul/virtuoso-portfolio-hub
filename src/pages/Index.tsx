@@ -122,8 +122,8 @@ const Index = () => {
                 category={project.category}
                 image={project.image}
                 description={project.description}
-                link={project.link}
                 technologies={project.technologies}
+                link={project.link}
               />
             ))}
           </div>
