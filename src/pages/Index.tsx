@@ -81,7 +81,8 @@ const Index = () => {
                 icon={service.icon}
                 price={service.price}
                 featured={service.featured}
-                features={service.features || []} {/* Ensure features is provided */}
+                features={service.features || []} 
+                {/* Ensure features is provided */}
               />
             ))}
           </div>
@@ -114,7 +115,8 @@ const Index = () => {
                 title={project.title}
                 category={project.category}
                 image={project.image}
-                description={project.description} {/* Ensure description is provided */}
+                description={project.description}
+                {/* Ensure description is provided */}
                 technologies={project.technologies}
                 link={project.link}
               />
