@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import Index from './pages/Index';
 import Contact from './pages/Contact';
@@ -15,18 +15,16 @@ import './App.css';
 function App() {
   return (
     <DataProvider>
-      <Router>
-        <Toaster position="top-right" closeButton richColors />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/portfolio" element={<Portfolio />} />
-          <Route path="/services" element={<Services />} />
-          <Route path="/admin-login" element={<AdminLogin />} />
-          <Route path="/admin-dashboard/*" element={<AdminDashboard />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
+      <Toaster position="top-right" closeButton richColors />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/portfolio" element={<Portfolio />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/admin-dashboard/*" element={<AdminDashboard />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
     </DataProvider>
   );
 }
