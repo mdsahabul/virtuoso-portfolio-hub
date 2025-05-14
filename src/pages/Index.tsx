@@ -24,7 +24,7 @@ const Index = () => {
       <Header />
       
       {/* Hero Section */}
-      <Hero
+      <Hero 
         title={heroSection.title}
         subtitle={heroSection.subtitle}
         backgroundImage={heroSection.backgroundImage}
@@ -89,6 +89,7 @@ const Index = () => {
                 icon={service.icon}
                 price={service.price}
                 featured={service.featured}
+                features={service.features}
               />
             ))}
           </div>

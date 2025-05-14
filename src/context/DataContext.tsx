@@ -1,113 +1,18 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
-
-// Define types for our data
-export interface HeroSection {
-  title: string;
-  subtitle: string;
-  backgroundImage: string;
-  ctaButton: string;
-  ctaLink: string;
-  secondaryButton: string;
-  secondaryLink: string;
-}
-
-export interface AboutSection {
-  title: string;
-  description: string[];
-  image: string;
-  skills: string[];
-}
-
-export interface MenuItem {
-  title: string;
-  url: string;
-}
-
-export interface HeaderContent {
-  logo: string;
-  menuItems: MenuItem[];
-}
-
-export interface Message {
-  id: string;
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  date: string;
-  createdAt: string; // Added this property
-  read: boolean;
-}
-
-export interface Project {
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  image: string;
-  technologies: string[];
-  link?: string;
-}
-
-export interface Service {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  price: number; // Added price for payment functionality
-  featured: boolean;
-}
-
-export interface FooterContent {
-  logo: string;
-  description: string;
-  contactEmail: string;
-  contactPhone: string;
-  address: string;
-  socialLinks: {
-    facebook: string;
-    twitter: string;
-    instagram: string;
-    linkedin: string;
-  };
-  menuItems: MenuItem[];
-  copyrightText: string;
-}
-
-export interface ContactPageContent {
-  title: string;
-  subtitle: string;
-  contactInfo: {
-    email: string;
-    phone: string;
-    address: string;
-  };
-  mapLocation: string;
-}
-
-export interface Review {
-  id: string;
-  name: string;
-  company?: string;
-  text: string;
-  rating: number;
-  image?: string;
-}
-
-export interface ReviewsSection {
-  title: string;
-  subtitle: string;
-  reviews: Review[];
-}
-
-export interface SEOSettings {
-  siteTitle: string;
-  siteDescription: string;
-  keywords: string;
-  ogImage: string;
-  favicon: string;
-}
+import {
+  HeroSection,
+  AboutSection,
+  MenuItem,
+  HeaderContent,
+  Message,
+  Project,
+  Service,
+  FooterContent,
+  ContactPageContent,
+  Review,
+  ReviewsSection,
+  SEOSettings
+} from '../types/appTypes';
 
 // Define context type
 interface DataContextType {
@@ -270,7 +175,8 @@ const defaultServices: Service[] = [
     description: "Custom websites built from scratch to meet your specific business needs. Includes responsive design, optimization, and seamless user experience.",
     icon: "code",
     price: 1499,
-    featured: true
+    featured: true,
+    features: ["Responsive Design", "SEO Optimization", "Fast Loading Speed"]
   },
   {
     id: "serv2",
@@ -278,7 +184,8 @@ const defaultServices: Service[] = [
     description: "Professional interface design that enhances user engagement and satisfaction. We create intuitive, aesthetically pleasing designs that convert visitors.",
     icon: "layout",
     price: 999,
-    featured: true
+    featured: true,
+    features: ["User Research", "Wireframing", "Prototyping", "Usability Testing"]
   },
   {
     id: "serv3",
@@ -286,7 +193,8 @@ const defaultServices: Service[] = [
     description: "Native and cross-platform mobile applications for iOS and Android. From concept to deployment, we handle the entire development process.",
     icon: "smartphone",
     price: 2499,
-    featured: true
+    featured: true,
+    features: ["iOS & Android Apps", "Cross-platform Development", "App Store Submission"]
   },
   {
     id: "serv4",
@@ -294,7 +202,8 @@ const defaultServices: Service[] = [
     description: "Complete online store setup with secure payment gateways, product management, and order processing systems.",
     icon: "shopping-cart",
     price: 1999,
-    featured: false
+    featured: false,
+    features: ["Secure Payments", "Inventory Management", "Shopping Cart"]
   }
 ];
 

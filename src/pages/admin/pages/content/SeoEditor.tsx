@@ -8,10 +8,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Save, Plus, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { SEOSettings } from '@/types/appTypes';
 
 const SeoEditor = () => {
   const { seoSettings, updateSeoSettings } = useData();
-  const [formData, setFormData] = useState({ ...seoSettings });
+  const [formData, setFormData] = useState<SEOSettings>({ ...seoSettings });
   const [isProcessing, setIsProcessing] = useState(false);
   const [keywordInput, setKeywordInput] = useState('');
   

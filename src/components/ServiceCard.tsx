@@ -1,11 +1,10 @@
 
-import { Card, CardContent } from "@/components/ui/card";
-import { 
-  Code, Layout, Smartphone, ShoppingCart, 
-  Globe, PenTool, Server, Zap 
-} from "lucide-react";
-import { PaymentSystem } from './PaymentSystem';
-import { toast } from 'sonner';
+import React from 'react';
+import { Card, CardContent, CardFooter, CardHeader } from './ui/card';
+import { Badge } from './ui/badge';
+import { Code, Layout, Smartphone, TrendingUp, ShoppingCart } from 'lucide-react';
+import { Button } from './ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface ServiceCardProps {
   id: string;
@@ -13,64 +12,70 @@ interface ServiceCardProps {
   description: string;
   icon: string;
   price: number;
-  featured?: boolean;
+  featured: boolean;
+  features?: string[];
 }
 
-const ServiceCard = ({ title, description, icon, price, featured }: ServiceCardProps) => {
+const ServiceCard = ({ id, title, description, icon, price, featured, features }: ServiceCardProps) => {
+  const navigate = useNavigate();
+
   const getIconComponent = () => {
     switch (icon) {
       case 'code':
-        return <Code size={24} />;
+        return <Code size={40} />;
       case 'layout':
-        return <Layout size={24} />;
+        return <Layout size={40} />;
       case 'smartphone':
-        return <Smartphone size={24} />;
+        return <Smartphone size={40} />;
+      case 'trend':
+        return <TrendingUp size={40} />;
       case 'shopping-cart':
-        return <ShoppingCart size={24} />;
-      case 'globe':
-        return <Globe size={24} />;
-      case 'pen-tool':
-        return <PenTool size={24} />;
-      case 'server':
-        return <Server size={24} />;
+        return <ShoppingCart size={40} />;
       default:
-        return <Zap size={24} />;
+        return <Code size={40} />;
     }
   };
 
-  const handlePaymentSuccess = () => {
-    toast.success(`Thank you for purchasing ${title}!`, {
-      description: "You'll receive details about next steps via email.",
-    });
-  };
-
   return (
-    <Card className={`h-full relative overflow-hidden ${featured ? 'border-blue-500 shadow-md' : ''}`}>
-      {featured && (
-        <div className="absolute top-0 right-0 bg-blue-500 text-white text-xs font-semibold px-3 py-1 rounded-bl-lg">
-          Popular
-        </div>
-      )}
-      <CardContent className="pt-6 flex flex-col h-full">
-        <div className="mb-4 text-blue-600 bg-blue-50 w-12 h-12 rounded-full flex items-center justify-center">
-          {getIconComponent()}
-        </div>
-        <h3 className="text-xl font-semibold mb-2">{title}</h3>
-        <p className="text-gray-600 mb-4 flex-grow">{description}</p>
-        <div className="mt-auto">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-2xl font-bold">${price}</span>
-            {featured && (
-              <span className="text-sm text-gray-500">Best value</span>
-            )}
+    <Card className={`h-full flex flex-col ${featured ? 'border-blue-500 border-2' : ''}`}>
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <div className={`text-blue-500 p-3 rounded-lg bg-blue-50`}>
+            {getIconComponent()}
           </div>
-          <PaymentSystem 
-            serviceName={title} 
-            amount={price}
-            onSuccess={handlePaymentSuccess}
-          />
+          {featured && (
+            <Badge>Featured</Badge>
+          )}
         </div>
+        <h3 className="text-xl font-bold mt-4">{title}</h3>
+        <p className="text-2xl font-semibold text-blue-600">${price}</p>
+      </CardHeader>
+
+      <CardContent className="flex-grow">
+        <p className="text-gray-600 mb-4">{description}</p>
+        {features && features.length > 0 && (
+          <div className="space-y-2">
+            <h4 className="font-medium">Features:</h4>
+            <ul className="space-y-1">
+              {features.map((feature, i) => (
+                <li key={i} className="flex items-start">
+                  <span className="text-green-500 mr-2">✓</span>
+                  <span>{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </CardContent>
+
+      <CardFooter>
+        <Button 
+          className="w-full" 
+          onClick={() => navigate(`/services/${id}`)}
+        >
+          Learn More
+        </Button>
+      </CardFooter>
     </Card>
   );
 };

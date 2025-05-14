@@ -55,7 +55,7 @@ export interface Service {
   icon: string;
   price: number;
   featured: boolean;
-  features: string[];
+  features?: string[]; // Make features optional with ?
 }
 
 export interface FooterContent {
@@ -103,7 +103,7 @@ export interface ReviewsSection {
 export interface SEOSettings {
   siteTitle: string;
   siteDescription: string;
-  keywords: string[];
+  keywords: string[]; // This is an array of strings
   ogImage: string;
   favicon: string;
 }
