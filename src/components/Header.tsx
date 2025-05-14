@@ -50,7 +50,7 @@ const Header = () => {
   return <header className="">
       <div className="flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2">
-          <span className="text-2xl font-bold text-blue-700">Portfolio</span>
+          <span className="text-2xl font-bold text-blue-700">Sahabul.</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -62,7 +62,7 @@ const Header = () => {
 
         {/* Mobile Menu Button */}
         <button className="md:hidden p-2 rounded-md hover:bg-gray-100" onClick={toggleMenu} aria-label="Toggle menu">
-          {isMenuOpen ? <X size={24} className="text-blue-800" /> : <Menu size={24} className="text-blue-800" />}
+          {isMenuOpen ? <X size={24} className="text-800" /> : <Menu size={24} className="text-blue-800" />}
         </button>
       </div>
 
