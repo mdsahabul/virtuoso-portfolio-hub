@@ -2,15 +2,15 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Routes, Route, Navigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import AdminSidebar from './components/AdminSidebar';
-import AdminHeader from './components/AdminHeader';
-import DashboardHome from './pages/DashboardHome';
-import ProjectsManager from './pages/ProjectsManager';
-import ServicesManager from './pages/admin/pages/ServicesManager';
-import MessagesManager from './pages/MessagesManager';
-import ContentManager from './pages/ContentManager';
-import ProfileSettings from './pages/ProfileSettings';
-import SiteSettings from './pages/SiteSettings';
+import AdminSidebar from './admin/components/AdminSidebar';
+import AdminHeader from './admin/components/AdminHeader';
+import DashboardHome from './admin/pages/DashboardHome';
+import ProjectsManager from './admin/pages/ProjectsManager';
+import ServicesManager from './admin/pages/ServicesManager';
+import MessagesManager from './admin/pages/MessagesManager';
+import ContentManager from './admin/pages/ContentManager';
+import ProfileSettings from './admin/pages/ProfileSettings';
+import SiteSettings from './admin/pages/SiteSettings';
 import { useData } from '../context/DataContext';
 
 const AdminDashboard = () => {
