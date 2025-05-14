@@ -1,1 +1,5 @@
+
 project_id = "zonfiqsjzejlovhdnqcp"
+
+[storage.site-content]
+public = true

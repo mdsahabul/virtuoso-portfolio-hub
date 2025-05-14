@@ -13,6 +13,9 @@ import {
   ReviewsSection,
   SEOSettings
 } from '../types/appTypes';
+import { supabase } from '../integrations/supabase/client';
+import { fetchContentSection, updateContentSection } from '../integrations/supabase/contentService';
+import { toast } from 'sonner';
 
 // Re-export these types so they can be imported directly from DataContext
 export type { Message, Project, Service };
@@ -68,6 +71,9 @@ interface DataContextType {
   // SEO settings
   seoSettings: SEOSettings;
   updateSeoSettings: (settings: SEOSettings) => void;
+  
+  // Loading state
+  isLoading: boolean;
 }
 
 // Create the context with a default value
@@ -295,13 +301,56 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [reviewsSection, setReviewsSection] = useState<ReviewsSection>(defaultReviewsSection);
   const [seoSettings, setSeoSettings] = useState<SEOSettings>(defaultSeoSettings);
   
+  // Add loading state
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch data from Supabase on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Fetch about section
+        const aboutData = await fetchContentSection('about');
+        if (aboutData) {
+          setAboutSection(aboutData as AboutSection);
+        }
+        
+        // Add other sections as needed
+        // const heroData = await fetchContentSection('hero');
+        // if (heroData) {
+        //   setHeroSection(heroData as HeroSection);
+        // }
+        
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+  
   // Update functions
-  const updateHeroSection = (data: HeroSection) => {
+  const updateHeroSection = async (data: HeroSection) => {
     setHeroSection(data);
+    try {
+      await updateContentSection('hero', data);
+      toast.success('Hero section updated successfully');
+    } catch (error) {
+      toast.error('Failed to update Hero section');
+      console.error(error);
+    }
   };
   
-  const updateAboutSection = (data: AboutSection) => {
+  const updateAboutSection = async (data: AboutSection) => {
     setAboutSection(data);
+    try {
+      await updateContentSection('about', data);
+      toast.success('About section updated successfully');
+    } catch (error) {
+      toast.error('Failed to update About section');
+      console.error(error);
+    }
   };
   
   const updateHeaderContent = (data: HeaderContent) => {
@@ -427,6 +476,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     updateReviewsSection,
     seoSettings,
     updateSeoSettings,
+    isLoading,
   };
   
   return (
