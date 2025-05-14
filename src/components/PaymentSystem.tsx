@@ -11,7 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { CreditCard, Check } from 'lucide-react';
+import { CreditCard, Check, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface PaymentSystemProps {
@@ -24,6 +24,7 @@ export const PaymentSystem = ({ serviceName, amount, onSuccess }: PaymentSystemP
   const [isOpen, setIsOpen] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'wallet'>('card');
   
   // Payment form state
   const [cardNumber, setCardNumber] = useState('');
@@ -69,24 +70,26 @@ export const PaymentSystem = ({ serviceName, amount, onSuccess }: PaymentSystemP
   };
   
   const validateForm = () => {
-    if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) {
-      toast.error('Please enter a valid card number');
-      return false;
-    }
-    
-    if (!cardName) {
-      toast.error('Please enter the name on card');
-      return false;
-    }
-    
-    if (!expiry || expiry.length < 5) {
-      toast.error('Please enter a valid expiry date (MM/YY)');
-      return false;
-    }
-    
-    if (!cvc || cvc.length < 3) {
-      toast.error('Please enter a valid CVC');
-      return false;
+    if (paymentMethod === 'card') {
+      if (!cardNumber || cardNumber.replace(/\s/g, '').length < 16) {
+        toast.error('Please enter a valid card number');
+        return false;
+      }
+      
+      if (!cardName) {
+        toast.error('Please enter the name on card');
+        return false;
+      }
+      
+      if (!expiry || expiry.length < 5) {
+        toast.error('Please enter a valid expiry date (MM/YY)');
+        return false;
+      }
+      
+      if (!cvc || cvc.length < 3) {
+        toast.error('Please enter a valid CVC');
+        return false;
+      }
     }
     
     return true;
@@ -161,53 +164,101 @@ export const PaymentSystem = ({ serviceName, amount, onSuccess }: PaymentSystemP
                   <span className="text-lg font-bold">${amount.toFixed(2)}</span>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="cardNumber">Card Number</Label>
-                  <Input
-                    id="cardNumber"
-                    placeholder="1234 5678 9012 3456"
-                    value={cardNumber}
-                    onChange={handleCardNumberChange}
-                    className="font-mono"
-                    maxLength={19}
-                  />
+                <div className="flex space-x-2 border-b pb-4 mb-4">
+                  <Button
+                    type="button"
+                    variant={paymentMethod === 'card' ? 'default' : 'outline'}
+                    onClick={() => setPaymentMethod('card')}
+                    className="flex-1"
+                  >
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Credit Card
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={paymentMethod === 'wallet' ? 'default' : 'outline'}
+                    onClick={() => setPaymentMethod('wallet')}
+                    className="flex-1"
+                  >
+                    <Wallet className="mr-2 h-4 w-4" />
+                    Digital Wallet
+                  </Button>
                 </div>
                 
-                <div className="space-y-2">
-                  <Label htmlFor="cardName">Name on Card</Label>
-                  <Input
-                    id="cardName"
-                    placeholder="John Doe"
-                    value={cardName}
-                    onChange={(e) => setCardName(e.target.value)}
-                  />
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="expiry">Expiry Date</Label>
-                    <Input
-                      id="expiry"
-                      placeholder="MM/YY"
-                      value={expiry}
-                      onChange={handleExpiryChange}
-                      className="font-mono"
-                      maxLength={5}
-                    />
+                {paymentMethod === 'card' ? (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="cardNumber">Card Number</Label>
+                      <Input
+                        id="cardNumber"
+                        placeholder="1234 5678 9012 3456"
+                        value={cardNumber}
+                        onChange={handleCardNumberChange}
+                        className="font-mono"
+                        maxLength={19}
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="cardName">Name on Card</Label>
+                      <Input
+                        id="cardName"
+                        placeholder="John Doe"
+                        value={cardName}
+                        onChange={(e) => setCardName(e.target.value)}
+                      />
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="expiry">Expiry Date</Label>
+                        <Input
+                          id="expiry"
+                          placeholder="MM/YY"
+                          value={expiry}
+                          onChange={handleExpiryChange}
+                          className="font-mono"
+                          maxLength={5}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="cvc">CVC</Label>
+                        <Input
+                          id="cvc"
+                          placeholder="123"
+                          value={cvc}
+                          onChange={handleCvcChange}
+                          className="font-mono"
+                          maxLength={4}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="cvc">CVC</Label>
-                    <Input
-                      id="cvc"
-                      placeholder="123"
-                      value={cvc}
-                      onChange={handleCvcChange}
-                      className="font-mono"
-                      maxLength={4}
-                    />
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex flex-col items-center gap-2 p-4 border rounded-md bg-gray-50">
+                      <p className="text-center text-gray-600">Choose your digital wallet</p>
+                      <div className="grid grid-cols-2 gap-3 w-full">
+                        <Button variant="outline" className="py-6">
+                          PayPal
+                        </Button>
+                        <Button variant="outline" className="py-6">
+                          Google Pay
+                        </Button>
+                        <Button variant="outline" className="py-6">
+                          bKash
+                        </Button>
+                        <Button variant="outline" className="py-6">
+                          Nagad
+                        </Button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        Note: Digital wallet integration is in development
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
               
               <DialogFooter>

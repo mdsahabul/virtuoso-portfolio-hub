@@ -1,10 +1,12 @@
 
 import React from 'react';
-import { Card, CardContent, CardFooter, CardHeader } from './ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Badge } from './ui/badge';
-import { Code, Layout, Smartphone, TrendingUp, ShoppingCart } from 'lucide-react';
-import { Button } from './ui/button';
-import { useNavigate } from 'react-router-dom';
+import { ServicesPurchase } from './ServicesPurchase';
+import { CheckIcon } from 'lucide-react';
+
+// Import icons dynamically based on name
+import * as LucideIcons from 'lucide-react';
 
 interface ServiceCardProps {
   id: string;
@@ -13,69 +15,59 @@ interface ServiceCardProps {
   icon: string;
   price: number;
   featured: boolean;
-  features?: string[];
+  features: string[];
 }
 
+interface DynamicIconProps {
+  name: string;
+  className?: string;
+  size?: number;
+}
+
+const DynamicIcon: React.FC<DynamicIconProps> = ({ name, className, size = 24 }) => {
+  // @ts-ignore - Lucide icons typing issue
+  const Icon = LucideIcons[name] || LucideIcons.HelpCircle;
+  return <Icon size={size} className={className} />;
+};
+
 const ServiceCard = ({ id, title, description, icon, price, featured, features }: ServiceCardProps) => {
-  const navigate = useNavigate();
-
-  const getIconComponent = () => {
-    switch (icon) {
-      case 'code':
-        return <Code size={40} />;
-      case 'layout':
-        return <Layout size={40} />;
-      case 'smartphone':
-        return <Smartphone size={40} />;
-      case 'trend':
-        return <TrendingUp size={40} />;
-      case 'shopping-cart':
-        return <ShoppingCart size={40} />;
-      default:
-        return <Code size={40} />;
-    }
-  };
-
+  // Create a service object to pass to ServicesPurchase
+  const service = { id, title, description, icon, price, featured, features };
+  
   return (
-    <Card className={`h-full flex flex-col ${featured ? 'border-blue-500 border-2' : ''}`}>
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div className={`text-blue-500 p-3 rounded-lg bg-blue-50`}>
-            {getIconComponent()}
+    <Card className={`overflow-hidden h-full flex flex-col ${featured ? 'shadow-lg border-blue-200' : ''}`}>
+      <CardHeader className={`${featured ? 'bg-blue-50' : ''}`}>
+        {featured && (
+          <Badge variant="outline" className="absolute top-2 right-2 bg-blue-500 text-white border-0">
+            Featured
+          </Badge>
+        )}
+        <div className="flex items-center justify-center mb-4">
+          <div className={`p-3 rounded-full ${featured ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-600'}`}>
+            <DynamicIcon name={icon} size={24} />
           </div>
-          {featured && (
-            <Badge>Featured</Badge>
-          )}
         </div>
-        <h3 className="text-xl font-bold mt-4">{title}</h3>
-        <p className="text-2xl font-semibold text-blue-600">${price}</p>
+        <CardTitle className="text-xl text-center">{title}</CardTitle>
       </CardHeader>
-
-      <CardContent className="flex-grow">
-        <p className="text-gray-600 mb-4">{description}</p>
+      <CardContent className="pt-4 flex-grow flex flex-col">
+        <p className="text-gray-600 mb-4 flex-grow">{description}</p>
+        
         {features && features.length > 0 && (
-          <div className="space-y-2">
-            <h4 className="font-medium">Features:</h4>
+          <div className="mb-6">
+            <p className="font-medium mb-2">Features:</p>
             <ul className="space-y-1">
-              {features.map((feature, i) => (
-                <li key={i} className="flex items-start">
-                  <span className="text-green-500 mr-2">✓</span>
-                  <span>{feature}</span>
+              {features.map((feature, index) => (
+                <li key={index} className="flex items-start">
+                  <CheckIcon className="h-4 w-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm text-gray-600">{feature}</span>
                 </li>
               ))}
             </ul>
           </div>
         )}
+        
+        <ServicesPurchase service={service} />
       </CardContent>
-
-      <CardFooter>
-        <Button 
-          className="w-full" 
-          onClick={() => navigate(`/services/${id}`)}
-        >
-          Learn More
-        </Button>
-      </CardFooter>
     </Card>
   );
 };
