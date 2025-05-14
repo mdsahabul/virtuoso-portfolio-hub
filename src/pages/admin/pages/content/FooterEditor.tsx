@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Save, Eye, Plus, X, Twitter, Linkedin, Github } from 'lucide-react';
+import { FooterContent, MenuItem } from '@/types/appTypes';
 
 interface SocialLink {
   platform: string;
@@ -13,34 +14,35 @@ interface SocialLink {
   icon: string;
 }
 
-interface QuickLink {
-  title: string;
-  url: string;
-}
-
-interface FooterContentState {
+// Define a state interface that matches our form structure
+interface FooterEditorState {
+  logo: string;
+  description: string;
+  contactEmail: string;
+  contactPhone: string;
+  address: string;
   copyrightText: string;
-  quickLinks: QuickLink[];
-  contactInfo: {
-    email: string;
-    phone: string;
-    address: string;
-  };
+  menuItems: MenuItem[];
   socialLinks: SocialLink[];
 }
 
 const FooterEditor = () => {
   const { footerContent, updateFooterContent } = useData();
-  const [formData, setFormData] = useState<FooterContentState>({
+  const [formData, setFormData] = useState<FooterEditorState>({
+    logo: footerContent.logo,
+    description: footerContent.description,
+    contactEmail: footerContent.contactEmail,
+    contactPhone: footerContent.contactPhone,
+    address: footerContent.address,
     copyrightText: footerContent.copyrightText,
-    quickLinks: [...(footerContent.quickLinks || [])],
-    contactInfo: {
-      email: footerContent.contactInfo.email,
-      phone: footerContent.contactInfo.phone,
-      address: footerContent.contactInfo.address
-    },
-    socialLinks: [...(footerContent.socialLinks || [])]
+    menuItems: [...footerContent.menuItems],
+    socialLinks: Object.entries(footerContent.socialLinks).map(([platform, url]) => ({
+      platform,
+      url,
+      icon: platform.toLowerCase()
+    }))
   });
+  
   const [isProcessing, setIsProcessing] = useState(false);
   const [previewMode, setPreviewMode] = useState(false);
   
@@ -55,26 +57,14 @@ const FooterEditor = () => {
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
-      setFormData(prev => ({
-        ...prev,
-        [parent]: {
-          ...(prev[parent as keyof typeof prev] as object),
-          [child]: value
-        }
-      }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
   
   const addQuickLink = () => {
     if (quickLinkTitle.trim() && quickLinkUrl.trim()) {
       setFormData(prev => ({
         ...prev,
-        quickLinks: [...prev.quickLinks, { title: quickLinkTitle.trim(), url: quickLinkUrl.trim() }]
+        menuItems: [...prev.menuItems, { title: quickLinkTitle.trim(), url: quickLinkUrl.trim() }]
       }));
       setQuickLinkTitle('');
       setQuickLinkUrl('');
@@ -86,7 +76,7 @@ const FooterEditor = () => {
   const removeQuickLink = (index: number) => {
     setFormData(prev => ({
       ...prev,
-      quickLinks: prev.quickLinks.filter((_, i) => i !== index)
+      menuItems: prev.menuItems.filter((_, i) => i !== index)
     }));
   };
   
@@ -133,7 +123,29 @@ const FooterEditor = () => {
     setIsProcessing(true);
     
     try {
-      updateFooterContent(formData);
+      // Convert the form data to match the FooterContent interface
+      const socialLinksObj: Record<string, string> = {};
+      formData.socialLinks.forEach(link => {
+        socialLinksObj[link.platform] = link.url;
+      });
+      
+      const updatedFooterContent: FooterContent = {
+        logo: formData.logo,
+        description: formData.description,
+        contactEmail: formData.contactEmail,
+        contactPhone: formData.contactPhone,
+        address: formData.address,
+        menuItems: formData.menuItems,
+        copyrightText: formData.copyrightText,
+        socialLinks: {
+          facebook: socialLinksObj.facebook || footerContent.socialLinks.facebook,
+          twitter: socialLinksObj.twitter || footerContent.socialLinks.twitter,
+          instagram: socialLinksObj.instagram || footerContent.socialLinks.instagram,
+          linkedin: socialLinksObj.linkedin || footerContent.socialLinks.linkedin
+        }
+      };
+      
+      updateFooterContent(updatedFooterContent);
       toast.success('Footer content updated successfully');
     } catch (error) {
       toast.error('An error occurred while updating the footer');
@@ -166,7 +178,7 @@ const FooterEditor = () => {
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
                   <ul className="space-y-2">
-                    {formData.quickLinks.map((link, i) => (
+                    {formData.menuItems.map((link, i) => (
                       <li key={i}>
                         <a href={link.url} className="hover:text-blue-300">{link.title}</a>
                       </li>
@@ -177,9 +189,9 @@ const FooterEditor = () => {
                 <div>
                   <h3 className="text-lg font-semibold mb-4">Contact</h3>
                   <address className="not-italic">
-                    <div className="mb-2">Email: {formData.contactInfo.email}</div>
-                    <div className="mb-2">Phone: {formData.contactInfo.phone}</div>
-                    <div>{formData.contactInfo.address}</div>
+                    <div className="mb-2">Email: {formData.contactEmail}</div>
+                    <div className="mb-2">Phone: {formData.contactPhone}</div>
+                    <div>{formData.address}</div>
                   </address>
                 </div>
                 
@@ -223,22 +235,22 @@ const FooterEditor = () => {
               <h4 className="text-lg font-medium">Contact Information</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="contactInfo.email">Email</Label>
+                  <Label htmlFor="contactEmail">Email</Label>
                   <Input
-                    id="contactInfo.email"
-                    name="contactInfo.email"
-                    value={formData.contactInfo.email}
+                    id="contactEmail"
+                    name="contactEmail"
+                    value={formData.contactEmail}
                     onChange={handleInputChange}
                     placeholder="contact@example.com"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="contactInfo.phone">Phone</Label>
+                  <Label htmlFor="contactPhone">Phone</Label>
                   <Input
-                    id="contactInfo.phone"
-                    name="contactInfo.phone"
-                    value={formData.contactInfo.phone}
+                    id="contactPhone"
+                    name="contactPhone"
+                    value={formData.contactPhone}
                     onChange={handleInputChange}
                     placeholder="+1 (123) 456-7890"
                   />
@@ -246,11 +258,11 @@ const FooterEditor = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="contactInfo.address">Address</Label>
+                <Label htmlFor="address">Address</Label>
                 <Input
-                  id="contactInfo.address"
-                  name="contactInfo.address"
-                  value={formData.contactInfo.address}
+                  id="address"
+                  name="address"
+                  value={formData.address}
                   onChange={handleInputChange}
                   placeholder="123 Main St, City, Country"
                 />
@@ -260,7 +272,7 @@ const FooterEditor = () => {
             <div className="space-y-4">
               <h4 className="text-lg font-medium">Quick Links</h4>
               <div className="space-y-2">
-                {formData.quickLinks.map((link, i) => (
+                {formData.menuItems.map((link, i) => (
                   <div key={i} className="flex items-center gap-2 p-2 rounded-md border">
                     <div className="grid grid-cols-2 gap-2 flex-grow">
                       <Input

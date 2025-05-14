@@ -33,7 +33,7 @@ const ServicesManager = ({ searchQuery }: ServicesManagerProps) => {
     description: '',
     price: 0,
     features: [] as string[],
-    highlighted: false,
+    featured: false,
     icon: 'code'
   });
 
@@ -45,7 +45,7 @@ const ServicesManager = ({ searchQuery }: ServicesManagerProps) => {
     ? services.filter(s => 
         s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         s.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        s.features.some(feature => feature.toLowerCase().includes(searchQuery.toLowerCase()))
+        (s.features && s.features.some(feature => feature.toLowerCase().includes(searchQuery.toLowerCase())))
       )
     : services;
 
@@ -59,8 +59,8 @@ const ServicesManager = ({ searchQuery }: ServicesManagerProps) => {
         title: service.title,
         description: service.description,
         price: service.price,
-        features: [...service.features],
-        highlighted: service.highlighted || false,
+        features: service.features || [],
+        featured: service.featured,
         icon: service.icon || 'code'
       });
     } else {
@@ -71,7 +71,7 @@ const ServicesManager = ({ searchQuery }: ServicesManagerProps) => {
         description: '',
         price: 0,
         features: [],
-        highlighted: false,
+        featured: false,
         icon: 'code'
       });
     }
@@ -98,7 +98,7 @@ const ServicesManager = ({ searchQuery }: ServicesManagerProps) => {
   const handleSwitchChange = (checked: boolean) => {
     setServiceForm(prev => ({
       ...prev,
-      highlighted: checked
+      featured: checked
     }));
   };
 
@@ -146,9 +146,9 @@ const ServicesManager = ({ searchQuery }: ServicesManagerProps) => {
           title: serviceForm.title,
           description: serviceForm.description,
           price: serviceForm.price,
-          features: serviceForm.features,
-          highlighted: serviceForm.highlighted,
+          featured: serviceForm.featured,
           icon: serviceForm.icon,
+          features: serviceForm.features,
         });
         toast.success('Service added successfully');
       } else {
@@ -157,9 +157,9 @@ const ServicesManager = ({ searchQuery }: ServicesManagerProps) => {
           title: serviceForm.title,
           description: serviceForm.description,
           price: serviceForm.price,
-          features: serviceForm.features,
-          highlighted: serviceForm.highlighted,
+          featured: serviceForm.featured,
           icon: serviceForm.icon,
+          features: serviceForm.features,
         });
         toast.success('Service updated successfully');
       }
@@ -217,7 +217,7 @@ const ServicesManager = ({ searchQuery }: ServicesManagerProps) => {
       {/* Services Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredServices.map(service => (
-          <Card key={service.id} className={`${service.highlighted ? 'border-blue-500 border-2' : ''}`}>
+          <Card key={service.id} className={`${service.featured ? 'border-blue-500 border-2' : ''}`}>
             <CardHeader className="pb-4">
               <div className="flex justify-between items-start">
                 <div className={`text-blue-500 p-3 rounded-lg bg-blue-50`}>
@@ -244,7 +244,7 @@ const ServicesManager = ({ searchQuery }: ServicesManagerProps) => {
               <h3 className="text-xl font-bold mt-4">{service.title}</h3>
               <div className="flex items-center">
                 <p className="text-2xl font-semibold text-blue-600">${service.price}</p>
-                {service.highlighted && (
+                {service.featured && (
                   <Badge className="ml-2">Featured</Badge>
                 )}
               </div>
@@ -254,7 +254,7 @@ const ServicesManager = ({ searchQuery }: ServicesManagerProps) => {
               <div className="space-y-2">
                 <h4 className="font-medium">Features:</h4>
                 <ul className="space-y-1">
-                  {service.features.map((feature, i) => (
+                  {service.features && service.features.map((feature, i) => (
                     <li key={i} className="flex items-start">
                       <span className="text-green-500 mr-2">✓</span>
                       <span>{feature}</span>
@@ -363,10 +363,10 @@ const ServicesManager = ({ searchQuery }: ServicesManagerProps) => {
 
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="highlighted">Featured Service</Label>
+                <Label htmlFor="featured">Featured Service</Label>
                 <Switch
-                  id="highlighted"
-                  checked={serviceForm.highlighted}
+                  id="featured"
+                  checked={serviceForm.featured}
                   onCheckedChange={handleSwitchChange}
                 />
               </div>

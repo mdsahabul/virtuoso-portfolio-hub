@@ -55,6 +55,7 @@ export interface Service {
   icon: string;
   price: number;
   featured: boolean;
+  features?: string[]; // Add features property to match the usage
 }
 
 export interface FooterContent {
@@ -71,6 +72,12 @@ export interface FooterContent {
   };
   menuItems: MenuItem[];
   copyrightText: string;
+  quickLinks?: MenuItem[]; // Add quickLinks to match usage in FooterEditor
+  contactInfo?: {          // Add contactInfo to match usage in FooterEditor
+    email: string;
+    phone: string;
+    address: string;
+  };
 }
 
 export interface ContactPageContent {
@@ -102,7 +109,7 @@ export interface ReviewsSection {
 export interface SEOSettings {
   siteTitle: string;
   siteDescription: string;
-  keywords: string;
+  keywords: string[];  // Change from string to string[] to match usage
   ogImage: string;
   favicon: string;
 }
