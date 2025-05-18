@@ -1,6 +1,6 @@
 
 import { supabase } from './client';
-import { AboutSection } from '../types/appTypes';
+import { AboutSection } from '../../types/appTypes';
 
 /**
  * Fetch a specific content section from Supabase
