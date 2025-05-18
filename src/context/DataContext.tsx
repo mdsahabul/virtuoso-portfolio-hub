@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   HeroSection,
@@ -15,7 +14,16 @@ import {
   SEOSettings
 } from '../types/appTypes';
 import { supabase } from '../integrations/supabase/client';
-import { fetchContentSection, updateContentSection, fetchAboutSection } from '../integrations/supabase/contentService';
+import { 
+  fetchAboutSection, 
+  fetchHeroSection, 
+  fetchHeaderContent,
+  fetchFooterContent,
+  fetchContactPageContent,
+  fetchReviewsSection,
+  fetchSeoSettings,
+  updateContentSection 
+} from '../integrations/supabase/contentService';
 import { toast } from 'sonner';
 
 // Re-export these types so they can be imported directly from DataContext
@@ -320,40 +328,40 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         
         // Fetch hero section
-        const heroData = await fetchContentSection('hero');
+        const heroData = await fetchHeroSection();
         if (heroData) {
           console.log("Setting hero section data:", heroData);
-          setHeroSection(heroData as HeroSection);
+          setHeroSection(heroData);
         }
         
         // Fetch header content
-        const headerData = await fetchContentSection('header');
+        const headerData = await fetchHeaderContent();
         if (headerData) {
-          setHeaderContent(headerData as HeaderContent);
+          setHeaderContent(headerData);
         }
         
         // Fetch footer content
-        const footerData = await fetchContentSection('footer');
+        const footerData = await fetchFooterContent();
         if (footerData) {
-          setFooterContent(footerData as FooterContent);
+          setFooterContent(footerData);
         }
         
         // Fetch contact page content
-        const contactData = await fetchContentSection('contact');
+        const contactData = await fetchContactPageContent();
         if (contactData) {
-          setContactPageContent(contactData as ContactPageContent);
+          setContactPageContent(contactData);
         }
         
         // Fetch reviews section
-        const reviewsData = await fetchContentSection('reviews');
+        const reviewsData = await fetchReviewsSection();
         if (reviewsData) {
-          setReviewsSection(reviewsData as ReviewsSection);
+          setReviewsSection(reviewsData);
         }
         
         // Fetch SEO settings
-        const seoData = await fetchContentSection('seo');
+        const seoData = await fetchSeoSettings();
         if (seoData) {
-          setSeoSettings(seoData as SEOSettings);
+          setSeoSettings(seoData);
         }
         
       } catch (error) {

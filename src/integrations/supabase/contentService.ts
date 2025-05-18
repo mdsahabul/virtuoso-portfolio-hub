@@ -1,13 +1,13 @@
 
 import { supabase } from './client';
-import { AboutSection } from '../../types/appTypes';
+import { AboutSection, HeroSection, HeaderContent, FooterContent, ContactPageContent, ReviewsSection, SEOSettings } from '../../types/appTypes';
 import { toast } from 'sonner';
 
 /**
  * Fetch a specific content section from Supabase
  * @param sectionName The name of the section to fetch
  */
-export async function fetchContentSection(sectionName: string) {
+export async function fetchContentSection<T>(sectionName: string): Promise<T | null> {
   try {
     const { data, error } = await supabase
       .from('content_sections')
@@ -21,7 +21,7 @@ export async function fetchContentSection(sectionName: string) {
     }
 
     console.log(`Successfully fetched ${sectionName} section:`, data);
-    return data?.content;
+    return data?.content as T;
   } catch (err) {
     console.error(`Failed to fetch ${sectionName} section:`, err);
     return null;
@@ -33,7 +33,7 @@ export async function fetchContentSection(sectionName: string) {
  */
 export async function fetchAboutSection(): Promise<AboutSection | null> {
   try {
-    const data = await fetchContentSection('about');
+    const data = await fetchContentSection<AboutSection>('about');
     
     if (!data) return null;
     
@@ -67,6 +67,84 @@ export async function fetchAboutSection(): Promise<AboutSection | null> {
     }
   } catch (err) {
     console.error('Error in fetchAboutSection:', err);
+    return null;
+  }
+}
+
+/**
+ * Fetch hero section with proper typing
+ */
+export async function fetchHeroSection(): Promise<HeroSection | null> {
+  try {
+    const data = await fetchContentSection<HeroSection>('hero');
+    return data;
+  } catch (err) {
+    console.error('Error in fetchHeroSection:', err);
+    return null;
+  }
+}
+
+/**
+ * Fetch header content with proper typing
+ */
+export async function fetchHeaderContent(): Promise<HeaderContent | null> {
+  try {
+    const data = await fetchContentSection<HeaderContent>('header');
+    return data;
+  } catch (err) {
+    console.error('Error in fetchHeaderContent:', err);
+    return null;
+  }
+}
+
+/**
+ * Fetch footer content with proper typing
+ */
+export async function fetchFooterContent(): Promise<FooterContent | null> {
+  try {
+    const data = await fetchContentSection<FooterContent>('footer');
+    return data;
+  } catch (err) {
+    console.error('Error in fetchFooterContent:', err);
+    return null;
+  }
+}
+
+/**
+ * Fetch contact page content with proper typing
+ */
+export async function fetchContactPageContent(): Promise<ContactPageContent | null> {
+  try {
+    const data = await fetchContentSection<ContactPageContent>('contact');
+    return data;
+  } catch (err) {
+    console.error('Error in fetchContactPageContent:', err);
+    return null;
+  }
+}
+
+/**
+ * Fetch reviews section with proper typing
+ */
+export async function fetchReviewsSection(): Promise<ReviewsSection | null> {
+  try {
+    const data = await fetchContentSection<ReviewsSection>('reviews');
+    return data;
+  } catch (err) {
+    console.error('Error in fetchReviewsSection:', err);
+    return null;
+  }
+}
+
+/**
+ * Fetch SEO settings with proper typing
+ */
+export async function fetchSeoSettings(): Promise<SEOSettings | null> {
+  try {
+    const data = await fetchContentSection<SEOSettings>('seo');
+    return data;
+  } catch (err) {
+    console.error('Error in fetchSeoSettings:', err);
     return null;
   }
 }
