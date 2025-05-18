@@ -1,8 +1,8 @@
 
 import { useState } from 'react';
-import { supabase } from '../integrations/supabase/client';
 import { useData } from '../context/DataContext';
 import { toast } from 'sonner';
+import { submitContactMessage } from '../integrations/supabase/contentService';
 
 interface ContactFormProps {
   onSuccess?: () => void;
@@ -34,27 +34,14 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
     setIsSubmitting(true);
     
     try {
-      // Insert into Supabase
-      const { data, error } = await supabase
-        .from('messages')
-        .insert([
-          {
-            name: formData.name,
-            email: formData.email,
-            subject: formData.subject || 'Website Inquiry',
-            message: formData.message,
-            read: false
-          }
-        ])
-        .select();
+      // Insert into Supabase using our contentService function
+      const data = await submitContactMessage(formData);
       
-      if (error) throw error;
-      
-      // Add to DataContext with ID from Supabase response
+      // Add to DataContext if the insert was successful
       if (data && data[0]) {
         addMessage(formData, data[0].id);
       } else {
-        // If no data returned, add with a generated ID
+        // If no data returned, just add to context
         addMessage(formData);
       }
       
@@ -66,8 +53,6 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
         message: ''
       });
       
-      toast.success('Message sent successfully!');
-      
       // Call onSuccess callback if provided
       if (onSuccess) {
         onSuccess();
@@ -75,7 +60,7 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
       
     } catch (error) {
       console.error('Error submitting form:', error);
-      toast.error('There was an error sending your message. Please try again.');
+      // We don't need to toast here as the submitContactMessage function already does that
     } finally {
       setIsSubmitting(false);
     }

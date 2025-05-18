@@ -77,7 +77,24 @@ export async function fetchAboutSection(): Promise<AboutSection | null> {
 export async function fetchHeroSection(): Promise<HeroSection | null> {
   try {
     const data = await fetchContentSection<HeroSection>('hero');
-    return data;
+    if (!data) return null;
+    
+    // Validate hero section data
+    const heroData = data as any;
+    if (
+      typeof heroData.title !== 'string' ||
+      typeof heroData.subtitle !== 'string' ||
+      typeof heroData.backgroundImage !== 'string' ||
+      typeof heroData.ctaButton !== 'string' ||
+      typeof heroData.ctaLink !== 'string' ||
+      typeof heroData.secondaryButton !== 'string' ||
+      typeof heroData.secondaryLink !== 'string'
+    ) {
+      console.error('Invalid hero section data structure');
+      return null;
+    }
+    
+    return heroData as HeroSection;
   } catch (err) {
     console.error('Error in fetchHeroSection:', err);
     return null;
@@ -90,7 +107,19 @@ export async function fetchHeroSection(): Promise<HeroSection | null> {
 export async function fetchHeaderContent(): Promise<HeaderContent | null> {
   try {
     const data = await fetchContentSection<HeaderContent>('header');
-    return data;
+    if (!data) return null;
+    
+    // Validate header content data
+    const headerData = data as any;
+    if (
+      typeof headerData.logo !== 'string' ||
+      !Array.isArray(headerData.menuItems)
+    ) {
+      console.error('Invalid header content data structure');
+      return null;
+    }
+    
+    return headerData as HeaderContent;
   } catch (err) {
     console.error('Error in fetchHeaderContent:', err);
     return null;
@@ -103,7 +132,25 @@ export async function fetchHeaderContent(): Promise<HeaderContent | null> {
 export async function fetchFooterContent(): Promise<FooterContent | null> {
   try {
     const data = await fetchContentSection<FooterContent>('footer');
-    return data;
+    if (!data) return null;
+    
+    // Validate footer content data
+    const footerData = data as any;
+    if (
+      typeof footerData.logo !== 'string' ||
+      typeof footerData.description !== 'string' ||
+      typeof footerData.contactEmail !== 'string' ||
+      typeof footerData.contactPhone !== 'string' ||
+      typeof footerData.address !== 'string' ||
+      !footerData.socialLinks ||
+      !Array.isArray(footerData.menuItems) ||
+      typeof footerData.copyrightText !== 'string'
+    ) {
+      console.error('Invalid footer content data structure');
+      return null;
+    }
+    
+    return footerData as FooterContent;
   } catch (err) {
     console.error('Error in fetchFooterContent:', err);
     return null;
@@ -116,7 +163,21 @@ export async function fetchFooterContent(): Promise<FooterContent | null> {
 export async function fetchContactPageContent(): Promise<ContactPageContent | null> {
   try {
     const data = await fetchContentSection<ContactPageContent>('contact');
-    return data;
+    if (!data) return null;
+    
+    // Validate contact page content data
+    const contactData = data as any;
+    if (
+      typeof contactData.title !== 'string' ||
+      typeof contactData.subtitle !== 'string' ||
+      !contactData.contactInfo ||
+      typeof contactData.mapLocation !== 'string'
+    ) {
+      console.error('Invalid contact page content data structure');
+      return null;
+    }
+    
+    return contactData as ContactPageContent;
   } catch (err) {
     console.error('Error in fetchContactPageContent:', err);
     return null;
@@ -129,7 +190,20 @@ export async function fetchContactPageContent(): Promise<ContactPageContent | nu
 export async function fetchReviewsSection(): Promise<ReviewsSection | null> {
   try {
     const data = await fetchContentSection<ReviewsSection>('reviews');
-    return data;
+    if (!data) return null;
+    
+    // Validate reviews section data
+    const reviewsData = data as any;
+    if (
+      typeof reviewsData.title !== 'string' ||
+      typeof reviewsData.subtitle !== 'string' ||
+      !Array.isArray(reviewsData.reviews)
+    ) {
+      console.error('Invalid reviews section data structure');
+      return null;
+    }
+    
+    return reviewsData as ReviewsSection;
   } catch (err) {
     console.error('Error in fetchReviewsSection:', err);
     return null;
@@ -142,7 +216,22 @@ export async function fetchReviewsSection(): Promise<ReviewsSection | null> {
 export async function fetchSeoSettings(): Promise<SEOSettings | null> {
   try {
     const data = await fetchContentSection<SEOSettings>('seo');
-    return data;
+    if (!data) return null;
+    
+    // Validate SEO settings data
+    const seoData = data as any;
+    if (
+      typeof seoData.siteTitle !== 'string' ||
+      typeof seoData.siteDescription !== 'string' ||
+      !Array.isArray(seoData.keywords) ||
+      typeof seoData.ogImage !== 'string' ||
+      typeof seoData.favicon !== 'string'
+    ) {
+      console.error('Invalid SEO settings data structure');
+      return null;
+    }
+    
+    return seoData as SEOSettings;
   } catch (err) {
     console.error('Error in fetchSeoSettings:', err);
     return null;
@@ -177,6 +266,41 @@ export async function updateContentSection(sectionName: string, content: any) {
   } catch (err) {
     console.error(`Failed to update ${sectionName} section:`, err);
     toast.error(`An unexpected error occurred while saving`);
+    throw err;
+  }
+}
+
+/**
+ * Submit a contact message to the Supabase database
+ * @param message The message data to submit
+ */
+export async function submitContactMessage(message: { name: string; email: string; subject: string; message: string }) {
+  try {
+    const { data, error } = await supabase
+      .from('messages')
+      .insert([
+        {
+          name: message.name,
+          email: message.email,
+          subject: message.subject || 'Website Inquiry',
+          message: message.message,
+          read: false
+        }
+      ])
+      .select();
+
+    if (error) {
+      console.error('Error submitting contact message:', error);
+      toast.error('Failed to send message: ' + error.message);
+      throw error;
+    }
+
+    console.log('Contact message submitted successfully:', data);
+    toast.success('Message sent successfully!');
+    return data;
+  } catch (err) {
+    console.error('Failed to submit contact message:', err);
+    toast.error('An unexpected error occurred while sending your message');
     throw err;
   }
 }

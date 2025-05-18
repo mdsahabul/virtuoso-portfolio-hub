@@ -9,10 +9,11 @@ import Footer from '../components/Footer';
 import ReviewsSection from '../components/ReviewsSection';
 import { useData } from '../context/DataContext';
 import ResponsiveImage from '../components/ResponsiveImage';
+import ContactForm from '../components/ContactForm';
 
 const Index = () => {
   const navigate = useNavigate();
-  const { services, projects, heroSection, aboutSection, isLoading } = useData();
+  const { services, projects, heroSection, aboutSection, contactPageContent, isLoading } = useData();
 
   // Filter featured services for the homepage
   const featuredServices = services.filter(service => service.featured);
@@ -147,6 +148,70 @@ const Index = () => {
       
       {/* Reviews Section */}
       <ReviewsSection />
+      
+      {/* Contact Section */}
+      <section id="contact" className="py-16 bg-gradient-to-b from-gray-50 to-gray-100">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-blue-700">Get In Touch</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Have a project in mind or just want to say hello? I'd love to hear from you!
+            </p>
+          </div>
+          
+          <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-white p-6 rounded-lg shadow-md">
+                <h3 className="text-xl font-semibold mb-4 text-blue-600">Contact Me</h3>
+                <ContactForm />
+              </div>
+              
+              <div className="space-y-6">
+                <div className="bg-white p-6 rounded-lg shadow-md">
+                  <h3 className="text-xl font-semibold mb-4 text-blue-600">Contact Information</h3>
+                  {contactPageContent && (
+                    <div className="space-y-3">
+                      <p className="flex items-start">
+                        <span className="font-medium w-20">Email:</span>
+                        <a href={`mailto:${contactPageContent.contactInfo.email}`} className="text-blue-600 hover:text-blue-700 transition-colors">
+                          {contactPageContent.contactInfo.email}
+                        </a>
+                      </p>
+                      <p className="flex items-start">
+                        <span className="font-medium w-20">Phone:</span>
+                        <a href={`tel:${contactPageContent.contactInfo.phone}`} className="text-blue-600 hover:text-blue-700 transition-colors">
+                          {contactPageContent.contactInfo.phone}
+                        </a>
+                      </p>
+                      <p className="flex items-start">
+                        <span className="font-medium w-20">Address:</span>
+                        <span>{contactPageContent.contactInfo.address}</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+                
+                {contactPageContent && contactPageContent.mapLocation && (
+                  <div className="bg-white p-6 rounded-lg shadow-md">
+                    <h3 className="text-xl font-semibold mb-4 text-blue-600">Location</h3>
+                    <div className="h-64 rounded-lg overflow-hidden">
+                      <iframe 
+                        src={contactPageContent.mapLocation}
+                        width="100%" 
+                        height="100%" 
+                        style={{ border: 0 }} 
+                        loading="lazy" 
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Google Maps"
+                      ></iframe>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       
       <Footer />
     </div>
