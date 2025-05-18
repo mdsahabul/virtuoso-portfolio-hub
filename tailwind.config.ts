@@ -63,18 +63,18 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-                // Custom colors
+                // Custom colors for dark theme
                 blue: {
-                    50: '#EBF5FF',
-                    100: '#E1EFFE',
-                    200: '#C3DAFE',
-                    300: '#A3BFFA',
-                    400: '#7F9CF5',
-                    500: '#4A7AFF',
-                    600: '#3755ED',
-                    700: '#2F4CB3',
-                    800: '#1A1F2C',
-                    900: '#1E1B24',
+                    50: '#E2E8F5',
+                    100: '#C5D0EB',
+                    200: '#9AADD8',
+                    300: '#7089C6',
+                    400: '#4A68B3',
+                    500: '#3755ED',
+                    600: '#2D45CB',
+                    700: '#233AA9',
+                    800: '#1A1F2C', // Dark blue for backgrounds
+                    900: '#111827', // Very dark blue
                 },
                 accent: {
                     orange: '#FF7E5F',
@@ -107,14 +107,24 @@ export default {
                 'slide-in': {
                     '0%': { opacity: '0', transform: 'translateX(-20px)' },
                     '100%': { opacity: '1', transform: 'translateX(0)' }
+                },
+                'glow': {
+                    '0%, 100%': { boxShadow: '0 0 10px 2px rgba(79, 70, 229, 0.2)' },
+                    '50%': { boxShadow: '0 0 20px 4px rgba(79, 70, 229, 0.4)' }
                 }
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
                 'fade-in': 'fade-in 0.5s ease-out forwards',
-                'slide-in': 'slide-in 0.3s ease-out forwards'
-			}
+                'slide-in': 'slide-in 0.3s ease-out forwards',
+                'glow': 'glow 2s infinite'
+			},
+            boxShadow: {
+                'neon': '0 0 5px rgba(79, 70, 229, 0.5), 0 0 20px rgba(79, 70, 229, 0.3)',
+                'card-dark': '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2)',
+                'subtle': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06)'
+            }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

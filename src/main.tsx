@@ -5,17 +5,9 @@ import { Toaster } from 'sonner';
 import App from './App.tsx';
 import './index.css';
 
-// Setup theme detection
-const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-const storedTheme = localStorage.getItem('theme');
-const initialTheme = storedTheme || (prefersDarkMode ? 'dark' : 'light');
-
-// Apply theme immediately to prevent flash
-if (initialTheme === 'dark') {
-  document.documentElement.classList.add('dark');
-} else {
-  document.documentElement.classList.remove('dark');
-}
+// Apply dark theme by default since we're going with a dark theme design
+document.documentElement.classList.add('dark');
+localStorage.setItem('theme', 'dark');
 
 createRoot(document.getElementById("root")!).render(
   <BrowserRouter>
@@ -24,6 +16,7 @@ createRoot(document.getElementById("root")!).render(
       position="top-right" 
       closeButton 
       richColors 
+      theme="dark" 
     />
   </BrowserRouter>
 );
