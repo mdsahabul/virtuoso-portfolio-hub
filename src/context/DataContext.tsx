@@ -309,20 +309,56 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
+        console.log("Fetching data from Supabase...");
+        
         // Fetch about section using our type-safe function
         const aboutData = await fetchAboutSection();
         if (aboutData) {
+          console.log("Setting about section data:", aboutData);
           setAboutSection(aboutData);
         }
         
-        // Add other sections as needed
-        // const heroData = await fetchContentSection('hero');
-        // if (heroData) {
-        //   setHeroSection(heroData as HeroSection);
-        // }
+        // Fetch hero section
+        const heroData = await fetchContentSection('hero');
+        if (heroData) {
+          console.log("Setting hero section data:", heroData);
+          setHeroSection(heroData as HeroSection);
+        }
+        
+        // Fetch header content
+        const headerData = await fetchContentSection('header');
+        if (headerData) {
+          setHeaderContent(headerData as HeaderContent);
+        }
+        
+        // Fetch footer content
+        const footerData = await fetchContentSection('footer');
+        if (footerData) {
+          setFooterContent(footerData as FooterContent);
+        }
+        
+        // Fetch contact page content
+        const contactData = await fetchContentSection('contact');
+        if (contactData) {
+          setContactPageContent(contactData as ContactPageContent);
+        }
+        
+        // Fetch reviews section
+        const reviewsData = await fetchContentSection('reviews');
+        if (reviewsData) {
+          setReviewsSection(reviewsData as ReviewsSection);
+        }
+        
+        // Fetch SEO settings
+        const seoData = await fetchContentSection('seo');
+        if (seoData) {
+          setSeoSettings(seoData as SEOSettings);
+        }
         
       } catch (error) {
         console.error('Error fetching data:', error);
+        toast.error('Failed to load content from the server');
       } finally {
         setIsLoading(false);
       }
@@ -333,45 +369,71 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   // Update functions
   const updateHeroSection = async (data: HeroSection) => {
-    setHeroSection(data);
     try {
+      setHeroSection(data);
       await updateContentSection('hero', data);
-      toast.success('Hero section updated successfully');
     } catch (error) {
-      toast.error('Failed to update Hero section');
-      console.error(error);
+      console.error('Failed to update Hero section', error);
     }
   };
   
   const updateAboutSection = async (data: AboutSection) => {
-    setAboutSection(data);
     try {
+      setAboutSection(data);
       await updateContentSection('about', data);
-      toast.success('About section updated successfully');
     } catch (error) {
-      toast.error('Failed to update About section');
-      console.error(error);
+      console.error('Failed to update About section', error);
     }
   };
   
-  const updateHeaderContent = (data: HeaderContent) => {
-    setHeaderContent(data);
+  const updateHeaderContent = async (data: HeaderContent) => {
+    try {
+      setHeaderContent(data);
+      await updateContentSection('header', data);
+    } catch (error) {
+      console.error('Failed to update Header content', error);
+      toast.error('Failed to update header content');
+    }
   };
   
-  const updateFooterContent = (data: FooterContent) => {
-    setFooterContent(data);
+  const updateFooterContent = async (data: FooterContent) => {
+    try {
+      setFooterContent(data);
+      await updateContentSection('footer', data);
+    } catch (error) {
+      console.error('Failed to update Footer content', error);
+      toast.error('Failed to update footer content');
+    }
   };
   
-  const updateContactPageContent = (data: ContactPageContent) => {
-    setContactPageContent(data);
+  const updateContactPageContent = async (data: ContactPageContent) => {
+    try {
+      setContactPageContent(data);
+      await updateContentSection('contact', data);
+    } catch (error) {
+      console.error('Failed to update Contact page content', error);
+      toast.error('Failed to update contact page content');
+    }
   };
   
-  const updateReviewsSection = (data: ReviewsSection) => {
-    setReviewsSection(data);
+  const updateReviewsSection = async (data: ReviewsSection) => {
+    try {
+      setReviewsSection(data);
+      await updateContentSection('reviews', data);
+    } catch (error) {
+      console.error('Failed to update Reviews section', error);
+      toast.error('Failed to update reviews section');
+    }
   };
   
-  const updateSeoSettings = (settings: SEOSettings) => {
-    setSeoSettings(settings);
+  const updateSeoSettings = async (settings: SEOSettings) => {
+    try {
+      setSeoSettings(settings);
+      await updateContentSection('seo', settings);
+    } catch (error) {
+      console.error('Failed to update SEO settings', error);
+      toast.error('Failed to update SEO settings');
+    }
   };
   
   // CRUD functions for services
