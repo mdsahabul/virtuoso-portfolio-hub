@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   HeroSection,
@@ -14,7 +15,7 @@ import {
   SEOSettings
 } from '../types/appTypes';
 import { supabase } from '../integrations/supabase/client';
-import { fetchContentSection, updateContentSection } from '../integrations/supabase/contentService';
+import { fetchContentSection, updateContentSection, fetchAboutSection } from '../integrations/supabase/contentService';
 import { toast } from 'sonner';
 
 // Re-export these types so they can be imported directly from DataContext
@@ -308,10 +309,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch about section
-        const aboutData = await fetchContentSection('about');
+        // Fetch about section using our type-safe function
+        const aboutData = await fetchAboutSection();
         if (aboutData) {
-          setAboutSection(aboutData as AboutSection);
+          setAboutSection(aboutData);
         }
         
         // Add other sections as needed

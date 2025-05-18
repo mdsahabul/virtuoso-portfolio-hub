@@ -1,5 +1,6 @@
 
 import { supabase } from './client';
+import { AboutSection } from '../types/appTypes';
 
 /**
  * Fetch a specific content section from Supabase
@@ -18,6 +19,44 @@ export async function fetchContentSection(sectionName: string) {
   }
 
   return data?.content;
+}
+
+/**
+ * Fetch and convert about section data with proper typing
+ */
+export async function fetchAboutSection(): Promise<AboutSection | null> {
+  const data = await fetchContentSection('about');
+  
+  if (!data) return null;
+  
+  // Ensure the data conforms to AboutSection structure
+  try {
+    const aboutData = data as any;
+    
+    // Validate required properties
+    if (
+      typeof aboutData.title !== 'string' ||
+      !Array.isArray(aboutData.description) ||
+      typeof aboutData.image !== 'string' ||
+      !Array.isArray(aboutData.skills)
+    ) {
+      console.error('Invalid about section data structure');
+      return null;
+    }
+    
+    // Convert to proper AboutSection type
+    const aboutSection: AboutSection = {
+      title: aboutData.title,
+      description: aboutData.description as string[],
+      image: aboutData.image,
+      skills: aboutData.skills as string[]
+    };
+    
+    return aboutSection;
+  } catch (error) {
+    console.error('Error converting about section data:', error);
+    return null;
+  }
 }
 
 /**
