@@ -117,8 +117,11 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
     }
 
     try {
+      console.log("Submitting project form:", projectForm);
+      
       if (modalMode === 'add') {
         // Create new project
+        console.log("Creating new project...");
         await addProject({
           title: projectForm.title,
           category: projectForm.category,
@@ -127,8 +130,10 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
           technologies: projectForm.technologies,
           link: projectForm.link,
         });
+        console.log("Project creation completed");
       } else {
         // Update existing project
+        console.log("Updating existing project...");
         await updateProject(projectForm.id, {
           title: projectForm.title,
           category: projectForm.category,
@@ -137,11 +142,13 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
           technologies: projectForm.technologies,
           link: projectForm.link,
         });
+        console.log("Project update completed");
       }
       
       closeModal();
     } catch (error) {
       console.error('Error saving project:', error);
+      toast.error('Failed to save project');
     } finally {
       setIsProcessing(false);
     }
@@ -150,9 +157,12 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
   const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this project?')) {
       try {
+        console.log("Deleting project:", id);
         await deleteProject(id);
+        console.log("Project deletion completed");
       } catch (error) {
         console.error('Error deleting project:', error);
+        toast.error('Failed to delete project');
       }
     }
   };
@@ -317,6 +327,12 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
                   onChange={(e) => setTechInput(e.target.value)}
                   placeholder="Add a technology"
                   className="rounded-r-none"
+                  onKeyPress={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addTechnology();
+                    }
+                  }}
                 />
                 <Button 
                   type="button" 

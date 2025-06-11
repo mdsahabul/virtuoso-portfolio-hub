@@ -78,7 +78,7 @@ interface DataContextType {
   // Message related state and functions
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
-  addMessage: (message: Omit<Message, "id" | "date" | "createdAt" | "read">, id?: string) => void;
+  addMessage: (message: Omit<Message, "id" | "date" | "createdAt" | "read">, id?: string) => Promise<void>;
   updateMessage: (id: string, message: Partial<Message>) => Promise<void>;
   deleteMessage: (id: string) => Promise<void>;
   markMessageAsRead: (id: string) => Promise<void>;
@@ -105,11 +105,6 @@ interface DataContextType {
 
 // Create the context with a default value
 const DataContext = createContext<DataContextType | undefined>(undefined);
-
-// Helper function to generate a random ID
-const generateId = () => {
-  return Math.random().toString(36).substr(2, 9);
-};
 
 // Default data values
 const defaultHeroSection: HeroSection = {
@@ -276,13 +271,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         // Fetch dynamic data from database
+        console.log("Fetching services from database...");
         const servicesData = await fetchServices();
+        console.log("Services fetched:", servicesData);
         setServices(servicesData);
 
+        console.log("Fetching projects from database...");
         const projectsData = await fetchProjects();
+        console.log("Projects fetched:", projectsData);
         setProjects(projectsData);
 
+        console.log("Fetching messages from database...");
         const messagesData = await fetchMessages();
+        console.log("Messages fetched:", messagesData);
         setMessages(messagesData);
         
       } catch (error) {
@@ -367,84 +368,182 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   
   // CRUD functions for services with Supabase integration
   const addService = async (service: Omit<Service, "id">) => {
-    const newService = await createServiceInDb(service);
-    if (newService) {
-      setServices(prev => [newService, ...prev]);
+    try {
+      console.log("Creating service:", service);
+      const newService = await createServiceInDb(service);
+      if (newService) {
+        console.log("Service created successfully:", newService);
+        setServices(prev => [newService, ...prev]);
+        toast.success('Service created successfully');
+      } else {
+        throw new Error('Failed to create service');
+      }
+    } catch (error) {
+      console.error('Error in addService:', error);
+      toast.error('Failed to create service');
     }
   };
   
   const updateService = async (id: string, service: Partial<Service>) => {
-    const success = await updateServiceInDb(id, service);
-    if (success) {
-      setServices(prev => 
-        prev.map(item => 
-          item.id === id ? { ...item, ...service } : item
-        )
-      );
+    try {
+      console.log("Updating service:", id, service);
+      const success = await updateServiceInDb(id, service);
+      if (success) {
+        setServices(prev => 
+          prev.map(item => 
+            item.id === id ? { ...item, ...service } : item
+          )
+        );
+        toast.success('Service updated successfully');
+      } else {
+        throw new Error('Failed to update service');
+      }
+    } catch (error) {
+      console.error('Error in updateService:', error);
+      toast.error('Failed to update service');
     }
   };
   
   const deleteService = async (id: string) => {
-    const success = await deleteServiceInDb(id);
-    if (success) {
-      setServices(prev => prev.filter(item => item.id !== id));
+    try {
+      console.log("Deleting service:", id);
+      const success = await deleteServiceInDb(id);
+      if (success) {
+        setServices(prev => prev.filter(item => item.id !== id));
+        toast.success('Service deleted successfully');
+      } else {
+        throw new Error('Failed to delete service');
+      }
+    } catch (error) {
+      console.error('Error in deleteService:', error);
+      toast.error('Failed to delete service');
     }
   };
   
   // CRUD functions for projects with Supabase integration
   const addProject = async (project: Omit<Project, "id">) => {
-    const newProject = await createProjectInDb(project);
-    if (newProject) {
-      setProjects(prev => [newProject, ...prev]);
+    try {
+      console.log("Creating project:", project);
+      const newProject = await createProjectInDb(project);
+      if (newProject) {
+        console.log("Project created successfully:", newProject);
+        setProjects(prev => [newProject, ...prev]);
+        toast.success('Project created successfully');
+      } else {
+        throw new Error('Failed to create project');
+      }
+    } catch (error) {
+      console.error('Error in addProject:', error);
+      toast.error('Failed to create project');
     }
   };
   
   const updateProject = async (id: string, project: Partial<Project>) => {
-    const success = await updateProjectInDb(id, project);
-    if (success) {
-      setProjects(prev => 
-        prev.map(item => 
-          item.id === id ? { ...item, ...project } : item
-        )
-      );
+    try {
+      console.log("Updating project:", id, project);
+      const success = await updateProjectInDb(id, project);
+      if (success) {
+        setProjects(prev => 
+          prev.map(item => 
+            item.id === id ? { ...item, ...project } : item
+          )
+        );
+        toast.success('Project updated successfully');
+      } else {
+        throw new Error('Failed to update project');
+      }
+    } catch (error) {
+      console.error('Error in updateProject:', error);
+      toast.error('Failed to update project');
     }
   };
   
   const deleteProject = async (id: string) => {
-    const success = await deleteProjectInDb(id);
-    if (success) {
-      setProjects(prev => prev.filter(item => item.id !== id));
+    try {
+      console.log("Deleting project:", id);
+      const success = await deleteProjectInDb(id);
+      if (success) {
+        setProjects(prev => prev.filter(item => item.id !== id));
+        toast.success('Project deleted successfully');
+      } else {
+        throw new Error('Failed to delete project');
+      }
+    } catch (error) {
+      console.error('Error in deleteProject:', error);
+      toast.error('Failed to delete project');
     }
   };
   
   // CRUD functions for messages with Supabase integration
-  const addMessage = (message: Omit<Message, "id" | "date" | "createdAt" | "read">, id?: string) => {
-    const now = new Date();
-    const newMessage = {
-      ...message,
-      id: id || generateId(),
-      date: now.toISOString().split('T')[0],
-      createdAt: now.toISOString(),
-      read: false,
-    };
-    setMessages(prev => [newMessage, ...prev]);
+  const addMessage = async (message: Omit<Message, "id" | "date" | "createdAt" | "read">, id?: string) => {
+    try {
+      console.log("Creating message:", message);
+      // For contact form submissions, directly insert into Supabase
+      const { data, error } = await supabase
+        .from('messages')
+        .insert([{
+          name: message.name,
+          email: message.email,
+          subject: message.subject,
+          message: message.message,
+          read: false
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating message:', error);
+        toast.error('Failed to send message');
+        return;
+      }
+
+      if (data) {
+        const newMessage: Message = {
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          subject: data.subject,
+          message: data.message,
+          read: data.read || false,
+          date: new Date(data.created_at).toISOString().split('T')[0],
+          createdAt: data.created_at
+        };
+        setMessages(prev => [newMessage, ...prev]);
+        toast.success('Message sent successfully');
+      }
+    } catch (error) {
+      console.error('Error in addMessage:', error);
+      toast.error('Failed to send message');
+    }
   };
   
   const updateMessage = async (id: string, message: Partial<Message>) => {
-    const success = await updateMessageInDb(id, message);
-    if (success) {
-      setMessages(prev => 
-        prev.map(item => 
-          item.id === id ? { ...item, ...message } : item
-        )
-      );
+    try {
+      console.log("Updating message:", id, message);
+      const success = await updateMessageInDb(id, message);
+      if (success) {
+        setMessages(prev => 
+          prev.map(item => 
+            item.id === id ? { ...item, ...message } : item
+          )
+        );
+      }
+    } catch (error) {
+      console.error('Error in updateMessage:', error);
+      toast.error('Failed to update message');
     }
   };
   
   const deleteMessage = async (id: string) => {
-    const success = await deleteMessageInDb(id);
-    if (success) {
-      setMessages(prev => prev.filter(item => item.id !== id));
+    try {
+      console.log("Deleting message:", id);
+      const success = await deleteMessageInDb(id);
+      if (success) {
+        setMessages(prev => prev.filter(item => item.id !== id));
+      }
+    } catch (error) {
+      console.error('Error in deleteMessage:', error);
+      toast.error('Failed to delete message');
     }
   };
   
