@@ -105,7 +105,7 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsProcessing(true);
     
@@ -119,7 +119,7 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
     try {
       if (modalMode === 'add') {
         // Create new project
-        addProject({
+        await addProject({
           title: projectForm.title,
           category: projectForm.category,
           description: projectForm.description,
@@ -127,10 +127,9 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
           technologies: projectForm.technologies,
           link: projectForm.link,
         });
-        toast.success('Project added successfully');
       } else {
         // Update existing project
-        updateProject(projectForm.id, {
+        await updateProject(projectForm.id, {
           title: projectForm.title,
           category: projectForm.category,
           description: projectForm.description,
@@ -138,26 +137,22 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
           technologies: projectForm.technologies,
           link: projectForm.link,
         });
-        toast.success('Project updated successfully');
       }
       
       closeModal();
     } catch (error) {
-      toast.error('An error occurred while saving the project');
-      console.error(error);
+      console.error('Error saving project:', error);
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this project?')) {
       try {
-        deleteProject(id);
-        toast.success('Project deleted successfully');
+        await deleteProject(id);
       } catch (error) {
-        toast.error('An error occurred while deleting the project');
-        console.error(error);
+        console.error('Error deleting project:', error);
       }
     }
   };

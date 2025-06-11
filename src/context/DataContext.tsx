@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   HeroSection,
@@ -24,6 +25,23 @@ import {
   fetchSeoSettings,
   updateContentSection 
 } from '../integrations/supabase/contentService';
+import { 
+  fetchServices,
+  createService as createServiceInDb,
+  updateService as updateServiceInDb,
+  deleteService as deleteServiceInDb
+} from '../integrations/supabase/servicesService';
+import {
+  fetchProjects,
+  createProject as createProjectInDb,
+  updateProject as updateProjectInDb,
+  deleteProject as deleteProjectInDb
+} from '../integrations/supabase/projectsService';
+import {
+  fetchMessages,
+  updateMessage as updateMessageInDb,
+  deleteMessage as deleteMessageInDb
+} from '../integrations/supabase/messagesService';
 import { toast } from 'sonner';
 
 // Re-export these types so they can be imported directly from DataContext
@@ -46,24 +64,24 @@ interface DataContextType {
   // Service related state and functions
   services: Service[];
   setServices: React.Dispatch<React.SetStateAction<Service[]>>;
-  addService: (service: Omit<Service, "id">) => void;
-  updateService: (id: string, service: Partial<Service>) => void;
-  deleteService: (id: string) => void;
+  addService: (service: Omit<Service, "id">) => Promise<void>;
+  updateService: (id: string, service: Partial<Service>) => Promise<void>;
+  deleteService: (id: string) => Promise<void>;
   
   // Project related state and functions
   projects: Project[];
   setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
-  addProject: (project: Omit<Project, "id">) => void;
-  updateProject: (id: string, project: Partial<Project>) => void;
-  deleteProject: (id: string) => void;
+  addProject: (project: Omit<Project, "id">) => Promise<void>;
+  updateProject: (id: string, project: Partial<Project>) => Promise<void>;
+  deleteProject: (id: string) => Promise<void>;
   
   // Message related state and functions
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   addMessage: (message: Omit<Message, "id" | "date" | "createdAt" | "read">, id?: string) => void;
-  updateMessage: (id: string, message: Partial<Message>) => void;
-  deleteMessage: (id: string) => void;
-  markMessageAsRead: (id: string) => void;
+  updateMessage: (id: string, message: Partial<Message>) => Promise<void>;
+  deleteMessage: (id: string) => Promise<void>;
+  markMessageAsRead: (id: string) => Promise<void>;
   
   // Footer content
   footerContent: FooterContent;
@@ -123,107 +141,6 @@ const defaultHeaderContent: HeaderContent = {
     { title: "Contact", url: "/contact" }
   ]
 };
-
-const defaultMessages: Message[] = [
-  {
-    id: "msg1",
-    name: "John Smith",
-    email: "john.smith@example.com",
-    subject: 'Website Project Inquiry',
-    message: "I'm interested in your web development services for my new business. Can we schedule a call to discuss the details?",
-    date: '2023-05-10',
-    createdAt: '2023-05-10T12:00:00Z',
-    read: false
-  },
-  {
-    id: "msg2",
-    name: "Sarah Johnson",
-    email: "sarah.j@example.com",
-    subject: 'Logo Design Project',
-    message: "Hello, I need a new logo for my startup. I like your portfolio and would like to discuss working together.",
-    date: '2023-05-08',
-    createdAt: '2023-05-08T12:00:00Z',
-    read: true
-  },
-  {
-    id: "msg3",
-    name: "Michael Brown",
-    email: "michael.b@example.com",
-    subject: 'Mobile App Development',
-    message: "We're looking for a developer to create a mobile app for our business. What's your availability in the coming months?",
-    date: '2023-05-05',
-    createdAt: '2023-05-05T12:00:00Z',
-    read: true
-  }
-];
-
-const defaultProjects: Project[] = [
-  {
-    id: "proj1",
-    title: "E-commerce Website",
-    category: "Web Development",
-    description: "A fully responsive e-commerce website with product catalog, shopping cart, and secure checkout.",
-    image: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1740&q=80",
-    technologies: ["React", "Node.js", "MongoDB", "Stripe"],
-    link: "https://example.com"
-  },
-  {
-    id: "proj2",
-    title: "Fitness App",
-    category: "Mobile Development",
-    description: "A mobile app for tracking workouts, nutrition, and fitness goals with analytics and progress charts.",
-    image: "https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
-    technologies: ["React Native", "Firebase", "Redux", "Chart.js"],
-  },
-  {
-    id: "proj3",
-    title: "Real Estate Platform",
-    category: "Web Development",
-    description: "A real estate listing website with property search, filters, and map integration.",
-    image: "https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1769&q=80",
-    technologies: ["Angular", "Node.js", "PostgreSQL", "Google Maps API"],
-    link: "https://example.com"
-  }
-];
-
-const defaultServices: Service[] = [
-  {
-    id: "serv1",
-    title: "Web Development",
-    description: "Custom websites built from scratch to meet your specific business needs. Includes responsive design, optimization, and seamless user experience.",
-    icon: "code",
-    price: 1499,
-    featured: true,
-    features: ["Responsive Design", "SEO Optimization", "Fast Loading Speed"]
-  },
-  {
-    id: "serv2",
-    title: "UI/UX Design",
-    description: "Professional interface design that enhances user engagement and satisfaction. We create intuitive, aesthetically pleasing designs that convert visitors.",
-    icon: "layout",
-    price: 999,
-    featured: true,
-    features: ["User Research", "Wireframing", "Prototyping", "Usability Testing"]
-  },
-  {
-    id: "serv3",
-    title: "Mobile App Development",
-    description: "Native and cross-platform mobile applications for iOS and Android. From concept to deployment, we handle the entire development process.",
-    icon: "smartphone",
-    price: 2499,
-    featured: true,
-    features: ["iOS & Android Apps", "Cross-platform Development", "App Store Submission"]
-  },
-  {
-    id: "serv4",
-    title: "E-commerce Solutions",
-    description: "Complete online store setup with secure payment gateways, product management, and order processing systems.",
-    icon: "shopping-cart",
-    price: 1999,
-    featured: false,
-    features: ["Secure Payments", "Inventory Management", "Shopping Cart"]
-  }
-];
 
 const defaultFooterContent: FooterContent = {
   logo: "YourName",
@@ -302,9 +219,9 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [heroSection, setHeroSection] = useState<HeroSection>(defaultHeroSection);
   const [aboutSection, setAboutSection] = useState<AboutSection>(defaultAboutSection);
   const [headerContent, setHeaderContent] = useState<HeaderContent>(defaultHeaderContent);
-  const [messages, setMessages] = useState<Message[]>(defaultMessages);
-  const [projects, setProjects] = useState<Project[]>(defaultProjects);
-  const [services, setServices] = useState<Service[]>(defaultServices);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
   const [footerContent, setFooterContent] = useState<FooterContent>(defaultFooterContent);
   const [contactPageContent, setContactPageContent] = useState<ContactPageContent>(defaultContactPageContent);
   const [reviewsSection, setReviewsSection] = useState<ReviewsSection>(defaultReviewsSection);
@@ -320,49 +237,53 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoading(true);
         console.log("Fetching data from Supabase...");
         
-        // Fetch about section using our type-safe function
+        // Fetch content sections
         const aboutData = await fetchAboutSection();
         if (aboutData) {
           console.log("Setting about section data:", aboutData);
           setAboutSection(aboutData);
         }
         
-        // Fetch hero section
         const heroData = await fetchHeroSection();
         if (heroData) {
           console.log("Setting hero section data:", heroData);
           setHeroSection(heroData);
         }
         
-        // Fetch header content
         const headerData = await fetchHeaderContent();
         if (headerData) {
           setHeaderContent(headerData);
         }
         
-        // Fetch footer content
         const footerData = await fetchFooterContent();
         if (footerData) {
           setFooterContent(footerData);
         }
         
-        // Fetch contact page content
         const contactData = await fetchContactPageContent();
         if (contactData) {
           setContactPageContent(contactData);
         }
         
-        // Fetch reviews section
         const reviewsData = await fetchReviewsSection();
         if (reviewsData) {
           setReviewsSection(reviewsData);
         }
         
-        // Fetch SEO settings
         const seoData = await fetchSeoSettings();
         if (seoData) {
           setSeoSettings(seoData);
         }
+
+        // Fetch dynamic data from database
+        const servicesData = await fetchServices();
+        setServices(servicesData);
+
+        const projectsData = await fetchProjects();
+        setProjects(projectsData);
+
+        const messagesData = await fetchMessages();
+        setMessages(messagesData);
         
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -375,7 +296,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     fetchData();
   }, []);
   
-  // Update functions
+  // Update functions for content sections
   const updateHeroSection = async (data: HeroSection) => {
     try {
       setHeroSection(data);
@@ -444,49 +365,59 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
   
-  // CRUD functions for services
-  const addService = (service: Omit<Service, "id">) => {
-    const newService = {
-      ...service,
-      id: generateId(),
-    };
-    setServices(prev => [...prev, newService]);
+  // CRUD functions for services with Supabase integration
+  const addService = async (service: Omit<Service, "id">) => {
+    const newService = await createServiceInDb(service);
+    if (newService) {
+      setServices(prev => [newService, ...prev]);
+    }
   };
   
-  const updateService = (id: string, service: Partial<Service>) => {
-    setServices(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, ...service } : item
-      )
-    );
+  const updateService = async (id: string, service: Partial<Service>) => {
+    const success = await updateServiceInDb(id, service);
+    if (success) {
+      setServices(prev => 
+        prev.map(item => 
+          item.id === id ? { ...item, ...service } : item
+        )
+      );
+    }
   };
   
-  const deleteService = (id: string) => {
-    setServices(prev => prev.filter(item => item.id !== id));
+  const deleteService = async (id: string) => {
+    const success = await deleteServiceInDb(id);
+    if (success) {
+      setServices(prev => prev.filter(item => item.id !== id));
+    }
   };
   
-  // CRUD functions for projects
-  const addProject = (project: Omit<Project, "id">) => {
-    const newProject = {
-      ...project,
-      id: generateId(),
-    };
-    setProjects(prev => [...prev, newProject]);
+  // CRUD functions for projects with Supabase integration
+  const addProject = async (project: Omit<Project, "id">) => {
+    const newProject = await createProjectInDb(project);
+    if (newProject) {
+      setProjects(prev => [newProject, ...prev]);
+    }
   };
   
-  const updateProject = (id: string, project: Partial<Project>) => {
-    setProjects(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, ...project } : item
-      )
-    );
+  const updateProject = async (id: string, project: Partial<Project>) => {
+    const success = await updateProjectInDb(id, project);
+    if (success) {
+      setProjects(prev => 
+        prev.map(item => 
+          item.id === id ? { ...item, ...project } : item
+        )
+      );
+    }
   };
   
-  const deleteProject = (id: string) => {
-    setProjects(prev => prev.filter(item => item.id !== id));
+  const deleteProject = async (id: string) => {
+    const success = await deleteProjectInDb(id);
+    if (success) {
+      setProjects(prev => prev.filter(item => item.id !== id));
+    }
   };
   
-  // CRUD functions for messages
+  // CRUD functions for messages with Supabase integration
   const addMessage = (message: Omit<Message, "id" | "date" | "createdAt" | "read">, id?: string) => {
     const now = new Date();
     const newMessage = {
@@ -496,23 +427,29 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       createdAt: now.toISOString(),
       read: false,
     };
-    setMessages(prev => [...prev, newMessage]);
+    setMessages(prev => [newMessage, ...prev]);
   };
   
-  const updateMessage = (id: string, message: Partial<Message>) => {
-    setMessages(prev => 
-      prev.map(item => 
-        item.id === id ? { ...item, ...message } : item
-      )
-    );
+  const updateMessage = async (id: string, message: Partial<Message>) => {
+    const success = await updateMessageInDb(id, message);
+    if (success) {
+      setMessages(prev => 
+        prev.map(item => 
+          item.id === id ? { ...item, ...message } : item
+        )
+      );
+    }
   };
   
-  const deleteMessage = (id: string) => {
-    setMessages(prev => prev.filter(item => item.id !== id));
+  const deleteMessage = async (id: string) => {
+    const success = await deleteMessageInDb(id);
+    if (success) {
+      setMessages(prev => prev.filter(item => item.id !== id));
+    }
   };
   
-  const markMessageAsRead = (id: string) => {
-    updateMessage(id, { read: true });
+  const markMessageAsRead = async (id: string) => {
+    await updateMessage(id, { read: true });
   };
   
   // Create the context value object

@@ -47,6 +47,7 @@ const ServicesManager = ({ searchQuery }: { searchQuery: string }) => {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentService, setCurrentService] = useState<Service | null>(null);
   const [filteredServices, setFilteredServices] = useState<Service[]>(services);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm<FormValues>();
   
@@ -62,63 +63,77 @@ const ServicesManager = ({ searchQuery }: { searchQuery: string }) => {
     }
   }, [searchQuery, services]);
   
-  const handleAdd = (data: FormValues) => {
-    // Convert features from comma-separated string to array
-    const featuresArray = data.features
-      ? data.features.split(',').map(feature => feature.trim())
-      : [];
+  const handleAdd = async (data: FormValues) => {
+    setIsSubmitting(true);
+    try {
+      const featuresArray = data.features
+        ? data.features.split(',').map(feature => feature.trim())
+        : [];
+        
+      await addService({
+        title: data.title,
+        description: data.description,
+        icon: data.icon,
+        price: parseFloat(data.price),
+        featured: data.featured,
+        features: featuresArray
+      });
       
-    addService({
-      title: data.title,
-      description: data.description,
-      icon: data.icon,
-      price: parseFloat(data.price),
-      featured: data.featured,
-      features: featuresArray
-    });
-    
-    // Close dialog and reset form
-    setIsAddDialogOpen(false);
-    reset();
+      setIsAddDialogOpen(false);
+      reset();
+    } catch (error) {
+      console.error('Error adding service:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
-  const handleEdit = (data: FormValues) => {
+  const handleEdit = async (data: FormValues) => {
     if (!currentService) return;
     
-    // Convert features from comma-separated string to array
-    const featuresArray = data.features
-      ? data.features.split(',').map(feature => feature.trim())
-      : [];
-    
-    updateService(currentService.id, {
-      title: data.title,
-      description: data.description,
-      icon: data.icon,
-      price: parseFloat(data.price),
-      featured: data.featured,
-      features: featuresArray
-    });
-    
-    // Close dialog and reset
-    setIsEditDialogOpen(false);
-    setCurrentService(null);
-    reset();
+    setIsSubmitting(true);
+    try {
+      const featuresArray = data.features
+        ? data.features.split(',').map(feature => feature.trim())
+        : [];
+      
+      await updateService(currentService.id, {
+        title: data.title,
+        description: data.description,
+        icon: data.icon,
+        price: parseFloat(data.price),
+        featured: data.featured,
+        features: featuresArray
+      });
+      
+      setIsEditDialogOpen(false);
+      setCurrentService(null);
+      reset();
+    } catch (error) {
+      console.error('Error updating service:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!currentService) return;
     
-    deleteService(currentService.id);
-    
-    // Close dialog and reset
-    setIsDeleteDialogOpen(false);
-    setCurrentService(null);
+    setIsSubmitting(true);
+    try {
+      await deleteService(currentService.id);
+      setIsDeleteDialogOpen(false);
+      setCurrentService(null);
+    } catch (error) {
+      console.error('Error deleting service:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   
   const openEditDialog = (service: Service) => {
     setCurrentService(service);
     
-    // Populate form fields
     setValue('title', service.title);
     setValue('description', service.description);
     setValue('icon', service.icon);
@@ -145,7 +160,7 @@ const ServicesManager = ({ searchQuery }: { searchQuery: string }) => {
             </CardDescription>
           </div>
           <Button onClick={() => {
-            reset(); // Reset form
+            reset();
             setIsAddDialogOpen(true);
           }}>
             Add New Service
@@ -269,8 +284,8 @@ const ServicesManager = ({ searchQuery }: { searchQuery: string }) => {
               <Button type="button" variant="outline" onClick={() => setIsAddDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit">
-                Add Service
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Adding...' : 'Add Service'}
               </Button>
             </DialogFooter>
           </form>
@@ -352,8 +367,8 @@ const ServicesManager = ({ searchQuery }: { searchQuery: string }) => {
               <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                 Cancel
               </Button>
-              <Button type="submit">
-                Save Changes
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : 'Save Changes'}
               </Button>
             </DialogFooter>
           </form>
@@ -371,8 +386,12 @@ const ServicesManager = ({ searchQuery }: { searchQuery: string }) => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-              Delete
+            <AlertDialogAction 
+              onClick={handleDelete} 
+              className="bg-red-600 hover:bg-red-700"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
