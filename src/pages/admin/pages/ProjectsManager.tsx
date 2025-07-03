@@ -107,62 +107,58 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsProcessing(true);
     
     // Validate form
-    if (!projectForm.title || !projectForm.category || !projectForm.description) {
-      toast.error('Please fill in all required fields');
-      setIsProcessing(false);
+    if (!projectForm.title.trim() || !projectForm.category.trim() || !projectForm.description.trim()) {
+      toast.error('Please fill in all required fields (Title, Category, Description)');
       return;
     }
 
+    setIsProcessing(true);
+    
     try {
-      console.log("Submitting project form:", projectForm);
+      console.log("ProjectsManager: Submitting project form:", projectForm);
+      
+      const projectData = {
+        title: projectForm.title.trim(),
+        category: projectForm.category.trim(),
+        description: projectForm.description.trim(),
+        image: projectForm.image.trim(),
+        technologies: projectForm.technologies,
+        link: projectForm.link.trim() || undefined,
+      };
       
       if (modalMode === 'add') {
-        // Create new project
-        console.log("Creating new project...");
-        await addProject({
-          title: projectForm.title,
-          category: projectForm.category,
-          description: projectForm.description,
-          image: projectForm.image,
-          technologies: projectForm.technologies,
-          link: projectForm.link,
-        });
-        console.log("Project creation completed");
+        console.log("ProjectsManager: Creating new project...");
+        await addProject(projectData);
+        toast.success('Project created successfully!');
+        console.log("ProjectsManager: Project creation completed");
       } else {
-        // Update existing project
-        console.log("Updating existing project...");
-        await updateProject(projectForm.id, {
-          title: projectForm.title,
-          category: projectForm.category,
-          description: projectForm.description,
-          image: projectForm.image,
-          technologies: projectForm.technologies,
-          link: projectForm.link,
-        });
-        console.log("Project update completed");
+        console.log("ProjectsManager: Updating existing project...");
+        await updateProject(projectForm.id, projectData);
+        toast.success('Project updated successfully!');
+        console.log("ProjectsManager: Project update completed");
       }
       
       closeModal();
     } catch (error) {
-      console.error('Error saving project:', error);
-      toast.error('Failed to save project');
+      console.error('ProjectsManager: Error saving project:', error);
+      toast.error(modalMode === 'add' ? 'Failed to create project. Please try again.' : 'Failed to update project. Please try again.');
     } finally {
       setIsProcessing(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (window.confirm('Are you sure you want to delete this project?')) {
+  const handleDelete = async (id: string, title: string) => {
+    if (window.confirm(`Are you sure you want to delete "${title}"? This action cannot be undone.`)) {
       try {
-        console.log("Deleting project:", id);
+        console.log("ProjectsManager: Deleting project:", id);
         await deleteProject(id);
-        console.log("Project deletion completed");
+        toast.success('Project deleted successfully!');
+        console.log("ProjectsManager: Project deletion completed");
       } catch (error) {
-        console.error('Error deleting project:', error);
-        toast.error('Failed to delete project');
+        console.error('ProjectsManager: Error deleting project:', error);
+        toast.error('Failed to delete project. Please try again.');
       }
     }
   };
@@ -195,12 +191,14 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
                 <button
                   onClick={() => openModal('edit', project)}
                   className="p-2 bg-white rounded-full text-gray-800 hover:bg-blue-100"
+                  title="Edit project"
                 >
                   <Edit size={18} />
                 </button>
                 <button
-                  onClick={() => handleDelete(project.id)}
+                  onClick={() => handleDelete(project.id, project.title)}
                   className="p-2 bg-white rounded-full text-gray-800 hover:bg-red-100"
+                  title="Delete project"
                 >
                   <Trash2 size={18} />
                 </button>
@@ -210,6 +208,7 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2 bg-white rounded-full text-gray-800 hover:bg-green-100"
+                    title="View project"
                   >
                     <ExternalLink size={18} />
                   </a>
@@ -235,7 +234,9 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
       
       {filteredProjects.length === 0 && (
         <div className="text-center py-12 bg-white rounded-lg border">
-          <p className="text-gray-500">No projects found</p>
+          <p className="text-gray-500">
+            {searchQuery ? 'No projects match your search criteria.' : 'No projects found'}
+          </p>
           <Button
             variant="outline"
             onClick={() => openModal('add')}
@@ -338,6 +339,7 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
                   type="button" 
                   onClick={addTechnology}
                   className="rounded-l-none"
+                  disabled={!techInput.trim()}
                 >
                   <Plus size={16} />
                 </Button>
@@ -349,7 +351,7 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
                     {tech}
                     <X 
                       size={12} 
-                      className="cursor-pointer" 
+                      className="cursor-pointer hover:text-red-500" 
                       onClick={() => removeTechnology(tech)}
                     />
                   </Badge>
@@ -361,7 +363,7 @@ const ProjectsManager = ({ searchQuery }: ProjectsManagerProps) => {
             </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={closeModal}>
+              <Button type="button" variant="outline" onClick={closeModal} disabled={isProcessing}>
                 Cancel
               </Button>
               <Button type="submit" disabled={isProcessing}>

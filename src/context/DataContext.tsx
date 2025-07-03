@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   HeroSection,
@@ -230,65 +229,76 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        console.log("Fetching data from Supabase...");
+        console.log("Starting data fetch from Supabase...");
         
-        // Fetch content sections
-        const aboutData = await fetchAboutSection();
-        if (aboutData) {
-          console.log("Setting about section data:", aboutData);
-          setAboutSection(aboutData);
+        // Fetch content sections first
+        console.log("Fetching content sections...");
+        const [aboutData, heroData, headerData, footerData, contactData, reviewsData, seoData] = await Promise.allSettled([
+          fetchAboutSection(),
+          fetchHeroSection(),
+          fetchHeaderContent(),
+          fetchFooterContent(),
+          fetchContactPageContent(),
+          fetchReviewsSection(),
+          fetchSeoSettings()
+        ]);
+        
+        // Update content sections if successful
+        if (aboutData.status === 'fulfilled' && aboutData.value) {
+          setAboutSection(aboutData.value);
         }
-        
-        const heroData = await fetchHeroSection();
-        if (heroData) {
-          console.log("Setting hero section data:", heroData);
-          setHeroSection(heroData);
+        if (heroData.status === 'fulfilled' && heroData.value) {
+          setHeroSection(heroData.value);
         }
-        
-        const headerData = await fetchHeaderContent();
-        if (headerData) {
-          setHeaderContent(headerData);
+        if (headerData.status === 'fulfilled' && headerData.value) {
+          setHeaderContent(headerData.value);
         }
-        
-        const footerData = await fetchFooterContent();
-        if (footerData) {
-          setFooterContent(footerData);
+        if (footerData.status === 'fulfilled' && footerData.value) {
+          setFooterContent(footerData.value);
         }
-        
-        const contactData = await fetchContactPageContent();
-        if (contactData) {
-          setContactPageContent(contactData);
+        if (contactData.status === 'fulfilled' && contactData.value) {
+          setContactPageContent(contactData.value);
         }
-        
-        const reviewsData = await fetchReviewsSection();
-        if (reviewsData) {
-          setReviewsSection(reviewsData);
+        if (reviewsData.status === 'fulfilled' && reviewsData.value) {
+          setReviewsSection(reviewsData.value);
         }
-        
-        const seoData = await fetchSeoSettings();
-        if (seoData) {
-          setSeoSettings(seoData);
+        if (seoData.status === 'fulfilled' && seoData.value) {
+          setSeoSettings(seoData.value);
         }
 
-        // Fetch dynamic data from database
-        console.log("Fetching services from database...");
-        const servicesData = await fetchServices();
-        console.log("Services fetched:", servicesData);
-        setServices(servicesData);
+        // Fetch dynamic data
+        console.log("Fetching dynamic data...");
+        const [servicesData, projectsData, messagesData] = await Promise.allSettled([
+          fetchServices(),
+          fetchProjects(),
+          fetchMessages()
+        ]);
 
-        console.log("Fetching projects from database...");
-        const projectsData = await fetchProjects();
-        console.log("Projects fetched:", projectsData);
-        setProjects(projectsData);
+        if (servicesData.status === 'fulfilled') {
+          console.log("Services fetched successfully:", servicesData.value);
+          setServices(servicesData.value);
+        } else {
+          console.error("Failed to fetch services:", servicesData.reason);
+        }
 
-        console.log("Fetching messages from database...");
-        const messagesData = await fetchMessages();
-        console.log("Messages fetched:", messagesData);
-        setMessages(messagesData);
+        if (projectsData.status === 'fulfilled') {
+          console.log("Projects fetched successfully:", projectsData.value);
+          setProjects(projectsData.value);
+        } else {
+          console.error("Failed to fetch projects:", projectsData.reason);
+        }
+
+        if (messagesData.status === 'fulfilled') {
+          console.log("Messages fetched successfully:", messagesData.value);
+          setMessages(messagesData.value);
+        } else {
+          console.error("Failed to fetch messages:", messagesData.reason);
+        }
         
+        console.log("Data fetch completed successfully");
       } catch (error) {
-        console.error('Error fetching data:', error);
-        toast.error('Failed to load content from the server');
+        console.error('Critical error during data fetch:', error);
+        toast.error('Failed to load application data');
       } finally {
         setIsLoading(false);
       }
@@ -366,27 +376,26 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
   
-  // CRUD functions for services with Supabase integration
+  // CRUD functions for services with enhanced error handling
   const addService = async (service: Omit<Service, "id">) => {
     try {
-      console.log("Creating service:", service);
+      console.log("DataContext: Creating service:", service);
       const newService = await createServiceInDb(service);
       if (newService) {
-        console.log("Service created successfully:", newService);
+        console.log("DataContext: Service created successfully:", newService);
         setServices(prev => [newService, ...prev]);
-        toast.success('Service created successfully');
       } else {
-        throw new Error('Failed to create service');
+        throw new Error('Service creation returned null');
       }
     } catch (error) {
-      console.error('Error in addService:', error);
-      toast.error('Failed to create service');
+      console.error('DataContext: Error in addService:', error);
+      throw error; // Re-throw to let the UI handle it
     }
   };
   
   const updateService = async (id: string, service: Partial<Service>) => {
     try {
-      console.log("Updating service:", id, service);
+      console.log("DataContext: Updating service:", id, service);
       const success = await updateServiceInDb(id, service);
       if (success) {
         setServices(prev => 
@@ -394,53 +403,52 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             item.id === id ? { ...item, ...service } : item
           )
         );
-        toast.success('Service updated successfully');
+        console.log("DataContext: Service updated successfully");
       } else {
-        throw new Error('Failed to update service');
+        throw new Error('Service update failed');
       }
     } catch (error) {
-      console.error('Error in updateService:', error);
-      toast.error('Failed to update service');
+      console.error('DataContext: Error in updateService:', error);
+      throw error;
     }
   };
   
   const deleteService = async (id: string) => {
     try {
-      console.log("Deleting service:", id);
+      console.log("DataContext: Deleting service:", id);
       const success = await deleteServiceInDb(id);
       if (success) {
         setServices(prev => prev.filter(item => item.id !== id));
-        toast.success('Service deleted successfully');
+        console.log("DataContext: Service deleted successfully");
       } else {
-        throw new Error('Failed to delete service');
+        throw new Error('Service deletion failed');
       }
     } catch (error) {
-      console.error('Error in deleteService:', error);
-      toast.error('Failed to delete service');
+      console.error('DataContext: Error in deleteService:', error);
+      throw error;
     }
   };
   
-  // CRUD functions for projects with Supabase integration
+  // CRUD functions for projects with enhanced error handling
   const addProject = async (project: Omit<Project, "id">) => {
     try {
-      console.log("Creating project:", project);
+      console.log("DataContext: Creating project:", project);
       const newProject = await createProjectInDb(project);
       if (newProject) {
-        console.log("Project created successfully:", newProject);
+        console.log("DataContext: Project created successfully:", newProject);
         setProjects(prev => [newProject, ...prev]);
-        toast.success('Project created successfully');
       } else {
-        throw new Error('Failed to create project');
+        throw new Error('Project creation returned null');
       }
     } catch (error) {
-      console.error('Error in addProject:', error);
-      toast.error('Failed to create project');
+      console.error('DataContext: Error in addProject:', error);
+      throw error;
     }
   };
   
   const updateProject = async (id: string, project: Partial<Project>) => {
     try {
-      console.log("Updating project:", id, project);
+      console.log("DataContext: Updating project:", id, project);
       const success = await updateProjectInDb(id, project);
       if (success) {
         setProjects(prev => 
@@ -448,36 +456,36 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             item.id === id ? { ...item, ...project } : item
           )
         );
-        toast.success('Project updated successfully');
+        console.log("DataContext: Project updated successfully");
       } else {
-        throw new Error('Failed to update project');
+        throw new Error('Project update failed');
       }
     } catch (error) {
-      console.error('Error in updateProject:', error);
-      toast.error('Failed to update project');
+      console.error('DataContext: Error in updateProject:', error);
+      throw error;
     }
   };
   
   const deleteProject = async (id: string) => {
     try {
-      console.log("Deleting project:", id);
+      console.log("DataContext: Deleting project:", id);
       const success = await deleteProjectInDb(id);
       if (success) {
         setProjects(prev => prev.filter(item => item.id !== id));
-        toast.success('Project deleted successfully');
+        console.log("DataContext: Project deleted successfully");
       } else {
-        throw new Error('Failed to delete project');
+        throw new Error('Project deletion failed');
       }
     } catch (error) {
-      console.error('Error in deleteProject:', error);
-      toast.error('Failed to delete project');
+      console.error('DataContext: Error in deleteProject:', error);
+      throw error;
     }
   };
   
-  // CRUD functions for messages with Supabase integration
+  // CRUD functions for messages
   const addMessage = async (message: Omit<Message, "id" | "date" | "createdAt" | "read">, id?: string) => {
     try {
-      console.log("Creating message:", message);
+      console.log("DataContext: Creating message:", message);
       // For contact form submissions, directly insert into Supabase
       const { data, error } = await supabase
         .from('messages')
@@ -492,7 +500,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .single();
 
       if (error) {
-        console.error('Error creating message:', error);
+        console.error('DataContext: Error creating message:', error);
         toast.error('Failed to send message');
         return;
       }
@@ -510,16 +518,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         setMessages(prev => [newMessage, ...prev]);
         toast.success('Message sent successfully');
+        console.log("DataContext: Message created successfully");
       }
     } catch (error) {
-      console.error('Error in addMessage:', error);
+      console.error('DataContext: Error in addMessage:', error);
       toast.error('Failed to send message');
     }
   };
   
   const updateMessage = async (id: string, message: Partial<Message>) => {
     try {
-      console.log("Updating message:", id, message);
+      console.log("DataContext: Updating message:", id, message);
       const success = await updateMessageInDb(id, message);
       if (success) {
         setMessages(prev => 
@@ -527,23 +536,23 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
             item.id === id ? { ...item, ...message } : item
           )
         );
+        console.log("DataContext: Message updated successfully");
       }
     } catch (error) {
-      console.error('Error in updateMessage:', error);
-      toast.error('Failed to update message');
+      console.error('DataContext: Error in updateMessage:', error);
     }
   };
   
   const deleteMessage = async (id: string) => {
     try {
-      console.log("Deleting message:", id);
+      console.log("DataContext: Deleting message:", id);
       const success = await deleteMessageInDb(id);
       if (success) {
         setMessages(prev => prev.filter(item => item.id !== id));
+        console.log("DataContext: Message deleted successfully");
       }
     } catch (error) {
-      console.error('Error in deleteMessage:', error);
-      toast.error('Failed to delete message');
+      console.error('DataContext: Error in deleteMessage:', error);
     }
   };
   

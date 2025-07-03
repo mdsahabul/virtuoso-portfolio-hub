@@ -36,13 +36,15 @@ export async function fetchServices(): Promise<Service[]> {
 
     if (error) {
       console.error('Error fetching services:', error);
+      toast.error(`Failed to fetch services: ${error.message}`);
       return [];
     }
 
     console.log("Services data from Supabase:", data);
-    return data.map(mapDbServiceToService);
+    return data ? data.map(mapDbServiceToService) : [];
   } catch (err) {
     console.error('Failed to fetch services:', err);
+    toast.error('An unexpected error occurred while fetching services');
     return [];
   }
 }
@@ -87,13 +89,15 @@ export async function updateService(id: string, updates: Partial<Service>): Prom
   try {
     console.log("Updating service in Supabase:", id, updates);
     
-    const updateData = {
-      ...(updates.title && { title: updates.title }),
-      ...(updates.description !== undefined && { description: updates.description || null }),
-      ...(updates.icon !== undefined && { icon_name: updates.icon || null }),
-      ...(updates.price !== undefined && { price: updates.price || 0 }),
-      ...(updates.featured !== undefined && { featured: updates.featured || false })
-    };
+    const updateData: any = {};
+    
+    if (updates.title !== undefined) updateData.title = updates.title;
+    if (updates.description !== undefined) updateData.description = updates.description || null;
+    if (updates.icon !== undefined) updateData.icon_name = updates.icon || null;
+    if (updates.price !== undefined) updateData.price = updates.price || 0;
+    if (updates.featured !== undefined) updateData.featured = updates.featured || false;
+
+    console.log("Update data being sent:", updateData);
 
     const { error } = await supabase
       .from('services')

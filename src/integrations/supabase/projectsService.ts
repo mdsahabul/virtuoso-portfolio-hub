@@ -39,13 +39,15 @@ export async function fetchProjects(): Promise<Project[]> {
 
     if (error) {
       console.error('Error fetching projects:', error);
+      toast.error(`Failed to fetch projects: ${error.message}`);
       return [];
     }
 
     console.log("Projects data from Supabase:", data);
-    return data.map(mapDbProjectToProject);
+    return data ? data.map(mapDbProjectToProject) : [];
   } catch (err) {
     console.error('Failed to fetch projects:', err);
+    toast.error('An unexpected error occurred while fetching projects');
     return [];
   }
 }
@@ -92,14 +94,16 @@ export async function updateProject(id: string, updates: Partial<Project>): Prom
   try {
     console.log("Updating project in Supabase:", id, updates);
     
-    const updateData = {
-      ...(updates.title && { title: updates.title }),
-      ...(updates.description !== undefined && { description: updates.description || null }),
-      ...(updates.category !== undefined && { category: updates.category || null }),
-      ...(updates.image !== undefined && { image_url: updates.image || null }),
-      ...(updates.technologies !== undefined && { technologies: updates.technologies && updates.technologies.length > 0 ? updates.technologies : null }),
-      ...(updates.link !== undefined && { live_url: updates.link || null })
-    };
+    const updateData: any = {};
+    
+    if (updates.title !== undefined) updateData.title = updates.title;
+    if (updates.description !== undefined) updateData.description = updates.description || null;
+    if (updates.category !== undefined) updateData.category = updates.category || null;
+    if (updates.image !== undefined) updateData.image_url = updates.image || null;
+    if (updates.technologies !== undefined) updateData.technologies = updates.technologies && updates.technologies.length > 0 ? updates.technologies : null;
+    if (updates.link !== undefined) updateData.live_url = updates.link || null;
+
+    console.log("Update data being sent:", updateData);
 
     const { error } = await supabase
       .from('projects')
