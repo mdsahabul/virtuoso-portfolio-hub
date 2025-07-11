@@ -47,33 +47,37 @@ const Header = () => {
     path: '/admin-dashboard',
     label: 'Admin'
   }];
-  return <header className="">
-      <div className="flex items-center justify-between">
-        <Link to="/" className="flex items-center space-x-2">
-          <span className="text-2xl font-bold text-blue-700">Sahabul.</span>
-        </Link>
+  return <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      scrolled ? 'bg-background/95 backdrop-blur-md border-b border-border shadow-medium' : 'bg-transparent'
+    }`}>
+      <div className="container-custom py-4">
+        <div className="flex items-center justify-between">
+          <Link to="/" className="flex items-center space-x-2">
+            <span className="text-2xl font-bold gradient-text">Sahabul.</span>
+          </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center space-x-8">
-          {navLinks.map((link, i) => <Link key={i} to={link.path} className={`text-base font-medium transition-colors hover:text-blue-500 relative after:absolute after:left-0 after:bottom-0 after:h-0.5 after:bg-blue-500 after:transition-all ${isCurrentPath(link.path) ? 'text-blue-600 after:w-full' : 'text-gray-700 after:w-0 hover:after:w-full'}`}>
-              {link.label}
-            </Link>)}
-        </nav>
-
-        {/* Mobile Menu Button */}
-        <button className="md:hidden p-2 rounded-md hover:bg-gray-100" onClick={toggleMenu} aria-label="Toggle menu">
-          {isMenuOpen ? <X size={24} className="text-800" /> : <Menu size={24} className="text-blue-800" />}
-        </button>
-      </div>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && <div className="md:hidden absolute top-full left-0 w-full bg-white shadow-lg py-5 animate-fade-in">
-          <div className="container-custom flex flex-col space-y-4">
-            {navLinks.map((link, i) => <Link key={i} to={link.path} className={`text-lg font-medium py-2 ${isCurrentPath(link.path) ? 'text-blue-600' : 'text-gray-700'}`} onClick={() => setIsMenuOpen(false)}>
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center space-x-8">
+            {navLinks.map((link, i) => <Link key={i} to={link.path} className={`text-base font-medium transition-all duration-300 hover:text-primary relative after:absolute after:left-0 after:bottom-0 after:h-0.5 after:bg-primary after:transition-all after:rounded-full ${isCurrentPath(link.path) ? 'text-primary after:w-full' : 'text-foreground after:w-0 hover:after:w-full'}`}>
                 {link.label}
               </Link>)}
-          </div>
-        </div>}
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <button className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors" onClick={toggleMenu} aria-label="Toggle menu">
+            {isMenuOpen ? <X size={24} className="text-foreground" /> : <Menu size={24} className="text-foreground" />}
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && <div className="md:hidden mt-4 p-4 bg-card rounded-lg border border-border shadow-large animate-fade-in">
+            <div className="flex flex-col space-y-4">
+              {navLinks.map((link, i) => <Link key={i} to={link.path} className={`text-lg font-medium py-2 px-4 rounded-lg transition-colors ${isCurrentPath(link.path) ? 'text-primary bg-primary/10' : 'text-foreground hover:bg-muted'}`} onClick={() => setIsMenuOpen(false)}>
+                  {link.label}
+                </Link>)}
+            </div>
+          </div>}
+      </div>
     </header>;
 };
 export default Header;

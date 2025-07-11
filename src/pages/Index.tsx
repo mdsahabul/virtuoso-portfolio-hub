@@ -23,9 +23,12 @@ const Index = () => {
   
   if (isLoading) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-700"></div>
-        <p className="mt-4 text-gray-600">Loading content...</p>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+        <div className="relative">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary/20 border-t-primary"></div>
+          <div className="absolute inset-0 animate-pulse rounded-full h-16 w-16 bg-primary/10"></div>
+        </div>
+        <p className="mt-6 text-muted-foreground text-lg">Loading your experience...</p>
       </div>
     );
   }
@@ -38,33 +41,35 @@ const Index = () => {
       <Hero /> 
       
       {/* About Section */}
-      <section id="about" className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="relative overflow-hidden rounded-lg shadow-xl">
-              <ResponsiveImage 
-                src={aboutSection.image} 
-                alt="About"
-                aspectRatio={1/1}
-                className="transition-transform hover:scale-105 duration-500"
-              />
-              <div className="absolute bottom-0 left-0 w-full h-1/4 bg-gradient-to-t from-black/50 to-transparent"></div>
+      <section id="about" className="section bg-background">
+        <div className="container-custom">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="relative">
+              <div className="glass-card p-8 floating-element">
+                <ResponsiveImage 
+                  src={aboutSection.image} 
+                  alt="About"
+                  aspectRatio={1/1}
+                  className="rounded-lg transition-transform hover:scale-105 duration-500"
+                />
+              </div>
+              <div className="absolute -z-10 -top-6 -left-6 w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 rounded-xl blur-xl"></div>
             </div>
-            <div>
-              <h2 className="text-3xl font-bold mb-6 text-blue-700">{aboutSection.title}</h2>
+            <div className="space-y-6">
+              <h2 className="section-title gradient-text">{aboutSection.title}</h2>
               <div className="space-y-4">
                 {aboutSection.description.map((paragraph, index) => (
-                  <p key={index} className="text-gray-700 leading-relaxed">
+                  <p key={index} className="text-lg leading-relaxed text-muted-foreground">
                     {paragraph}
                   </p>
                 ))}
               </div>
               
               <div className="mt-8">
-                <h3 className="text-xl font-semibold mb-4 text-blue-600">Skills & Expertise</h3>
-                <div className="flex flex-wrap gap-2">
+                <h3 className="text-2xl font-semibold mb-6 text-foreground">Skills & Expertise</h3>
+                <div className="flex flex-wrap gap-3">
                   {aboutSection.skills.map((skill, index) => (
-                    <span key={index} className="bg-blue-50 text-blue-700 px-4 py-2 rounded-full text-sm font-medium shadow-sm hover:shadow-md transition-shadow">
+                    <span key={index} className="bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium border border-primary/20 hover:bg-primary/20 transition-colors">
                       {skill}
                     </span>
                   ))}
@@ -76,34 +81,35 @@ const Index = () => {
       </section>
       
       {/* Services Section */}
-      <section id="services" className="py-16 bg-gradient-to-b from-gray-50 to-gray-100">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-blue-700">My Services</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+      <section id="services" className="section bg-muted/50">
+        <div className="container-custom">
+          <div className="text-center mb-16">
+            <h2 className="section-title gradient-text">My Services</h2>
+            <p className="section-subtitle text-lg">
               I offer a variety of services to help businesses establish an effective online presence.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredServices.map((service) => (
-              <ServiceCard
-                key={service.id}
-                id={service.id}
-                title={service.title}
-                description={service.description}
-                icon={service.icon}
-                price={service.price}
-                featured={service.featured}
-                features={service.features || []}  
-              />
+              <div key={service.id} className="card-hover">
+                <ServiceCard
+                  id={service.id}
+                  title={service.title}
+                  description={service.description}
+                  icon={service.icon}
+                  price={service.price}
+                  featured={service.featured}
+                  features={service.features || []}  
+                />
+              </div>
             ))}
           </div>
           
-          <div className="text-center mt-12">
+          <div className="text-center mt-16">
             <button
               onClick={() => navigate('/services')}
-              className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
+              className="btn-primary text-lg px-8 py-4"
             >
               View All Services
             </button>
@@ -112,33 +118,34 @@ const Index = () => {
       </section>
       
       {/* Portfolio Section */}
-      <section id="portfolio" className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-blue-700">Featured Projects</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+      <section id="portfolio" className="section bg-background">
+        <div className="container-custom">
+          <div className="text-center mb-16">
+            <h2 className="section-title gradient-text">Featured Projects</h2>
+            <p className="section-subtitle text-lg">
               Take a look at some of my recent projects and the results they've achieved.
             </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {featuredProjects.map((project) => (
-              <PortfolioItem
-                key={project.id}
-                title={project.title}
-                category={project.category}
-                image={project.image}
-                description={project.description}
-                technologies={project.technologies}
-                link={project.link}
-              />
+              <div key={project.id} className="card-hover">
+                <PortfolioItem
+                  title={project.title}
+                  category={project.category}
+                  image={project.image}
+                  description={project.description}
+                  technologies={project.technologies}
+                  link={project.link}
+                />
+              </div>
             ))}
           </div>
           
-          <div className="text-center mt-12">
+          <div className="text-center mt-16">
             <button
               onClick={() => navigate('/portfolio')}
-              className="px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl"
+              className="btn-primary text-lg px-8 py-4"
             >
               View All Projects
             </button>
@@ -150,51 +157,51 @@ const Index = () => {
       <ReviewsSection />
       
       {/* Contact Section */}
-      <section id="contact" className="py-16 bg-gradient-to-b from-gray-50 to-gray-100">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-blue-700">Get In Touch</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+      <section id="contact" className="section bg-muted/50">
+        <div className="container-custom">
+          <div className="text-center mb-16">
+            <h2 className="section-title gradient-text">Get In Touch</h2>
+            <p className="section-subtitle text-lg">
               Have a project in mind or just want to say hello? I'd love to hear from you!
             </p>
           </div>
           
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-white p-6 rounded-lg shadow-md">
-                <h3 className="text-xl font-semibold mb-4 text-blue-600">Contact Me</h3>
+          <div className="max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <div className="glass-card">
+                <h3 className="text-2xl font-semibold mb-6 text-foreground">Contact Me</h3>
                 <ContactForm />
               </div>
               
-              <div className="space-y-6">
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                  <h3 className="text-xl font-semibold mb-4 text-blue-600">Contact Information</h3>
+              <div className="space-y-8">
+                <div className="glass-card">
+                  <h3 className="text-2xl font-semibold mb-6 text-foreground">Contact Information</h3>
                   {contactPageContent && (
-                    <div className="space-y-3">
-                      <p className="flex items-start">
-                        <span className="font-medium w-20">Email:</span>
-                        <a href={`mailto:${contactPageContent.contactInfo.email}`} className="text-blue-600 hover:text-blue-700 transition-colors">
+                    <div className="space-y-4">
+                      <p className="flex items-start gap-4">
+                        <span className="font-medium text-primary min-w-[80px]">Email:</span>
+                        <a href={`mailto:${contactPageContent.contactInfo.email}`} className="text-primary hover:text-primary/80 transition-colors">
                           {contactPageContent.contactInfo.email}
                         </a>
                       </p>
-                      <p className="flex items-start">
-                        <span className="font-medium w-20">Phone:</span>
-                        <a href={`tel:${contactPageContent.contactInfo.phone}`} className="text-blue-600 hover:text-blue-700 transition-colors">
+                      <p className="flex items-start gap-4">
+                        <span className="font-medium text-primary min-w-[80px]">Phone:</span>
+                        <a href={`tel:${contactPageContent.contactInfo.phone}`} className="text-primary hover:text-primary/80 transition-colors">
                           {contactPageContent.contactInfo.phone}
                         </a>
                       </p>
-                      <p className="flex items-start">
-                        <span className="font-medium w-20">Address:</span>
-                        <span>{contactPageContent.contactInfo.address}</span>
+                      <p className="flex items-start gap-4">
+                        <span className="font-medium text-primary min-w-[80px]">Address:</span>
+                        <span className="text-muted-foreground">{contactPageContent.contactInfo.address}</span>
                       </p>
                     </div>
                   )}
                 </div>
                 
                 {contactPageContent && contactPageContent.mapLocation && (
-                  <div className="bg-white p-6 rounded-lg shadow-md">
-                    <h3 className="text-xl font-semibold mb-4 text-blue-600">Location</h3>
-                    <div className="h-64 rounded-lg overflow-hidden">
+                  <div className="glass-card">
+                    <h3 className="text-2xl font-semibold mb-6 text-foreground">Location</h3>
+                    <div className="h-64 rounded-lg overflow-hidden shadow-medium">
                       <iframe 
                         src={contactPageContent.mapLocation}
                         width="100%" 

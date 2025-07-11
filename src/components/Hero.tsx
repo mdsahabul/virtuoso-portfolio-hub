@@ -28,29 +28,28 @@ const Hero = (props: HeroProps) => {
   const secondaryLink = props.secondaryLink || heroSection.secondaryLink;
 
   return (
-    <section 
-      className="relative min-h-[75vh] flex items-center overflow-hidden"
-      style={{
-        backgroundImage: `url('${backgroundImage}')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
-      }}
-    >
-      <div className="absolute inset-0 bg-black/60"></div>
+    <section className="relative min-h-screen flex items-center overflow-hidden bg-background pt-20">
+      {/* Background gradient */}
+      <div className="absolute inset-0 hero-gradient opacity-10"></div>
       
-      <div className="container-custom relative z-10 text-white py-16 md:py-24">
-        <div className="max-w-3xl mx-auto md:ml-0 text-center md:text-left">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-6 animate-fade-in">
-            {title}
+      {/* Floating elements */}
+      <div className="absolute top-20 left-10 w-20 h-20 bg-primary/20 rounded-full blur-xl floating-element"></div>
+      <div className="absolute top-40 right-20 w-32 h-32 bg-accent/20 rounded-full blur-xl floating-element" style={{ animationDelay: '2s' }}></div>
+      <div className="absolute bottom-20 left-1/4 w-16 h-16 bg-primary/30 rounded-full blur-xl floating-element" style={{ animationDelay: '4s' }}></div>
+      
+      <div className="container-custom relative z-10 py-20">
+        <div className="max-w-4xl mx-auto text-center">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-8 animate-fade-in">
+            <span className="gradient-text">{title}</span>
           </h1>
-          <p className="text-xl md:text-2xl text-gray-200 mb-8 animate-fade-in" style={{ animationDelay: '0.2s' }}>
+          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in" style={{ animationDelay: '0.2s' }}>
             {subtitle}
           </p>
-          <div className="flex flex-wrap gap-4 justify-center md:justify-start animate-fade-in" style={{ animationDelay: '0.4s' }}>
-            <Link to={ctaLink} className="btn-primary">
+          <div className="flex flex-col sm:flex-row gap-6 justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <Link to={ctaLink} className="btn-primary text-lg px-8 py-4 shadow-glow">
               {ctaButton}
             </Link>
-            <Link to={secondaryLink} className="btn-secondary">
+            <Link to={secondaryLink} className="btn-secondary text-lg px-8 py-4">
               {secondaryButton}
             </Link>
           </div>
