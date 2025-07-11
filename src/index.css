@@ -109,7 +109,7 @@
   }
   
   .btn-primary {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium transition-all inline-block shadow-medium hover:shadow-large;
+    @apply bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium transition-all inline-block shadow-md hover:shadow-lg;
   }
   
   .btn-secondary {
@@ -117,7 +117,7 @@
   }
   
   .card {
-    @apply bg-card rounded-xl shadow-soft p-6 transition-all hover:shadow-medium border border-border;
+    @apply bg-card rounded-xl shadow-sm p-6 transition-all hover:shadow-md border border-border;
   }
   
   .section-title {
@@ -151,7 +151,7 @@
   /* Modern theme components */
   .glass-card {
     background: var(--gradient-surface);
-    @apply backdrop-blur-md border border-border rounded-xl shadow-medium;
+    @apply backdrop-blur-md border border-border rounded-xl shadow-md;
   }
   
   .highlight-text {
@@ -168,7 +168,7 @@
   }
   
   .card-hover {
-    @apply transition-all duration-300 hover:shadow-large hover:-translate-y-1;
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
   }
   
   .floating-element {

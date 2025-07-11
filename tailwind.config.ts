@@ -121,6 +121,10 @@ export default {
                 'glow': 'glow 2s infinite'
 			},
             boxShadow: {
+                'soft': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+                'medium': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+                'large': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+                'glow': '0 0 20px hsl(230 95% 62% / 0.3)',
                 'neon': '0 0 5px rgba(79, 70, 229, 0.5), 0 0 20px rgba(79, 70, 229, 0.3)',
                 'card-dark': '0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.2)',
                 'subtle': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06)'
