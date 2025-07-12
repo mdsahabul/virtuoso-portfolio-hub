@@ -23,7 +23,7 @@ const AdminLogin = () => {
       setIsLoading(false);
       
       // Demo credentials - in a real app, this would be a secure authentication process
-      if (credentials.email === 'admin@example.com' && credentials.password === 'password') {
+      if (credentials.email === 'devsahabul@gmail.com' && credentials.password === 'lovAble10dev') {
         // Set a demo token in localStorage - in a real app, this would be a JWT or similar
         localStorage.setItem('adminToken', 'demo-token');
         toast.success('Login successful!');
@@ -61,7 +61,7 @@ const AdminLogin = () => {
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="admin@example.com"
+                placeholder="devsahabul@gmail.com"
               />
             </div>
             
@@ -80,7 +80,7 @@ const AdminLogin = () => {
                 placeholder="••••••••"
               />
               <p className="text-xs text-gray-500 mt-1">
-                Demo: Use "admin@example.com" and "password"
+                Demo: Use "devsahabul@gmail.com" and "lovAble10dev"
               </p>
             </div>
             

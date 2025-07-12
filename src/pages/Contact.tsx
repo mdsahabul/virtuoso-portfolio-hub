@@ -6,10 +6,10 @@ const Contact = () => {
   return (
     <main className="pt-20">
       {/* Header */}
-      <section className="section pt-16 pb-12 bg-blue-50">
+      <section className="section pt-16 pb-12 bg-gradient-to-br from-primary/5 to-accent/5">
         <div className="container-custom text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">Contact Me</h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-foreground">Contact Me</h1>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Have a project in mind or want to learn more about my services? Get in touch 
             and let's discuss how I can help you achieve your goals.
           </p>
@@ -24,11 +24,11 @@ const Contact = () => {
       </section>
 
       {/* Location */}
-      <section className="section bg-blue-50">
+      <section className="section bg-gradient-to-br from-accent/5 to-primary/5">
         <div className="container-custom">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Visit My Office</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">Visit My Office</h2>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
               If you prefer to meet in person, you can visit my office location.
             </p>
           </div>
@@ -36,14 +36,14 @@ const Contact = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div>
               {/* Map Placeholder */}
-              <div className="bg-white rounded-xl shadow-lg p-4 h-96 flex items-center justify-center">
+              <div className="bg-card rounded-xl shadow-lg p-4 h-96 flex items-center justify-center border">
                 <div className="text-center space-y-4">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-500 mx-auto">
+                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary mx-auto">
                     <MapPin size={24} />
                   </div>
                   <div>
-                    <h3 className="font-medium text-lg">Office Location</h3>
-                    <p className="text-gray-500">123 Portfolio Street, Design District, 12345</p>
+                    <h3 className="font-medium text-lg text-foreground">Office Location</h3>
+                    <p className="text-muted-foreground">123 Portfolio Street, Design District, 12345</p>
                   </div>
                 </div>
               </div>
@@ -51,25 +51,25 @@ const Contact = () => {
             
             <div>
               <div className="space-y-6">
-                <h3 className="text-2xl font-bold">Office Hours</h3>
+                <h3 className="text-2xl font-bold text-foreground">Office Hours</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-white p-5 rounded-lg shadow">
-                    <h4 className="font-semibold mb-2">Weekdays</h4>
-                    <p className="text-gray-600">9:00 AM - 5:00 PM</p>
+                  <div className="bg-card p-5 rounded-lg shadow border">
+                    <h4 className="font-semibold mb-2 text-foreground">Weekdays</h4>
+                    <p className="text-muted-foreground">9:00 AM - 5:00 PM</p>
                   </div>
-                  <div className="bg-white p-5 rounded-lg shadow">
-                    <h4 className="font-semibold mb-2">Weekends</h4>
-                    <p className="text-gray-600">By appointment only</p>
+                  <div className="bg-card p-5 rounded-lg shadow border">
+                    <h4 className="font-semibold mb-2 text-foreground">Weekends</h4>
+                    <p className="text-muted-foreground">By appointment only</p>
                   </div>
                 </div>
                 
-                <div className="bg-blue-800 text-white p-6 rounded-lg">
+                <div className="bg-primary text-primary-foreground p-6 rounded-lg">
                   <h4 className="text-xl font-semibold mb-3">Appointment Required</h4>
-                  <p className="text-blue-100 mb-4">
+                  <p className="text-primary-foreground/80 mb-4">
                     To ensure I can provide you with my full attention, please schedule an appointment 
                     before visiting the office.
                   </p>
-                  <a href="mailto:contact@example.com" className="bg-white text-blue-800 px-4 py-2 rounded font-medium hover:bg-blue-50 transition-colors inline-block">
+                  <a href="mailto:contact@example.com" className="bg-background text-foreground px-4 py-2 rounded font-medium hover:bg-accent transition-colors inline-block">
                     Schedule Now
                   </a>
                 </div>
@@ -83,8 +83,8 @@ const Contact = () => {
       <section className="section">
         <div className="container-custom max-w-4xl">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">Frequently Asked Questions</h2>
+            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
               Find answers to common questions about working with me.
             </p>
           </div>
@@ -108,9 +108,9 @@ const Contact = () => {
                 answer: 'Absolutely. I understand the confidential nature of many projects and am happy to sign a Non-Disclosure Agreement before discussing sensitive details.'
               }
             ].map((faq, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md p-6">
-                <h3 className="text-lg font-semibold mb-2">{faq.question}</h3>
-                <p className="text-gray-600">{faq.answer}</p>
+              <div key={index} className="bg-card rounded-lg shadow-md p-6 border">
+                <h3 className="text-lg font-semibold mb-2 text-foreground">{faq.question}</h3>
+                <p className="text-muted-foreground">{faq.answer}</p>
               </div>
             ))}
           </div>
