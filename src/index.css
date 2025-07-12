@@ -6,7 +6,7 @@
 @tailwind utilities;
 
 @layer base {
-:root {
+  :root {
     /* Light theme - Modern professional colors */
     --background: 0 0% 100%;
     --foreground: 222 84% 4.9%;
@@ -57,6 +57,58 @@
     --sidebar-accent: 230 95% 62%;
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 230 95% 62%;
+  }
+
+  .dark {
+    /* Dark theme - Professional dark colors */
+    --background: 222 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 230 95% 62%;  /* Bright blue for dark mode */
+    --primary-foreground: 222 84% 4.9%;
+
+    --secondary: 217 32% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 32% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 264 83% 70%;  /* Purple accent */
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217 32% 17%;
+    --input: 217 32% 17%;
+    --ring: 230 95% 62%;
+
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(230 95% 62%), hsl(264 83% 70%));
+    --gradient-accent: linear-gradient(135deg, hsl(264 83% 70%), hsl(295 83% 70%));
+    --gradient-surface: linear-gradient(145deg, hsl(222 84% 4.9%), hsl(217 32% 17%));
+
+    /* Dark mode shadows */
+    --shadow-soft: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+    --shadow-medium: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+    --shadow-large: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+    --shadow-glow: 0 0 20px hsl(230 95% 62% / 0.4);
+
+    /* Dark sidebar */
+    --sidebar-background: 217 32% 17%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 230 95% 62%;
+    --sidebar-primary-foreground: 222 84% 4.9%;
+    --sidebar-accent: 230 95% 62%;
+    --sidebar-accent-foreground: 222 84% 4.9%;
+    --sidebar-border: 217 32% 17%;
     --sidebar-ring: 230 95% 62%;
   }
 }

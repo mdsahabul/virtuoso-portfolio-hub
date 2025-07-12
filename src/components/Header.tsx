@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ThemeToggle } from '@/components/ThemeToggle';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -57,16 +58,22 @@ const Header = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link, i) => <Link key={i} to={link.path} className={`text-base font-medium transition-all duration-300 hover:text-primary relative after:absolute after:left-0 after:bottom-0 after:h-0.5 after:bg-primary after:transition-all after:rounded-full ${isCurrentPath(link.path) ? 'text-primary after:w-full' : 'text-foreground after:w-0 hover:after:w-full'}`}>
-                {link.label}
-              </Link>)}
-          </nav>
+          <div className="hidden md:flex items-center space-x-8">
+            <nav className="flex items-center space-x-8">
+              {navLinks.map((link, i) => <Link key={i} to={link.path} className={`text-base font-medium transition-all duration-300 hover:text-primary relative after:absolute after:left-0 after:bottom-0 after:h-0.5 after:bg-primary after:transition-all after:rounded-full ${isCurrentPath(link.path) ? 'text-primary after:w-full' : 'text-foreground after:w-0 hover:after:w-full'}`}>
+                  {link.label}
+                </Link>)}
+            </nav>
+            <ThemeToggle />
+          </div>
 
-          {/* Mobile Menu Button */}
-          <button className="md:hidden p-2 rounded-lg hover:bg-muted transition-colors" onClick={toggleMenu} aria-label="Toggle menu">
-            {isMenuOpen ? <X size={24} className="text-foreground" /> : <Menu size={24} className="text-foreground" />}
-          </button>
+          {/* Mobile Menu Button & Theme Toggle */}
+          <div className="md:hidden flex items-center space-x-2">
+            <ThemeToggle />
+            <button className="p-2 rounded-lg hover:bg-muted transition-colors" onClick={toggleMenu} aria-label="Toggle menu">
+              {isMenuOpen ? <X size={24} className="text-foreground" /> : <Menu size={24} className="text-foreground" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
