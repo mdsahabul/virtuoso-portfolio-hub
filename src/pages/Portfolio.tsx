@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import PortfolioItem from '@/components/PortfolioItem';
+import ExperiencesSection from '@/components/ExperiencesSection';
 import { useData } from '../context/DataContext';
 
 const Portfolio = () => {
@@ -120,11 +121,14 @@ const Portfolio = () => {
         </div>
       </section>
 
+      {/* Experience Section */}
+      <ExperiencesSection />
+
       {/* CTA */}
       <section className="section">
         <div className="container-custom text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">Ready to Start Your Project?</h2>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto">
             Let's work together to create something amazing. Contact me today to discuss your project requirements.
           </p>
           <a href="/contact" className="btn-primary">Get in Touch</a>

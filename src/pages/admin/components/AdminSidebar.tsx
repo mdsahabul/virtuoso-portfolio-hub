@@ -2,7 +2,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { 
   Home, User, FileText, Mail, Settings, LogOut, X, 
-  Grid, Package, MessageSquare, BarChart, Palette, Users
+  Grid, Package, MessageSquare, BarChart, Palette, Users, Award
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -24,6 +24,8 @@ const AdminSidebar = ({ isSidebarOpen, toggleSidebar, unreadMessagesCount }: Adm
     { id: '', label: 'Dashboard', icon: Home },
     { id: 'projects', label: 'Projects', icon: Grid },
     { id: 'services', label: 'Services', icon: Package },
+    { id: 'experiences', label: 'Experiences', icon: BarChart },
+    { id: 'skills-certifications', label: 'Skills & Certifications', icon: Award },
     { id: 'messages', label: 'Messages', icon: MessageSquare, badge: unreadMessagesCount },
     { id: 'content', label: 'Content', icon: Palette },
     { id: 'users', label: 'Users', icon: Users },

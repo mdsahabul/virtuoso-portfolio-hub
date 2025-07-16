@@ -10,6 +10,8 @@ import ServicesManager from './admin/pages/ServicesManager';
 import MessagesManager from './admin/pages/MessagesManager';
 import ContentManager from './admin/pages/ContentManager';
 import UsersManager from './admin/pages/UsersManager';
+import ExperiencesManager from './admin/pages/ExperiencesManager';
+import SkillsCertificationsManager from './admin/pages/SkillsCertificationsManager';
 import ProfileSettings from './admin/pages/ProfileSettings';
 import SiteSettings from './admin/pages/SiteSettings';
 import { useData } from '../context/DataContext';
@@ -80,6 +82,8 @@ const AdminDashboard = () => {
             <Route path="/messages" element={<MessagesManager searchQuery={searchQuery} />} />
             <Route path="/content/*" element={<ContentManager />} />
             <Route path="/users" element={<UsersManager searchQuery={searchQuery} />} />
+            <Route path="/experiences" element={<ExperiencesManager />} />
+            <Route path="/skills-certifications" element={<SkillsCertificationsManager />} />
             <Route path="/profile" element={<ProfileSettings />} />
             <Route path="/settings" element={<SiteSettings />} />
             <Route path="*" element={<Navigate to="/admin-dashboard" replace />} />

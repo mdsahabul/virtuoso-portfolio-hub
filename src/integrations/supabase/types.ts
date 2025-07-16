@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      certifications: {
+        Row: {
+          created_at: string
+          credential_id: string | null
+          credential_url: string | null
+          description: string | null
+          expiry_date: string | null
+          id: string
+          issue_date: string
+          issuing_organization: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          credential_id?: string | null
+          credential_url?: string | null
+          description?: string | null
+          expiry_date?: string | null
+          id?: string
+          issue_date: string
+          issuing_organization: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          credential_id?: string | null
+          credential_url?: string | null
+          description?: string | null
+          expiry_date?: string | null
+          id?: string
+          issue_date?: string
+          issuing_organization?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       content_sections: {
         Row: {
           content: Json
@@ -35,6 +74,48 @@ export type Database = {
           id?: string
           section_name?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      experiences: {
+        Row: {
+          company: string
+          created_at: string
+          description: string | null
+          end_date: string | null
+          id: string
+          is_current: boolean | null
+          location: string | null
+          start_date: string
+          technologies: string[] | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          company: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_current?: boolean | null
+          location?: string | null
+          start_date: string
+          technologies?: string[] | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          company?: string
+          created_at?: string
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_current?: boolean | null
+          location?: string | null
+          start_date?: string
+          technologies?: string[] | null
+          title?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -212,6 +293,36 @@ export type Database = {
           site_name?: string
           social_links?: Json | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      skills: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          name: string
+          proficiency_level: number | null
+          updated_at: string
+          years_experience: number | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          name: string
+          proficiency_level?: number | null
+          updated_at?: string
+          years_experience?: number | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          name?: string
+          proficiency_level?: number | null
+          updated_at?: string
+          years_experience?: number | null
         }
         Relationships: []
       }
