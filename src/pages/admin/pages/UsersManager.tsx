@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { Plus, Trash2, Edit, UserCheck, Shield, User } from 'lucide-react';
+import { Plus, Trash2, Edit, UserCheck, Shield, User, RotateCcw } from 'lucide-react';
 import { userRolesService, UserRole } from '../../../integrations/supabase/userRolesService';
+import { supabase } from '../../../integrations/supabase/client';
 
 interface UsersManagerProps {
   searchQuery?: string;
@@ -14,7 +15,8 @@ const UsersManager = ({ searchQuery = '' }: UsersManagerProps) => {
   const [editingUser, setEditingUser] = useState<UserRole | null>(null);
   const [formData, setFormData] = useState({
     email: '',
-    role: 'moderator' as 'admin' | 'moderator'
+    role: 'moderator' as 'admin' | 'moderator',
+    password: ''
   });
 
   const currentUserEmail = 'devsahabul@gmail.com'; // Current admin user
@@ -43,13 +45,27 @@ const UsersManager = ({ searchQuery = '' }: UsersManagerProps) => {
         await userRolesService.updateUserRole(editingUser.id, formData.role);
         toast.success('User role updated successfully');
       } else {
+        // Create user in Supabase Auth first
+        const tempPassword = 'TempPass123!';
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+          email: formData.email,
+          password: tempPassword,
+          email_confirm: true
+        });
+
+        if (authError) {
+          toast.error(`Failed to create user: ${authError.message}`);
+          return;
+        }
+
+        // Add role to user_roles table
         await userRolesService.addUserRole(formData.email, formData.role, currentUserEmail);
-        toast.success('User added successfully');
+        toast.success(`User added successfully! Temporary password: ${tempPassword}`);
       }
       
       setIsModalOpen(false);
       setEditingUser(null);
-      setFormData({ email: '', role: 'moderator' });
+      setFormData({ email: '', role: 'moderator', password: '' });
       loadUserRoles();
     } catch (error: any) {
       console.error('Error saving user:', error);
@@ -61,7 +77,8 @@ const UsersManager = ({ searchQuery = '' }: UsersManagerProps) => {
     setEditingUser(user);
     setFormData({
       email: user.email,
-      role: user.role
+      role: user.role,
+      password: ''
     });
     setIsModalOpen(true);
   };
@@ -81,8 +98,24 @@ const UsersManager = ({ searchQuery = '' }: UsersManagerProps) => {
 
   const openModal = () => {
     setEditingUser(null);
-    setFormData({ email: '', role: 'moderator' });
+    setFormData({ email: '', role: 'moderator', password: '' });
     setIsModalOpen(true);
+  };
+
+  const handleResetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      });
+      
+      if (error) {
+        toast.error(error.message);
+      } else {
+        toast.success('Password reset email sent successfully');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send reset email');
+    }
   };
 
   // Filter users based on search query
@@ -174,13 +207,22 @@ const UsersManager = ({ searchQuery = '' }: UsersManagerProps) => {
                     <button
                       onClick={() => handleEdit(user)}
                       className="p-2 text-muted-foreground hover:text-primary hover:bg-accent rounded-lg transition-colors"
+                      title="Edit Role"
                     >
                       <Edit size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleResetPassword(user.email)}
+                      className="p-2 text-muted-foreground hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-colors"
+                      title="Reset Password"
+                    >
+                      <RotateCcw size={16} />
                     </button>
                     {user.email !== currentUserEmail && (
                       <button
                         onClick={() => handleDelete(user.id)}
                         className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg transition-colors"
+                        title="Remove User"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -233,6 +275,24 @@ const UsersManager = ({ searchQuery = '' }: UsersManagerProps) => {
                   {formData.role === 'admin' ? 'Full access to all features' : 'Limited access to content management'}
                 </p>
               </div>
+
+              {!editingUser && (
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-1">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full px-3 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="Leave empty for auto-generated password"
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">
+                    If left empty, a temporary password will be generated
+                  </p>
+                </div>
+              )}
               
               <div className="flex gap-3 pt-4">
                 <button
