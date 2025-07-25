@@ -106,7 +106,8 @@ const ExperiencesManager = () => {
       end_date: experience.end_date || '',
       is_current: experience.is_current || false,
       description: experience.description || '',
-      technologies: experience.technologies || []
+      technologies: experience.technologies || [],
+      company_logo_url: experience.company_logo_url || ''
     });
     setIsDialogOpen(true);
   };
@@ -120,7 +121,8 @@ const ExperiencesManager = () => {
       end_date: '',
       is_current: false,
       description: '',
-      technologies: []
+      technologies: [],
+      company_logo_url: ''
     });
     setEditingExperience(null);
   };
@@ -233,6 +235,17 @@ const ExperiencesManager = () => {
                   value={formData.technologies?.join(', ') || ''}
                   onChange={(e) => handleTechnologiesChange(e.target.value)}
                   placeholder="React, TypeScript, Node.js"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="company_logo_url">Company Logo URL (Optional)</Label>
+                <Input
+                  id="company_logo_url"
+                  type="url"
+                  value={formData.company_logo_url}
+                  onChange={(e) => setFormData({ ...formData, company_logo_url: e.target.value })}
+                  placeholder="https://example.com/logo.png"
                 />
               </div>
 

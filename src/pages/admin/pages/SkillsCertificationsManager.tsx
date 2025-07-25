@@ -27,7 +27,8 @@ const SkillsCertificationsManager = () => {
     name: '',
     category: '',
     proficiency_level: 1,
-    years_experience: 0
+    years_experience: 0,
+    icon_url: ''
   });
 
   const [certFormData, setCertFormData] = useState<CertificationInsert>({
@@ -37,7 +38,8 @@ const SkillsCertificationsManager = () => {
     expiry_date: '',
     credential_id: '',
     credential_url: '',
-    description: ''
+    description: '',
+    organization_logo_url: ''
   });
 
   const skillCategories = ['Frontend', 'Backend', 'Database', 'DevOps', 'Tools', 'Languages', 'Frameworks'];
@@ -111,7 +113,8 @@ const SkillsCertificationsManager = () => {
       name: skill.name,
       category: skill.category,
       proficiency_level: skill.proficiency_level || 1,
-      years_experience: skill.years_experience || 0
+      years_experience: skill.years_experience || 0,
+      icon_url: skill.icon_url || ''
     });
     setIsSkillDialogOpen(true);
   };
@@ -121,7 +124,8 @@ const SkillsCertificationsManager = () => {
       name: '',
       category: '',
       proficiency_level: 1,
-      years_experience: 0
+      years_experience: 0,
+      icon_url: ''
     });
     setEditingSkill(null);
   };
@@ -136,7 +140,8 @@ const SkillsCertificationsManager = () => {
         expiry_date: certFormData.expiry_date || null,
         credential_id: certFormData.credential_id || null,
         credential_url: certFormData.credential_url || null,
-        description: certFormData.description || null
+        description: certFormData.description || null,
+        organization_logo_url: certFormData.organization_logo_url || null
       };
 
       if (editingCertification) {
@@ -185,7 +190,8 @@ const SkillsCertificationsManager = () => {
       expiry_date: certification.expiry_date || '',
       credential_id: certification.credential_id || '',
       credential_url: certification.credential_url || '',
-      description: certification.description || ''
+      description: certification.description || '',
+      organization_logo_url: certification.organization_logo_url || ''
     });
     setIsCertDialogOpen(true);
   };
@@ -198,7 +204,8 @@ const SkillsCertificationsManager = () => {
       expiry_date: '',
       credential_id: '',
       credential_url: '',
-      description: ''
+      description: '',
+      organization_logo_url: ''
     });
     setEditingCertification(null);
   };
@@ -297,6 +304,17 @@ const SkillsCertificationsManager = () => {
                       min="0"
                       value={skillFormData.years_experience || 0}
                       onChange={(e) => setSkillFormData({ ...skillFormData, years_experience: parseInt(e.target.value) || 0 })}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="icon-url">Icon URL (Optional)</Label>
+                    <Input
+                      id="icon-url"
+                      type="url"
+                      value={skillFormData.icon_url || ''}
+                      onChange={(e) => setSkillFormData({ ...skillFormData, icon_url: e.target.value })}
+                      placeholder="https://example.com/icon.png"
                     />
                   </div>
 
@@ -446,6 +464,17 @@ const SkillsCertificationsManager = () => {
                       value={certFormData.description}
                       onChange={(e) => setCertFormData({ ...certFormData, description: e.target.value })}
                       rows={3}
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="org-logo-url">Organization Logo URL (Optional)</Label>
+                    <Input
+                      id="org-logo-url"
+                      type="url"
+                      value={certFormData.organization_logo_url}
+                      onChange={(e) => setCertFormData({ ...certFormData, organization_logo_url: e.target.value })}
+                      placeholder="https://example.com/logo.png"
                     />
                   </div>
 

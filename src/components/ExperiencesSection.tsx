@@ -64,8 +64,16 @@ const ExperiencesSection = () => {
                   <div className="flex-1">
                     <CardTitle className="text-xl mb-2">{experience.title}</CardTitle>
                     <div className="flex flex-wrap items-center gap-4 text-muted-foreground mb-3">
-                      <div className="flex items-center gap-1">
-                        <Building className="h-4 w-4" />
+                      <div className="flex items-center gap-2">
+                        {experience.company_logo_url ? (
+                          <img 
+                            src={experience.company_logo_url} 
+                            alt={`${experience.company} logo`}
+                            className="h-5 w-5 object-contain rounded"
+                          />
+                        ) : (
+                          <Building className="h-4 w-4" />
+                        )}
                         {experience.company}
                       </div>
                       {experience.location && (

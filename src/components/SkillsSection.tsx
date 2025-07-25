@@ -71,7 +71,16 @@ const SkillsSection = () => {
                 {categorySkills.map((skill) => (
                   <div key={skill.id} className="space-y-2">
                     <div className="flex justify-between items-center">
-                      <h4 className="font-medium text-foreground">{skill.name}</h4>
+                      <div className="flex items-center gap-2">
+                        {skill.icon_url ? (
+                          <img 
+                            src={skill.icon_url} 
+                            alt={`${skill.name} icon`}
+                            className="h-5 w-5 object-contain"
+                          />
+                        ) : null}
+                        <h4 className="font-medium text-foreground">{skill.name}</h4>
+                      </div>
                       <div className="flex items-center gap-2">
                         {skill.years_experience && (
                           <Badge variant="secondary" className="text-xs">

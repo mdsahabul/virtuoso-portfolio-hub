@@ -25,6 +25,7 @@ export type Database = {
           issue_date: string
           issuing_organization: string
           name: string
+          organization_logo_url: string | null
           updated_at: string
         }
         Insert: {
@@ -37,6 +38,7 @@ export type Database = {
           issue_date: string
           issuing_organization: string
           name: string
+          organization_logo_url?: string | null
           updated_at?: string
         }
         Update: {
@@ -49,6 +51,7 @@ export type Database = {
           issue_date?: string
           issuing_organization?: string
           name?: string
+          organization_logo_url?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -80,6 +83,7 @@ export type Database = {
       experiences: {
         Row: {
           company: string
+          company_logo_url: string | null
           created_at: string
           description: string | null
           end_date: string | null
@@ -93,6 +97,7 @@ export type Database = {
         }
         Insert: {
           company: string
+          company_logo_url?: string | null
           created_at?: string
           description?: string | null
           end_date?: string | null
@@ -106,6 +111,7 @@ export type Database = {
         }
         Update: {
           company?: string
+          company_logo_url?: string | null
           created_at?: string
           description?: string | null
           end_date?: string | null
@@ -300,6 +306,7 @@ export type Database = {
         Row: {
           category: string
           created_at: string
+          icon_url: string | null
           id: string
           name: string
           proficiency_level: number | null
@@ -309,6 +316,7 @@ export type Database = {
         Insert: {
           category: string
           created_at?: string
+          icon_url?: string | null
           id?: string
           name: string
           proficiency_level?: number | null
@@ -318,6 +326,7 @@ export type Database = {
         Update: {
           category?: string
           created_at?: string
+          icon_url?: string | null
           id?: string
           name?: string
           proficiency_level?: number | null

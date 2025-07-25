@@ -63,7 +63,15 @@ const CertificationsSection = () => {
             <Card key={certification.id} className="glass-card card-hover">
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
-                  <Award className="h-8 w-8 text-primary flex-shrink-0" />
+                  {certification.organization_logo_url ? (
+                    <img 
+                      src={certification.organization_logo_url} 
+                      alt={`${certification.issuing_organization} logo`}
+                      className="h-8 w-8 object-contain rounded flex-shrink-0"
+                    />
+                  ) : (
+                    <Award className="h-8 w-8 text-primary flex-shrink-0" />
+                  )}
                   {certification.expiry_date && (
                     <Badge 
                       variant={isExpired(certification.expiry_date) ? "destructive" : "secondary"}

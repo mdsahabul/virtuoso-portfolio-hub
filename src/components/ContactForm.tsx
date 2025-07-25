@@ -70,7 +70,7 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="name" className="block text-sm font-medium text-foreground mb-1">
             Name *
           </label>
           <input
@@ -79,12 +79,12 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             id="name"
             value={formData.name}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
             required
           />
         </div>
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1">
             Email *
           </label>
           <input
@@ -93,13 +93,13 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             id="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-4 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
             required
           />
         </div>
       </div>
       <div>
-        <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="subject" className="block text-sm font-medium text-foreground mb-1">
           Subject
         </label>
         <input
@@ -108,11 +108,11 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
           id="subject"
           value={formData.subject}
           onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
       <div>
-        <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="message" className="block text-sm font-medium text-foreground mb-1">
           Message *
         </label>
         <textarea
@@ -121,14 +121,14 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
           rows={5}
           value={formData.message}
           onChange={handleChange}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
           required
         ></textarea>
       </div>
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full md:w-auto px-6 py-3 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+        className="w-full md:w-auto px-6 py-3 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors"
       >
         {isSubmitting ? 'Sending...' : 'Send Message'}
       </button>
