@@ -7,6 +7,9 @@ import ServiceCard from '../components/ServiceCard';
 import PortfolioItem from '../components/PortfolioItem';
 import Footer from '../components/Footer';
 import ReviewsSection from '../components/ReviewsSection';
+import ExperiencesSection from '../components/ExperiencesSection';
+import SkillsSection from '../components/SkillsSection';
+import CertificationsSection from '../components/CertificationsSection';
 import { useData } from '../context/DataContext';
 import ResponsiveImage from '../components/ResponsiveImage';
 import ContactForm from '../components/ContactForm';
@@ -152,6 +155,15 @@ const Index = () => {
           </div>
         </div>
       </section>
+      
+      {/* Experience Section */}
+      <ExperiencesSection />
+      
+      {/* Skills Section */}
+      <SkillsSection />
+      
+      {/* Certifications Section */}
+      <CertificationsSection />
       
       {/* Reviews Section */}
       <ReviewsSection />
