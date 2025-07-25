@@ -130,11 +130,20 @@ const SkillsCertificationsManager = () => {
   const handleCertSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      // Clean the form data to handle empty dates properly
+      const cleanedData = {
+        ...certFormData,
+        expiry_date: certFormData.expiry_date || null,
+        credential_id: certFormData.credential_id || null,
+        credential_url: certFormData.credential_url || null,
+        description: certFormData.description || null
+      };
+
       if (editingCertification) {
-        await certificationsService.update(editingCertification.id, certFormData);
+        await certificationsService.update(editingCertification.id, cleanedData);
         toast({ title: "Success", description: "Certification updated successfully" });
       } else {
-        await certificationsService.create(certFormData);
+        await certificationsService.create(cleanedData);
         toast({ title: "Success", description: "Certification created successfully" });
       }
       
@@ -142,6 +151,7 @@ const SkillsCertificationsManager = () => {
       resetCertForm();
       fetchData();
     } catch (error) {
+      console.error('Certification save error:', error);
       toast({
         title: "Error",
         description: "Failed to save certification",
